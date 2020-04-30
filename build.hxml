@@ -1,0 +1,11 @@
+-cp src
+-main Main
+#-dce full
+
+--each
+
+-neko bin/neko/main.n
+
+--next
+
+-hl bin/hl/main.hl
