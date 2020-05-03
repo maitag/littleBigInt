@@ -7,15 +7,18 @@ typedef SmallIntArray = Array<SmallInt>; // TODO: can be optimized later for JS 
 class SmallIntChunks {
 	
 	// save for multiplication is 15 Bit per SmallInt on all platforms
+	static public inline var BITSIZE:Int = 15;
 	static public inline var UPPESTBIT:Int = 0x8000;
 	static public inline var BITMASK:Int = 0x7FFF;
+		
+	//static public inline var BITSIZE:Int = 31;
 	//static public inline var UPPEST:Int = 0x80000000;
 	//static public inline var MASK:Int = 0x7FFFFFFF;
 
 	var chunks:SmallIntArray;
 	var isNegative:Bool = false;
-	var start:Int = 0;
-	var end:Int = 0;
+	public var start:Int = 0;
+	public var end:Int = 0;
 	public var length(get, never):Int;
 	inline function get_length():Int return end-start;
 	
@@ -26,10 +29,16 @@ class SmallIntChunks {
 		
 	public inline function clone():SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
-		for (v in this.chunks) smallIntChunks.push(v);
+		for (v in this.chunks) smallIntChunks.add(v); // TODO: only start to end
 		return smallIntChunks;
 	}
 	
+	// TODO
+/*	public inline function split(size:Int):SmallIntChunks {
+		// TODO
+		return smallIntChunks;
+	}
+*/	
 	public inline function get(i:Int):SmallInt {
 		return chunks[i];
 	}
@@ -38,15 +47,16 @@ class SmallIntChunks {
 		chunks[i] = v;
 	}
 	
-	public inline function push(v:SmallInt) {
+	public inline function add(v:SmallInt) {
 		chunks.push(v);
 		end++;
 	}
 	
-	public inline function fromSmallInt(i:SmallInt):SmallIntChunks {
-		push(i);
-		isNegative = (i < 0) ? true : false;
-		return this;
+	public static inline function CreateFromSmallInt(i:SmallInt):SmallIntChunks {
+		var smallIntChunks = new SmallIntChunks();
+		smallIntChunks.add(i);
+		smallIntChunks.isNegative = (i < 0) ? true : false;
+		return smallIntChunks;
 	}
 
 	public inline function toSmallInt():SmallInt {
@@ -56,26 +66,121 @@ class SmallIntChunks {
 	}	
 	
 	
-	public inline function fromString(s:String):SmallIntChunks {
+	inline function fromBinaryString(s:String):SmallIntChunks {
 		
-		//TODO parsing
+		var i = s.length;
+		var bit:Int = 1;
+		var chunk:Int = 0;
 		
+		while (i > 0) {
+			switch (s.charAt(--i)) {
+				case "0":
+				case "1": chunk += bit;
+				default: throw('Error, binary string can only contain "0" or "1"');
+			}
+			bit = bit << 1;
+			if (bit == UPPESTBIT) {
+				add(chunk);
+				bit = 0;
+				chunk = 0;
+			}
+		}
+		trace(chunk);
+		if (chunk != 0) add(chunk);
 		return this;
 	}
-
 	
-	public inline function toString():String {
+	inline function fromHexString(s:String):SmallIntChunks {
+		
+		var i = s.length;
+		var bit:Int = 1;
+		var chunk:Int = 0;
+		
+		while (i > 0) {
+			switch (s.charAt(--i)) {
+				case "0":
+				case "1": chunk += 1  * bit;  // TODO: refactor later
+				case "2": chunk += 2  * bit;
+				case "3": chunk += 3  * bit;
+				case "4": chunk += 4  * bit;
+				case "5": chunk += 5  * bit;
+				case "6": chunk += 6  * bit;
+				case "7": chunk += 7  * bit;
+				case "8": chunk += 8  * bit;
+				case "9": chunk += 9  * bit;
+				case "a": chunk += 10 * bit;
+				case "b": chunk += 11 * bit;
+				case "c": chunk += 12 * bit;
+				case "d": chunk += 13 * bit;
+				case "e": chunk += 14 * bit;
+				case "f": chunk += 15 * bit;
+				default: throw('Error, hexadecimal string can only contain "0123456789abcdef"');
+			}
+			bit = bit << 4;
+			if (bit == UPPESTBIT) {
+				add(chunk);
+				bit = 0;
+				chunk = 0;
+			}
+		}
+		trace(chunk);
+		if (chunk != 0) add(chunk);
+		return this;
+	}
+	
+	static var regexSpaces = ~/\s+/g;
+	static var regexBinary = ~/^0b0*/;
+	//static var regexOctal = ~/^0o0*/;
+	static var regexHex = ~/^0x0*/;
+	static var regexSign = ~/^-?/;
+	public static function CreateFromString(s:String):SmallIntChunks {
+		
+		var smallIntChunks = new SmallIntChunks();
+		
+		// make lowercase and parse out all spaces
+		s = regexSpaces.replace(s.toLowerCase(), "");
+		
+		// check sign
+		s = regexSign.replace(s, ""); //trace(regexSign.matched(0));
+		smallIntChunks.isNegative = (regexSign.matched(0) == "-") ? true : false;
+		
+		if (regexBinary.match(s)) return smallIntChunks.fromBinaryString(regexBinary.replace(s, ""));
+		else if (regexHex.match(s)) return smallIntChunks.fromHexString(regexHex.replace(s, ""));
+		//else if (regexOctal.match(s)) return smallIntChunks.fromOctString(regexOctal.replace(s, ""));
+		//else return smallIntChunks.fromTenBaseString(s);
+		else throw ("Only supported Binary and Hex stringinput yet");
+		
+		//TODO parsing any base
+		
+	}
+
+	public inline function toBinaryString():String {
 		// traverse
 		var s = "";
-		
 		for (i in start...end) {
-			stringAdd(s, get(i));
+			
 		}
 		
 		return s;
 	}
 	
-	static inline function stringAdd(s:String, a:Int):String {
+	
+	public inline function toString():String {
+		
+		// only binary yet
+		return toBinaryString();
+
+		
+		// traverse
+		//var s = "";
+		
+		//for (i in start...end) {
+		//	stringAdd(s, get(i));
+		//}
+		
+		//return s;
+	}
+/*	static inline function stringAdd(s:String, a:Int):String {
 		
 		// TODO
 		// zifferlaenge von a holen und auf die max-laenge weteitern
@@ -83,6 +188,7 @@ class SmallIntChunks {
 		
 		return s;
 	}
+*/	
 }
 
 abstract BigInt(SmallIntChunks) {
@@ -93,15 +199,19 @@ abstract BigInt(SmallIntChunks) {
 	
 	public var length(get, never):Int;
 	inline function get_length():Int return this.length;
+	var start(get, never):Int;
+	inline function get_start():Int return this.start;
+	var end(get, never):Int;
+	inline function get_end():Int return this.end;
 	
 	inline function get(i:Int):SmallInt return this.get(i);
 	
 	@:from static public function fromInt(i:SmallInt):BigInt {
-		return new BigInt( new SmallIntChunks().fromSmallInt(i) );
+		return new BigInt( SmallIntChunks.CreateFromSmallInt(i) );
 	}
 
 	@:from static public function fromString(s:String):BigInt {
-		return new BigInt( new SmallIntChunks().fromString(s) );
+		return new BigInt( SmallIntChunks.CreateFromString(s) );
 	}
 
 	@:to public function toString():String return this.toString();	
@@ -111,7 +221,7 @@ abstract BigInt(SmallIntChunks) {
 	@:op(A + B)
 	public function add(rhs:BigInt):BigInt {
 		var result = this.clone();
-		for (i in 0...rhs.length) {
+		for (i in rhs.start...rhs.end) {
 			addAtPosition(rhs.get(i), i, result);
 		}
 		return new BigInt(result);
@@ -129,7 +239,7 @@ abstract BigInt(SmallIntChunks) {
 			result.set(i, x & SmallIntChunks.BITMASK);
 			a = 1;
 		}
-		if (a > 0) result.push(a);
+		if (a > 0) result.add(a);
 	}
 	
 	

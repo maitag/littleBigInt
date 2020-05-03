@@ -4,8 +4,8 @@ class Main {
 
     public static function main() {
 
-		var a:BigInt = 4;
-		var b:BigInt = 5;
+		var a:BigInt = "0b 101";
+		var b:BigInt = "0x ff";
 		
 		var c:Int = a + b;
 		trace(c);
