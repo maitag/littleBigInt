@@ -1,5 +1,3 @@
-import haxe.ds.IntMap;
-
 typedef SmallInt = Int;
 typedef SmallIntArray = Array<SmallInt>; // TODO: can be optimized later for JS here (UInt32Array for example)
 
@@ -67,6 +65,8 @@ class SmallIntChunks {
 		end++;
 	}
 	
+	// ---------- From/ToInteger -------------------
+
 	public static inline function CreateFromSmallInt(i:SmallInt):SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
 		smallIntChunks.add(i);
@@ -78,8 +78,60 @@ class SmallIntChunks {
 		if (length == 0) return 0;
 		else if (length > 1) throw("Error, BigInt is to Big for one Int");
 		else return (isNegative) ? -get(0) : get(0);
-	}	
+	}
 	
+	// ---------- From/To String -------------------
+
+	static var regexSpaces = ~/\s+/g;
+	static var regexBinary = ~/^0b0*/;
+	static var regexOctal = ~/^0o0*/;
+	static var regexHex = ~/^0x0*/;
+	static var regexSign = ~/^-/;
+	
+	public static function CreateFromString(s:String):SmallIntChunks {
+		
+		var smallIntChunks = new SmallIntChunks();
+		
+		// make lowercase and parse out all spaces
+		s = regexSpaces.replace(s.toLowerCase(), "");
+		
+		// check sign
+		if (regexSign.match(s)) {
+			s = regexSign.replace(s, "");
+			smallIntChunks.isNegative = true;
+		}
+		
+		if (regexBinary.match(s)) return smallIntChunks.fromBinaryString(regexBinary.replace(s, ""));
+		else if (regexHex.match(s)) return smallIntChunks.fromHexString(regexHex.replace(s, ""));
+		else if (regexOctal.match(s)) return smallIntChunks.fromBaseString(regexOctal.replace(s, ""), 8);
+		else return smallIntChunks.fromBaseString(s, 10);
+		//else throw ("Only supported Binary and Hex stringinput yet");
+		
+		// TODO parsing any base
+		// -> needs bigint multiplication
+		
+	}
+	
+	public inline function toString():String {
+		
+		// only hex and binary yet
+		//return toBinaryString();
+		return toHexString();
+
+		// TODO:
+		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
+		//   -> needs divMod
+		
+	}
+	
+	// ------ Parsing String from Number to a defined Base ------------
+	
+	inline function fromBaseString(s:String, base:Int):SmallIntChunks {
+		// TODO:
+		return null;
+	}
+	
+	// ---------- Parsing Binary String -------------------
 	
 	inline function fromBinaryString(s:String):SmallIntChunks {
 		
@@ -105,33 +157,43 @@ class SmallIntChunks {
 		return this;
 	}
 	
+	public inline function toBinaryString(spacing:Bool = true):String {
+		
+		var s = "";
+		var chunk:SmallInt;
+		var bit:Int;
+		var j:Int = 0;
+		
+		for (i in start...end) { // TODO: iterator !
+			chunk = get(i);
+			bit = 1;
+			while (bit < UPPESTBIT) {
+				s = (((bit & chunk) == 0) ? "0" : "1") + ((j++ % 8 == 0 && spacing) ? " " : "") + s;
+				bit = bit << 1;
+			}
+		}
+		
+		for (i in 0...(8 - j % 8)) s = "0" + s;
+		
+		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
+	}
+	
+	
+	// ---------- Parsing Hexadecimal String -------------------
+	
+	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
 	
 	inline function fromHexString(s:String):SmallIntChunks {
 		
 		var i = s.length;
 		var bit:Int = 1;
 		var chunk:Int = 0;
+		var offset:Int;
 		
 		while (i > 0) {
-			switch (s.charAt(--i)) {
-				case "0":
-				case "1": chunk += 1  * bit;  // TODO: refactor later
-				case "2": chunk += 2  * bit;
-				case "3": chunk += 3  * bit;
-				case "4": chunk += 4  * bit;
-				case "5": chunk += 5  * bit;
-				case "6": chunk += 6  * bit;
-				case "7": chunk += 7  * bit;
-				case "8": chunk += 8  * bit;
-				case "9": chunk += 9  * bit;
-				case "a": chunk += 10 * bit;
-				case "b": chunk += 11 * bit;
-				case "c": chunk += 12 * bit;
-				case "d": chunk += 13 * bit;
-				case "e": chunk += 14 * bit;
-				case "f": chunk += 15 * bit;
-				default: throw('Error, hexadecimal string can only contain "0123456789abcdef"');
-			}
+			offset = hexaChars.indexOf(s.charAt(--i));
+			if (offset == -1) throw('Error, hexadecimal string can only contain "${hexaChars.join("")}"');
+			chunk += offset * bit;
 			bit = bit << 4;
 			if (bit >= UPPESTBIT) {
 				add(chunk & BITMASK);
@@ -148,58 +210,6 @@ class SmallIntChunks {
 		if (chunk != 0) add(chunk);
 		return this;
 	}
-	
-	
-	static var regexSpaces = ~/\s+/g;
-	static var regexBinary = ~/^0b0*/;
-	//static var regexOctal = ~/^0o0*/;
-	static var regexHex = ~/^0x0*/;
-	static var regexSign = ~/^-?/;
-	
-	public static function CreateFromString(s:String):SmallIntChunks {
-		
-		var smallIntChunks = new SmallIntChunks();
-		
-		// make lowercase and parse out all spaces
-		s = regexSpaces.replace(s.toLowerCase(), "");
-		
-		// check sign
-		s = regexSign.replace(s, ""); //trace(regexSign.matched(0));
-		smallIntChunks.isNegative = (regexSign.matched(0) == "-") ? true : false;
-		
-		if (regexBinary.match(s)) return smallIntChunks.fromBinaryString(regexBinary.replace(s, ""));
-		else if (regexHex.match(s)) return smallIntChunks.fromHexString(regexHex.replace(s, ""));
-		//else if (regexOctal.match(s)) return smallIntChunks.fromOctString(regexOctal.replace(s, ""));
-		//else return smallIntChunks.fromTenBaseString(s);
-		else throw ("Only supported Binary and Hex stringinput yet");
-		
-		// TODO parsing any base
-		// -> needs bigint multiplication
-		
-	}
-
-	
-	public inline function toBinaryString(spacing:Bool = true):String {
-		
-		var s = "";
-		var chunk:SmallInt;
-		var bit:Int;
-		var j:Int = 0;
-		
-		for (i in start...end) { // TODO: iterator !
-			chunk = get(i);
-			bit = 1;
-			while (bit < UPPESTBIT) {
-				s = (((bit & chunk) == 0) ? "0" : "1") + ((j++ % 8 == 0 && spacing) ? " " : "") + s;
-				bit = bit << 1;
-			}
-		}
-		for (i in 0...(8 - j % 8)) s = "0" + s;
-		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
-	}
-	
-	
-	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
 	
 	public inline function toHexString(spacing:Bool = true):String {
 		
@@ -222,30 +232,23 @@ class SmallIntChunks {
 				case 2: chunk &= 3;
 				default: chunk &= 7;
 			}
-			
 		}
 		
 		if (restBits > 0) s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
 
-		if (j%4 != 0) for (i in 0...(4 - j % 4)) s = "0" + s;
+		if (j % 4 != 0) for (i in 0...(4 - j % 4)) s = "0" + s;
 		
 		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
 	}
 	
 	
-	public inline function toString():String {
-		
-		// only hex and binary yet
-		//return toBinaryString();
-		return toHexString();
-
-		// TODO:
-		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
-		//   -> needs divMod
-		
-	}
 
 }
+
+
+// -----------------------------------------------------------------
+// ----------------------------  BigInt ----------------------------
+// -----------------------------------------------------------------
 
 abstract BigInt(SmallIntChunks) {
 	
