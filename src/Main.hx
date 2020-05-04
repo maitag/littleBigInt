@@ -3,16 +3,56 @@ package;
 class Main {
 
     public static function main() {
+		
+		// from integer
+		
+		var i:BigInt = 0x7FFFFFFF;
+		trace('i = $i');
 
+		i = i + 1;
+		trace('i+1 = $i');
+		
+		// mhm, why 1 + i not work ?
+		// i = 1 + i;
+
+		
+		
+		// from binary
+		
 		var a:BigInt = "0b 1111 1111";
 		trace('a = $a');
+		
+		
+		
+		// from hexadecimal
+		
 		var b:BigInt = "0x aa bb";
 		trace('b = $b');
 		
+		
+		
+		// ------- Addition -------
+
 		var c:BigInt = a + b;
 		trace('a+b = $c');
+		
+		
+		
+		
+		
+		// sample
+		
+		//var metersOfLightyear:BigInt = "9 460 730 472 580 800";
+		//var lightyearDistanceToAndromeda:BigInt = "2 537 000";
 
-/* 		var b:BigInt;
+		
+        trace("--------------------------------------------");
+		
+		
+/* 		
+		// old tests with thx.core's BigInts
+		
+  		var b:BigInt;
 		var n:BigInt;
 		
 		a = BigInt.fromInt(2);
@@ -47,7 +87,6 @@ class Main {
 		trace( ((9999999 : BigInt) + 1 == 10000000) );
 		trace( ((10000000 : BigInt) - 1 == 9999999) );
  */ 		
-        trace("--------------------------------------------");
     }
 
 }

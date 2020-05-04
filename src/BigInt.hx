@@ -37,7 +37,7 @@ class SmallIntChunks {
 		
 	public inline function clone():SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
-		for (v in this.chunks) smallIntChunks.add(v); // TODO: only start to end
+		for (v in this.chunks) smallIntChunks.add(v); // TODO: only start to end ?
 		return smallIntChunks;
 	}
 	
@@ -47,7 +47,9 @@ class SmallIntChunks {
 		return smallIntChunks;
 	}
 */	
-/*	public inline function join3(a:SmallIntChunks, b:SmallIntChunks, c:SmallIntChunks):SmallIntChunks {
+/*	
+	// Multiplikaiton helper
+	public inline function join3(a:SmallIntChunks, b:SmallIntChunks, c:SmallIntChunks):SmallIntChunks {
 		// TODO
 		return smallIntChunks;
 	}
@@ -69,14 +71,21 @@ class SmallIntChunks {
 
 	public static inline function CreateFromSmallInt(i:SmallInt):SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
-		smallIntChunks.add(i);
-		smallIntChunks.isNegative = (i < 0) ? true : false;
+		if (i < 0) {
+			smallIntChunks.isNegative = true;
+			i = -i;
+		}
+		while (i != 0) {
+			smallIntChunks.add(i & BITMASK);
+			i = i >> BITSIZE;
+		}
 		return smallIntChunks;
 	}
 
 	public inline function toSmallInt():SmallInt {
 		if (length == 0) return 0;
-		else if (length > 1) throw("Error, BigInt is to Big for one Int");
+		// TODO: fill dependent of what is native Int-bitsize
+		else if (length > 1) throw('Error, BigInt is to Big for $BITSIZE bit Int');
 		else return (isNegative) ? -get(0) : get(0);
 	}
 	
@@ -104,31 +113,35 @@ class SmallIntChunks {
 		if (regexBinary.match(s)) return smallIntChunks.fromBinaryString(regexBinary.replace(s, ""));
 		else if (regexHex.match(s)) return smallIntChunks.fromHexString(regexHex.replace(s, ""));
 		else if (regexOctal.match(s)) return smallIntChunks.fromBaseString(regexOctal.replace(s, ""), 8);
-		else return smallIntChunks.fromBaseString(s, 10);
-		//else throw ("Only supported Binary and Hex stringinput yet");
-		
-		// TODO parsing any base
-		// -> needs bigint multiplication
-		
+		else return smallIntChunks.fromBaseString(s);		
 	}
 	
 	public inline function toString():String {
 		
-		// only hex and binary yet
-		//return toBinaryString();
-		return toHexString();
-
-		// TODO:
-		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
-		//   -> needs divMod
+		//return toBaseString();
 		
+		// only binary and hexadecimal dummy output yet
+		//return toBinaryString();
+		return toHexString();		
 	}
 	
 	// ------ Parsing String from Number to a defined Base ------------
 	
-	inline function fromBaseString(s:String, base:Int):SmallIntChunks {
-		// TODO:
+	inline function fromBaseString(s:String, base:Int = 10):SmallIntChunks {
+		
+		// TODO: parsing any base needs bigint multiplication first
+
+		throw ("Only supported Binary and Hex stringinput yet");
 		return null;
+	}
+	
+	inline function toBaseString(base:Int = 10):String {
+		
+		// TODO:
+		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
+		//   -> needs divMod
+		
+		return "not yet";
 	}
 	
 	// ---------- Parsing Binary String -------------------
@@ -164,7 +177,7 @@ class SmallIntChunks {
 		var bit:Int;
 		var j:Int = 0;
 		
-		for (i in start...end) { // TODO: iterator !
+		for (i in start...end) {
 			chunk = get(i);
 			bit = 1;
 			while (bit < UPPESTBIT) {
@@ -218,7 +231,7 @@ class SmallIntChunks {
 		var restBits:Int = 0;
 		var j:Int = 0;
 		
-		for (i in start...end) { // TODO: iterator !
+		for (i in start...end) {
 			chunk = (get(i) << restBits) + chunk;
 			while (BITSIZE + restBits >= 4) {
 				s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
@@ -283,7 +296,7 @@ abstract BigInt(SmallIntChunks) {
 		// TODO: check sign
 		
 		var result = this.clone();
-		for (i in rhs.start...rhs.end) {  // TODO: iterator !
+		for (i in rhs.start...rhs.end) {
 			addAtPosition(rhs.get(i), i, result);
 		}
 		return new BigInt(result);
