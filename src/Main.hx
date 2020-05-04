@@ -39,12 +39,23 @@ class Main {
 		
 		
 		
-		
 		// sample
 		
 		//var metersOfLightyear:BigInt = "9 460 730 472 580 800";
 		//var lightyearDistanceToAndromeda:BigInt = "2 537 000";
 
+
+		// Fibonacci
+		var fibo:BigInt = 2;
+		var fiboOld:BigInt = 1;
+		var tmp:BigInt;
+		
+		for (i in 0...10000) {
+			tmp = fibo;
+			fibo = fibo + fiboOld;
+			fiboOld = tmp;
+		}
+		trace('Fibonacci(10 000) : 0x $fibo');
 		
         trace("--------------------------------------------");
 		
