@@ -7,6 +7,10 @@ typedef SmallIntArray = Array<SmallInt>; // TODO: can be optimized later for JS 
 class SmallIntChunks {
 	
 	// save for multiplication is 15 Bit per SmallInt on all platforms
+/*	static public inline var BITSIZE:Int = 7;
+	static public inline var UPPESTBIT:Int = 0x80;
+	static public inline var BITMASK:Int = 0x7F;
+*/		
 	static public inline var BITSIZE:Int = 15;
 	static public inline var UPPESTBIT:Int = 0x8000;
 	static public inline var BITMASK:Int = 0x7FFF;
@@ -17,8 +21,14 @@ class SmallIntChunks {
 
 	var chunks:SmallIntArray;
 	var isNegative:Bool = false;
+	
+	// for splitting only start/end is changing for each part
 	public var start:Int = 0;
 	public var end:Int = 0;
+	
+	// on need: number how much zero-chunks would be right (1 -> like ^0x8000)
+	//public var exp:Int = 0; 
+	
 	public var length(get, never):Int;
 	inline function get_length():Int return end-start;
 	
@@ -35,6 +45,11 @@ class SmallIntChunks {
 	
 	// TODO
 /*	public inline function split(size:Int):SmallIntChunks {
+		// TODO
+		return smallIntChunks;
+	}
+*/	
+/*	public inline function join3(a:SmallIntChunks, b:SmallIntChunks, c:SmallIntChunks):SmallIntChunks {
 		// TODO
 		return smallIntChunks;
 	}
@@ -81,14 +96,15 @@ class SmallIntChunks {
 			bit = bit << 1;
 			if (bit == UPPESTBIT) {
 				add(chunk);
-				bit = 0;
+				bit = 1;
 				chunk = 0;
 			}
 		}
-		trace(chunk);
-		if (chunk != 0) add(chunk);
+		
+		if (bit > 1) add(chunk);
 		return this;
 	}
+	
 	
 	inline function fromHexString(s:String):SmallIntChunks {
 		
@@ -117,16 +133,22 @@ class SmallIntChunks {
 				default: throw('Error, hexadecimal string can only contain "0123456789abcdef"');
 			}
 			bit = bit << 4;
-			if (bit == UPPESTBIT) {
-				add(chunk);
-				bit = 0;
-				chunk = 0;
+			if (bit >= UPPESTBIT) {
+				add(chunk & BITMASK);
+				
+				if (bit == UPPESTBIT) bit = 1;
+				else if (bit == UPPESTBIT << 1) bit = 1 << 1;
+				else if (bit == UPPESTBIT << 2) bit = 1 << 2;
+				else bit = 1 << 3;
+				
+				chunk = chunk >> BITSIZE;
 			}
 		}
-		trace(chunk);
+		
 		if (chunk != 0) add(chunk);
 		return this;
 	}
+	
 	
 	static var regexSpaces = ~/\s+/g;
 	static var regexBinary = ~/^0b0*/;
@@ -154,14 +176,23 @@ class SmallIntChunks {
 		
 	}
 
-	public inline function toBinaryString():String {
+	
+	public inline function toBinaryString(spacing:Bool = true):String {
 		// traverse
 		var s = "";
-		for (i in start...end) {
-			
+		var chunk:SmallInt;
+		var bit:Int;
+		var j:Int = 0;
+		for (i in start...end) { // TODO: iterator !
+			chunk = get(i);
+			bit = 1;
+			while (bit < UPPESTBIT) {
+				s = (((bit & chunk) == 0) ? "0" : "1") + ((j++ % 8 == 0 && spacing) ? " " : "") + s;
+				bit = bit << 1;
+			}
 		}
-		
-		return s;
+		for (i in 0...(8 - j % 8)) s = "0" + s;
+		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
 	}
 	
 	
@@ -220,8 +251,11 @@ abstract BigInt(SmallIntChunks) {
 	
 	@:op(A + B)
 	public function add(rhs:BigInt):BigInt {
+		
+		// TODO: check sign
+		
 		var result = this.clone();
-		for (i in rhs.start...rhs.end) {
+		for (i in rhs.start...rhs.end) {  // TODO: iterator !
 			addAtPosition(rhs.get(i), i, result);
 		}
 		return new BigInt(result);

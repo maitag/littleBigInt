@@ -4,12 +4,14 @@ class Main {
 
     public static function main() {
 
-		var a:BigInt = "0b 101";
-		var b:BigInt = "0x ff";
+		var a:BigInt = "0b 1111 1111";
+		trace('a = $a');
+		var b:BigInt = "0x 7f FF";
+		trace('b = $b');
 		
-		var c:Int = a + b;
-		trace(c);
-		
+		var c:BigInt = a + b;
+		trace('a+b = $c');
+
 /* 		var b:BigInt;
 		var n:BigInt;
 		
@@ -45,7 +47,7 @@ class Main {
 		trace( ((9999999 : BigInt) + 1 == 10000000) );
 		trace( ((10000000 : BigInt) - 1 == 9999999) );
  */ 		
-        trace("---------------------------------------");
+        trace("--------------------------------------------");
     }
 
 }
