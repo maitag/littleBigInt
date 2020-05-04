@@ -155,6 +155,7 @@ class SmallIntChunks {
 	//static var regexOctal = ~/^0o0*/;
 	static var regexHex = ~/^0x0*/;
 	static var regexSign = ~/^-?/;
+	
 	public static function CreateFromString(s:String):SmallIntChunks {
 		
 		var smallIntChunks = new SmallIntChunks();
@@ -172,17 +173,19 @@ class SmallIntChunks {
 		//else return smallIntChunks.fromTenBaseString(s);
 		else throw ("Only supported Binary and Hex stringinput yet");
 		
-		//TODO parsing any base
+		// TODO parsing any base
+		// -> needs bigint multiplication
 		
 	}
 
 	
 	public inline function toBinaryString(spacing:Bool = true):String {
-		// traverse
+		
 		var s = "";
 		var chunk:SmallInt;
 		var bit:Int;
 		var j:Int = 0;
+		
 		for (i in start...end) { // TODO: iterator !
 			chunk = get(i);
 			bit = 1;
@@ -196,30 +199,52 @@ class SmallIntChunks {
 	}
 	
 	
+	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
+	
+	public inline function toHexString(spacing:Bool = true):String {
+		
+		var s = "";
+		var chunk:SmallInt = 0;
+		var restBits:Int = 0;
+		var j:Int = 0;
+		
+		for (i in start...end) { // TODO: iterator !
+			chunk = (get(i) << restBits) + chunk;
+			while (BITSIZE + restBits >= 4) {
+				s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
+				chunk = chunk >> 4;
+				restBits -= 4;
+			}
+			restBits = BITSIZE + restBits;
+			switch (restBits) {
+				case 0: chunk = 0;
+				case 1: chunk &= 1;
+				case 2: chunk &= 3;
+				default: chunk &= 7;
+			}
+			
+		}
+		
+		if (restBits > 0) s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
+
+		if (j%4 != 0) for (i in 0...(4 - j % 4)) s = "0" + s;
+		
+		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
+	}
+	
+	
 	public inline function toString():String {
 		
-		// only binary yet
-		return toBinaryString();
+		// only hex and binary yet
+		//return toBinaryString();
+		return toHexString();
 
+		// TODO:
+		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
+		//   -> needs divMod
 		
-		// traverse
-		//var s = "";
-		
-		//for (i in start...end) {
-		//	stringAdd(s, get(i));
-		//}
-		
-		//return s;
 	}
-/*	static inline function stringAdd(s:String, a:Int):String {
-		
-		// TODO
-		// zifferlaenge von a holen und auf die max-laenge weteitern
-		// analog wie bei addAtPosition
-		
-		return s;
-	}
-*/	
+
 }
 
 abstract BigInt(SmallIntChunks) {

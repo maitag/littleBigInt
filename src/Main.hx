@@ -6,7 +6,7 @@ class Main {
 
 		var a:BigInt = "0b 1111 1111";
 		trace('a = $a');
-		var b:BigInt = "0x 7f FF";
+		var b:BigInt = "0x aa bb";
 		trace('b = $b');
 		
 		var c:BigInt = a + b;
