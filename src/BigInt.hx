@@ -69,7 +69,7 @@ class SmallIntChunks {
 	
 	// ---------- From/ToInteger -------------------
 
-	public static inline function CreateFromSmallInt(i:SmallInt):SmallIntChunks {
+	public static inline function createFromSmallInt(i:SmallInt):SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
 		if (i < 0) {
 			smallIntChunks.isNegative = true;
@@ -97,7 +97,7 @@ class SmallIntChunks {
 	static var regexHex = ~/^0x0*/;
 	static var regexSign = ~/^-/;
 	
-	public static function CreateFromString(s:String):SmallIntChunks {
+	public static function createFromString(s:String):SmallIntChunks {
 		
 		var smallIntChunks = new SmallIntChunks();
 		
@@ -279,11 +279,11 @@ abstract BigInt(SmallIntChunks) {
 	inline function get(i:Int):SmallInt return this.get(i);
 	
 	@:from static public function fromInt(i:SmallInt):BigInt {
-		return new BigInt( SmallIntChunks.CreateFromSmallInt(i) );
+		return new BigInt( SmallIntChunks.createFromSmallInt(i) );
 	}
 
 	@:from static public function fromString(s:String):BigInt {
-		return new BigInt( SmallIntChunks.CreateFromString(s) );
+		return new BigInt( SmallIntChunks.createFromString(s) );
 	}
 
 	@:to public function toString():String return this.toString();	
