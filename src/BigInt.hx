@@ -30,6 +30,9 @@ class SmallIntChunks {
 	public var length(get, never):Int;
 	inline function get_length():Int return end - start;
 	
+	public var isZero(get, never):Bool;
+	inline function get_isZero():Bool return (length == 0);
+	
 	
 	public inline function new() {
 		chunks = new SmallIntArray();
@@ -37,7 +40,7 @@ class SmallIntChunks {
 		
 	public inline function clone():SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
-		for (i in start...end) smallIntChunks.push(get(i));
+		for (i in 0...length) smallIntChunks.push(get(i));
 		return smallIntChunks;
 	}
 	
@@ -65,6 +68,22 @@ class SmallIntChunks {
 	public inline function push(v:SmallInt) {
 		chunks.push(v);
 		end++;
+	}
+	
+	public inline function pop():SmallInt {
+		end--;
+		return chunks.pop();
+	}
+	
+	public inline function truncateZeroChunks(remove:Bool = false) {
+		var i = length;
+		while ( --i >= 0) {
+			if (get(i) == 0) {
+				if (remove) pop();
+				else end--;
+			}
+			else i = 0;
+		}
 	}
 	
 	// ---------- From/ToInteger -------------------
@@ -181,7 +200,7 @@ class SmallIntChunks {
 		var bit:Int;
 		var j:Int = 0;
 		
-		for (i in start...end) {
+		for (i in 0...length) {
 			chunk = get(i);
 			bit = 1;
 			while (bit < UPPESTBIT) {
@@ -239,7 +258,7 @@ class SmallIntChunks {
 		var restBits:Int = 0;
 		var j:Int = 0;
 		
-		for (i in start...end) {
+		for (i in 0...length) {
 			chunk = (get(i) << restBits) + chunk;
 			while (BITSIZE + restBits >= 4) {
 				s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
@@ -270,7 +289,6 @@ class SmallIntChunks {
 // -----------------------------------------------------------------
 // ----------------------------  BigInt ----------------------------
 // -----------------------------------------------------------------
-
 abstract BigInt(SmallIntChunks) from SmallIntChunks {
 	
 	inline function new(SmallIntChunks:SmallIntChunks) {
@@ -283,9 +301,14 @@ abstract BigInt(SmallIntChunks) from SmallIntChunks {
 	public var length(get, never):Int;
 	inline function get_length():Int return this.length;
 	
+	public var isZero(get, never):Bool;
+	inline function get_isZero():Bool return this.isZero;
+
 	inline function get(i:Int):SmallInt return this.get(i);
 	inline function set(i:Int, v:Int) this.set(i,v);
 	inline function push(v:SmallInt) this.push(v);
+	
+	inline function truncateZeroChunks(remove:Bool = false) this.truncateZeroChunks(remove);
 	
 	inline function negate() this.isNegative = ! this.isNegative;
 	//inline function setNegative() this.isNegative = true;
@@ -360,7 +383,11 @@ abstract BigInt(SmallIntChunks) from SmallIntChunks {
 
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
 		if (a > b) return __subtract(a.clone(), b);
-		else return - __subtract(b.clone(), a);
+		else {
+			var v = __subtract(b.clone(), a); // can contain zero chunks
+			v.truncateZeroChunks();
+			return -v;
+		}
 	}
 
 	static inline function __subtract(a:BigInt, b:BigInt):BigInt {
@@ -440,6 +467,18 @@ abstract BigInt(SmallIntChunks) from SmallIntChunks {
 			for (i in 0...length) {
 				if (get(length-i-1) < b.get(length-i-1)) return true;
 				else if (get(length-i-1) > b.get(length-i-1)) return false;
+			}
+			return true;
+		}
+	}
+	
+	@:op(A == B)
+	function equal(b:BigInt):Bool {
+		if (length < b.length) return false;
+		else if (length > b.length) return false;
+		else {
+			for (i in 0...length) {
+				if (get(length-i-1) != b.get(length-i-1)) return false;
 			}
 			return true;
 		}
