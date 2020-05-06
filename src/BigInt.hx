@@ -5,30 +5,30 @@ typedef SmallIntArray = Array<SmallInt>; // TODO: can be optimized later for JS 
 class SmallIntChunks {
 	
 	// save for multiplication is 15 Bit per SmallInt on all platforms
-/*	static public inline var BITSIZE:Int = 7;
+	static public inline var BITSIZE:Int = 7;
 	static public inline var UPPESTBIT:Int = 0x80;
 	static public inline var BITMASK:Int = 0x7F;
-*/		
-	static public inline var BITSIZE:Int = 15;
+		
+/*	static public inline var BITSIZE:Int = 15;
 	static public inline var UPPESTBIT:Int = 0x8000;
 	static public inline var BITMASK:Int = 0x7FFF;
-		
+*/		
 	//static public inline var BITSIZE:Int = 31;
 	//static public inline var UPPEST:Int = 0x80000000;
 	//static public inline var MASK:Int = 0x7FFFFFFF;
 
 	var chunks:SmallIntArray;
-	var isNegative:Bool = false;
+	public var isNegative:Bool = false;
 	
 	// for splitting only start/end is changing for each part
-	public var start:Int = 0;
-	public var end:Int = 0;
+	var start:Int = 0;
+	var end:Int = 0;
 	
 	// on need: number how much zero-chunks would be right (1 -> like ^0x8000)
 	//public var exp:Int = 0; 
 	
 	public var length(get, never):Int;
-	inline function get_length():Int return end-start;
+	inline function get_length():Int return end - start;
 	
 	
 	public inline function new() {
@@ -37,7 +37,7 @@ class SmallIntChunks {
 		
 	public inline function clone():SmallIntChunks {
 		var smallIntChunks = new SmallIntChunks();
-		for (v in this.chunks) smallIntChunks.add(v); // TODO: only start to end ?
+		for (i in start...end) smallIntChunks.push(get(i));
 		return smallIntChunks;
 	}
 	
@@ -55,14 +55,14 @@ class SmallIntChunks {
 	}
 */	
 	public inline function get(i:Int):SmallInt {
-		return chunks[i];
+		return chunks[start + i];
 	}
 	
 	public inline function set(i:Int, v:SmallInt) {
-		chunks[i] = v;
+		chunks[start + i] = v;
 	}
 	
-	public inline function add(v:SmallInt) {
+	public inline function push(v:SmallInt) {
 		chunks.push(v);
 		end++;
 	}
@@ -76,7 +76,7 @@ class SmallIntChunks {
 			i = -i;
 		}
 		while (i != 0) {
-			smallIntChunks.add(i & BITMASK);
+			smallIntChunks.push(i & BITMASK);
 			i = i >> BITSIZE;
 		}
 		return smallIntChunks;
@@ -146,7 +146,7 @@ class SmallIntChunks {
 	
 	// ---------- Parsing Binary String -------------------
 	
-	inline function fromBinaryString(s:String):SmallIntChunks {
+	public inline function fromBinaryString(s:String):SmallIntChunks {
 		
 		var i = s.length;
 		var bit:Int = 1;
@@ -160,17 +160,21 @@ class SmallIntChunks {
 			}
 			bit = bit << 1;
 			if (bit == UPPESTBIT) {
-				add(chunk);
+				push(chunk);
 				bit = 1;
 				chunk = 0;
 			}
 		}
 		
-		if (bit > 1) add(chunk);
+		if (bit > 1) push(chunk);
 		return this;
 	}
 	
 	public inline function toBinaryString(spacing:Bool = true):String {
+		
+		if (length == 0) {
+			return ((spacing) ? [for (i in 0...8) "0"].join("") : "0");
+		}
 		
 		var s = "";
 		var chunk:SmallInt;
@@ -186,7 +190,7 @@ class SmallIntChunks {
 			}
 		}
 		
-		for (i in 0...(8 - j % 8)) s = "0" + s;
+		if (spacing) for (i in 0...(8 - j % 8)) s = "0" + s;
 		
 		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
 	}
@@ -196,7 +200,7 @@ class SmallIntChunks {
 	
 	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
 	
-	inline function fromHexString(s:String):SmallIntChunks {
+	public inline function fromHexString(s:String):SmallIntChunks {
 		
 		var i = s.length;
 		var bit:Int = 1;
@@ -209,7 +213,7 @@ class SmallIntChunks {
 			chunk += offset * bit;
 			bit = bit << 4;
 			if (bit >= UPPESTBIT) {
-				add(chunk & BITMASK);
+				push(chunk & BITMASK);
 				
 				if (bit == UPPESTBIT) bit = 1;
 				else if (bit == UPPESTBIT << 1) bit = 1 << 1;
@@ -220,11 +224,15 @@ class SmallIntChunks {
 			}
 		}
 		
-		if (chunk != 0) add(chunk);
+		if (chunk != 0) push(chunk);
 		return this;
 	}
 	
-	public inline function toHexString(spacing:Bool = true):String {
+	public function toHexString(spacing:Bool = true):String {
+		
+		if (length == 0) {
+			return ((spacing) ? [for (i in 0...4) "0"].join("") : "0");
+		}
 		
 		var s = "";
 		var chunk:SmallInt = 0;
@@ -249,7 +257,7 @@ class SmallIntChunks {
 		
 		if (restBits > 0) s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
 
-		if (j % 4 != 0) for (i in 0...(4 - j % 4)) s = "0" + s;
+		if (spacing && j % 4 != 0) for (i in 0...(4 - j % 4)) s = "0" + s;
 		
 		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
 	}
@@ -263,21 +271,27 @@ class SmallIntChunks {
 // ----------------------------  BigInt ----------------------------
 // -----------------------------------------------------------------
 
-abstract BigInt(SmallIntChunks) {
+abstract BigInt(SmallIntChunks) from SmallIntChunks {
 	
 	inline function new(SmallIntChunks:SmallIntChunks) {
 		this = SmallIntChunks;
 	}
 	
+	public var isNegative(get, never):Bool;
+	inline function get_isNegative():Bool return this.isNegative;
+	
 	public var length(get, never):Int;
 	inline function get_length():Int return this.length;
-	var start(get, never):Int;
-	inline function get_start():Int return this.start;
-	var end(get, never):Int;
-	inline function get_end():Int return this.end;
 	
 	inline function get(i:Int):SmallInt return this.get(i);
+	inline function set(i:Int, v:Int) this.set(i,v);
+	inline function push(v:SmallInt) this.push(v);
 	
+	inline function negate() this.isNegative = ! this.isNegative;
+	//inline function setNegative() this.isNegative = true;
+	
+	inline function clone():BigInt return new BigInt(this.clone());
+
 	@:from static public function fromInt(i:SmallInt):BigInt {
 		return new BigInt( SmallIntChunks.createFromSmallInt(i) );
 	}
@@ -290,33 +304,146 @@ abstract BigInt(SmallIntChunks) {
 	@:to public function toInt():Int       return this.toSmallInt();
 	
 	
+	// ------- addition -----------
+	
 	@:op(A + B)
-	public function add(rhs:BigInt):BigInt {
-		
-		// TODO: check sign
-		
-		var result = this.clone();
-		for (i in rhs.start...rhs.end) {
-			addAtPosition(rhs.get(i), i, result);
+	function add(b:BigInt):BigInt {
+		if (isNegative) {
+			if (b.isNegative) return - _add(this, b);
+			else return _subtract(b, this);
 		}
-		return new BigInt(result);
+		else {
+			if (b.isNegative) return _subtract(this, b);
+			else return _add(this, b);
+		}
 	}
 	
-	static inline function addAtPosition(a:SmallInt, position:Int, result:SmallIntChunks):Void {
-		for (i in position...result.length) {
-			var x:Int = result.get(i);
-			x += a;
+	static inline function _add(a:BigInt, b:BigInt):BigInt {
+		if (a.length > b.length) return __add(a.clone(), b);
+		else return __add(b.clone(), a);
+	}
+	
+	static inline function __add(a:BigInt, b:BigInt):BigInt {
+		for (position in 0...b.length) {
+			addAtPosition(a, b.get(position), position);
+		}
+		return a;
+	}
+	
+	static inline function addAtPosition(a:BigInt, v:SmallInt, position:Int):Void {
+		for (i in position...a.length) {
+			var x:Int = a.get(i) + v;
 			if (x & SmallIntChunks.UPPESTBIT == 0) {
-				result.set(i, x);
-				a = 0;
+				a.set(i, x);
+				v = 0;
 				break; 
 			}
-			result.set(i, x & SmallIntChunks.BITMASK);
-			a = 1;
+			a.set(i, x & SmallIntChunks.BITMASK);
+			v = 1;
 		}
-		if (a > 0) result.add(a);
+		if (v > 0) a.push(v);
 	}
 	
+	// ------- subtraction -----------
+	
+	@:op(A - B)
+	function subtract(b:BigInt):BigInt {
+		if (isNegative) {
+			if (b.isNegative) return - _subtract(b, this);
+			else return - _add(this, b);
+		}
+		else {
+			if (b.isNegative) return _add(this, b);
+			else return _subtract(this, b);
+		}
+	}
+
+	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
+		if (a > b) return __subtract(a.clone(), b);
+		else return - __subtract(b.clone(), a);
+	}
+
+	static inline function __subtract(a:BigInt, b:BigInt):BigInt {
+		for (position in 0...b.length) {
+			subtractAtPosition(a, b.get(position), position);
+		}
+		return a;
+	}
+
+	static inline function subtractAtPosition(a:BigInt, v:SmallInt, position:Int):Void {		
+		for (i in position...a.length) {
+			var x:Int = a.get(i);
+			if (x >= v) {
+				a.set(i, x - v);
+				v = 0;
+				break; 
+			}
+			a.set(i, x + SmallIntChunks.UPPESTBIT - v);
+			v = 1;
+		}
+	}
+	
+	// ------- negation -----------
+
+	@:op(- B)
+	inline function negation():BigInt {
+		negate();
+		return this;
+	}
+	
+	// ------- comparing -----------
+
+	@:op(A > B)
+	function greater(b:BigInt):Bool {
+		if (length > b.length) return true;
+		else if (length < b.length) return false;
+		else {
+			for (i in 0...length) {
+				if (get(length-i-1) > b.get(length-i-1)) return true;
+				else if (get(length-i-1) < b.get(length-i-1)) return false;
+			}
+			return false;
+		}
+	}
+	
+	@:op(A >= B)
+	function greaterOrEqual(b:BigInt):Bool {
+		if (length > b.length) return true;
+		else if (length < b.length) return false;
+		else {
+			for (i in 0...length) {
+				if (get(length-i-1) > b.get(length-i-1)) return true;
+				else if (get(length-i-1) < b.get(length-i-1)) return false;
+			}
+			return true;
+		}
+	}
+	
+	@:op(A < B)
+	function lesser(b:BigInt):Bool {
+		if (length < b.length) return true;
+		else if (length > b.length) return false;
+		else {
+			for (i in 0...length) {
+				if (get(length-i-1) < b.get(length-i-1)) return true;
+				else if (get(length-i-1) > b.get(length-i-1)) return false;
+			}
+			return false;
+		}
+	}
+	
+	@:op(A <= B)
+	function lesserOrEqual(b:BigInt):Bool {
+		if (length < b.length) return true;
+		else if (length > b.length) return false;
+		else {
+			for (i in 0...length) {
+				if (get(length-i-1) < b.get(length-i-1)) return true;
+				else if (get(length-i-1) > b.get(length-i-1)) return false;
+			}
+			return true;
+		}
+	}
 	
 	
 }

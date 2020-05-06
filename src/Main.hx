@@ -3,7 +3,7 @@ package;
 class Main {
 
     public static function main() {
-		
+
 		// from integer
 		
 		var i:BigInt = 0x7FFFFFFF;
@@ -37,6 +37,16 @@ class Main {
 		trace('a+b = $c');
 		
 		
+		// ------- Subtraction -----
+		trace('a-b', a - b);
+		trace('b-a', b - a);
+		
+		
+		// comparing
+		trace('a>b', (a > b));
+		trace('a<b', (a < b));
+		
+		
 		
 		
 		// sample
@@ -50,12 +60,12 @@ class Main {
 		var fiboOld:BigInt = 1;
 		var tmp:BigInt;
 		
-		for (i in 0...10000) {
+		for (i in 0...1000) {
 			tmp = fibo;
 			fibo = fibo + fiboOld;
 			fiboOld = tmp;
 		}
-		trace('Fibonacci(10 000) : 0x $fibo');
+		trace('Fibonacci(1000) : 0x $fibo');
 		
         trace("--------------------------------------------");
 		
