@@ -1,6 +1,6 @@
 package;
 
-import SmallIntChunks;
+import LittleIntChunks;
 
 /**
  * pure Haxe BigInt implementation
@@ -10,10 +10,10 @@ import SmallIntChunks;
  */
 
 
- abstract BigInt(SmallIntChunks) from SmallIntChunks {
+abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
-	inline function new(SmallIntChunks:SmallIntChunks) {
-		this = SmallIntChunks;
+	inline function new(LittleIntChunks:LittleIntChunks) {
+		this = LittleIntChunks;
 	}
 	
 	public var isNegative(get, never):Bool;
@@ -25,9 +25,9 @@ import SmallIntChunks;
 	public var isZero(get, never):Bool;
 	inline function get_isZero():Bool return this.isZero;
 
-	inline function get(i:Int):SmallInt return this.get(i);
+	inline function get(i:Int):LittleInt return this.get(i);
 	inline function set(i:Int, v:Int) this.set(i,v);
-	inline function push(v:SmallInt) this.push(v);
+	inline function push(v:LittleInt) this.push(v);
 	
 	inline function truncateZeroChunks(remove:Bool = false) this.truncateZeroChunks(remove);
 	
@@ -36,19 +36,19 @@ import SmallIntChunks;
 	
 	inline function clone():BigInt return new BigInt(this.clone());
 
-	@:from static public function fromInt(i:SmallInt):BigInt {
-		return new BigInt( SmallIntChunks.createFromSmallInt(i) );
+	@:from static public function fromInt(i:LittleInt):BigInt {
+		return new BigInt( LittleIntChunks.createFromLittleInt(i) );
 	}
 
 	@:from static public function fromString(s:String):BigInt {
-		return new BigInt( SmallIntChunks.createFromString(s) );
+		return new BigInt( LittleIntChunks.createFromString(s) );
 	}
 
 	@:to public function toString():String return this.toString();	
 	public function toHexString(spacing:Bool = true):String return this.toHexString(spacing);	
 	public function toBinaryString(spacing:Bool = true):String return this.toBinaryString(spacing);	
 	
-	@:to public function toInt():Int       return this.toSmallInt();
+	@:to public function toInt():Int       return this.toLittleInt();
 	
 	
 	// ------- addition -----------
@@ -77,15 +77,15 @@ import SmallIntChunks;
 		return a;
 	}
 	
-	static inline function addAtPosition(a:BigInt, v:SmallInt, position:Int):Void {
+	static inline function addAtPosition(a:BigInt, v:LittleInt, position:Int):Void {
 		for (i in position...a.length) {
 			var x:Int = a.get(i) + v;
-			if (x & SmallIntChunks.UPPESTBIT == 0) {
+			if (x & LittleIntChunks.UPPESTBIT == 0) {
 				a.set(i, x);
 				v = 0;
 				break; 
 			}
-			a.set(i, x & SmallIntChunks.BITMASK);
+			a.set(i, x & LittleIntChunks.BITMASK);
 			v = 1;
 		}
 		if (v > 0) a.push(v);
@@ -121,7 +121,7 @@ import SmallIntChunks;
 		return a;
 	}
 
-	static inline function subtractAtPosition(a:BigInt, v:SmallInt, position:Int):Void {		
+	static inline function subtractAtPosition(a:BigInt, v:LittleInt, position:Int):Void {		
 		for (i in position...a.length) {
 			var x:Int = a.get(i);
 			if (x >= v) {
@@ -129,7 +129,7 @@ import SmallIntChunks;
 				v = 0;
 				break; 
 			}
-			a.set(i, x + SmallIntChunks.UPPESTBIT - v);
+			a.set(i, x + LittleIntChunks.UPPESTBIT - v);
 			v = 1;
 		}
 	}

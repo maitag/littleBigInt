@@ -9,13 +9,13 @@ package;
  */
 
 
-typedef SmallInt = Int;
-typedef SmallIntArray = Array<SmallInt>; // TODO: can be optimized later for JS here (UInt32Array for example)
+typedef LittleInt = Int;
+typedef LittleIntArray = Array<LittleInt>; // TODO: can be optimized later for JS here (UInt32Array for example)
 
 
-class SmallIntChunks {
+class LittleIntChunks {
 	
-	// chunksize need to be small enough to multiplicate 2 smallInts without leaving range
+	// chunksize need to be Little enough to multiplicate 2 LittleInts without leaving range
 	
 	// TODO: use a haxe-define for easy switch with conditional compiling here
 	
@@ -24,14 +24,14 @@ class SmallIntChunks {
 	// static public inline var UPPESTBIT:Int = 0x80;
 	// static public inline var BITMASK:Int = 0x7F;
 		
-	// save for multiplication is 15 Bit per SmallInt on all platforms
+	// save for multiplication is 15 Bit per LittleInt on all platforms
 	
-	// if SmallInt is native 32 Bit Integer (neko):
+	// if LittleInt is native 32 Bit Integer (neko):
 	static public inline var BITSIZE:Int = 15;
 	static public inline var UPPESTBIT:Int = 0x8000;
 	static public inline var BITMASK:Int = 0x7FFF;
 	
-	// if SmallInt is native 64 Bit Integer:
+	// if LittleInt is native 64 Bit Integer:
 	//static public inline var BITSIZE:Int = 31;
 	//static public inline var UPPEST:Int = 0x80000000;
 	//static public inline var MASK:Int = 0x7FFFFFFF;
@@ -39,7 +39,7 @@ class SmallIntChunks {
 	
 	// --------------------------------------------------------------------
 	
-	var chunks:SmallIntArray;
+	var chunks:LittleIntArray;
 	public var isNegative:Bool = false;
 	
 	// for splitting only start/end is changing for each part
@@ -57,42 +57,42 @@ class SmallIntChunks {
 	
 	
 	public inline function new() {
-		chunks = new SmallIntArray();
+		chunks = new LittleIntArray();
 	}
 		
-	public inline function clone():SmallIntChunks {
-		var smallIntChunks = new SmallIntChunks();
-		for (i in 0...length) smallIntChunks.push(get(i));
-		return smallIntChunks;
+	public inline function clone():LittleIntChunks {
+		var LittleIntChunks = new LittleIntChunks();
+		for (i in 0...length) LittleIntChunks.push(get(i));
+		return LittleIntChunks;
 	}
 	
 	// TODO
-/*	public inline function split(size:Int):SmallIntChunks {
+/*	public inline function split(size:Int):LittleIntChunks {
 		// TODO
-		return smallIntChunks;
+		return LittleIntChunks;
 	}
 */	
 /*	
 	// Multiplikaiton helper
-	public inline function join3(a:SmallIntChunks, b:SmallIntChunks, c:SmallIntChunks):SmallIntChunks {
+	public inline function join3(a:LittleIntChunks, b:LittleIntChunks, c:LittleIntChunks):LittleIntChunks {
 		// TODO
-		return smallIntChunks;
+		return LittleIntChunks;
 	}
 */	
-	public inline function get(i:Int):SmallInt {
+	public inline function get(i:Int):LittleInt {
 		return chunks[start + i];
 	}
 	
-	public inline function set(i:Int, v:SmallInt) {
+	public inline function set(i:Int, v:LittleInt) {
 		chunks[start + i] = v;
 	}
 	
-	public inline function push(v:SmallInt) {
+	public inline function push(v:LittleInt) {
 		chunks.push(v);
 		end++;
 	}
 	
-	public inline function pop():SmallInt {
+	public inline function pop():LittleInt {
 		end--;
 		return chunks.pop();
 	}
@@ -110,20 +110,20 @@ class SmallIntChunks {
 	
 	// ---------- From/ToInteger -------------------
 
-	public static inline function createFromSmallInt(i:SmallInt):SmallIntChunks {
-		var smallIntChunks = new SmallIntChunks();
+	public static inline function createFromLittleInt(i:LittleInt):LittleIntChunks {
+		var LittleIntChunks = new LittleIntChunks();
 		if (i < 0) {
-			smallIntChunks.isNegative = true;
+			LittleIntChunks.isNegative = true;
 			i = -i;
 		}
 		while (i != 0) {
-			smallIntChunks.push(i & BITMASK);
+			LittleIntChunks.push(i & BITMASK);
 			i = i >> BITSIZE;
 		}
-		return smallIntChunks;
+		return LittleIntChunks;
 	}
 
-	public inline function toSmallInt():SmallInt {
+	public inline function toLittleInt():LittleInt {
 		if (length == 0) return 0;
 		// TODO: fill dependent of what is native Int-bitsize
 		else if (length > 1) throw('Error, BigInt is to Big for $BITSIZE bit Int');
@@ -139,9 +139,9 @@ class SmallIntChunks {
 	static var regexHex = ~/^0x/;
 	static var regexSign = ~/^-/;
 	
-	public static function createFromString(s:String):SmallIntChunks {
+	public static function createFromString(s:String):LittleIntChunks {
 		
-		var smallIntChunks = new SmallIntChunks();
+		var LittleIntChunks = new LittleIntChunks();
 		
 		// make lowercase and parse out all spaces
 		s = regexSpaces.replace(s.toLowerCase(), "");
@@ -149,19 +149,19 @@ class SmallIntChunks {
 		// check sign
 		if (regexSign.match(s)) {
 			s = regexSign.replace(s, "");
-			smallIntChunks.isNegative = true;
+			LittleIntChunks.isNegative = true;
 		}
 		
 		if (regexBinary.match(s)) 
-			smallIntChunks.fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""));
+			LittleIntChunks.fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""));
 		else if (regexHex.match(s))
-			smallIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
+			LittleIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
 		else if (regexOctal.match(s)) 
-			return smallIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
-		else smallIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
+			return LittleIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
+		else LittleIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
 		
-		if (smallIntChunks.isZero) smallIntChunks.isNegative = false;
-		return smallIntChunks;
+		if (LittleIntChunks.isZero) LittleIntChunks.isNegative = false;
+		return LittleIntChunks;
 	}
 	
 	public inline function toString():String {
@@ -175,7 +175,7 @@ class SmallIntChunks {
 	
 	// ------ Parsing String from Number to a defined Base ------------
 	
-	inline function fromBaseString(s:String, base:Int = 10):SmallIntChunks {
+	inline function fromBaseString(s:String, base:Int = 10):LittleIntChunks {
 		
 		// TODO: parsing any base needs bigint multiplication first
 
@@ -194,7 +194,7 @@ class SmallIntChunks {
 	
 	// ---------- Parsing Binary String -------------------
 	
-	public inline function fromBinaryString(s:String):SmallIntChunks {
+	public inline function fromBinaryString(s:String):LittleIntChunks {
 		
 		var i = s.length;
 		var bit:Int = 1;
@@ -225,7 +225,7 @@ class SmallIntChunks {
 		}
 		
 		var s = "";
-		var chunk:SmallInt;
+		var chunk:LittleInt;
 		var bit:Int;
 		var j:Int = 0;
 		
@@ -249,7 +249,7 @@ class SmallIntChunks {
 	
 	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
 	
-	public inline function fromHexString(s:String):SmallIntChunks {
+	public inline function fromHexString(s:String):LittleIntChunks {
 		
 		var i = s.length;
 		var bit:Int = 1;
@@ -284,7 +284,7 @@ class SmallIntChunks {
 		}
 		
 		var s = "";
-		var chunk:SmallInt = 0;
+		var chunk:LittleInt = 0;
 		var restBits:Int = 0;
 		var j:Int = 0;
 		
