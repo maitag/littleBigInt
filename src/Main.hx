@@ -1,5 +1,10 @@
 package;
 
+/**
+ * by Sylvio Sell, Rostock 2020
+ * 
+ */
+
 class Main {
 
     public static function main() {
