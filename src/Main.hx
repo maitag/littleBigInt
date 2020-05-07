@@ -9,8 +9,6 @@ class Main {
 
     public static function main() {
 
-		trace('test', ((10 : BigInt) - (10 : BigInt)));
-		
 		// from integer
 		
 		var i:BigInt = 0x7FFFFFFF;

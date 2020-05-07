@@ -226,7 +226,7 @@ class SmallIntChunks {
 			chunk = get(i);
 			bit = 1;
 			while (bit < UPPESTBIT) {
-				s = (((bit & chunk) == 0) ? "0" : "1") + ((j++ % 8 == 0 && spacing) ? " " : "") + s;
+				s = (((bit & chunk) == 0) ? "0" : "1") + ((j++ % 8 == 0 && spacing && i != 0) ? " " : "") + s;
 				bit = bit << 1;
 			}
 		}
@@ -283,7 +283,7 @@ class SmallIntChunks {
 		for (i in 0...length) {
 			chunk = (get(i) << restBits) + chunk;
 			while (BITSIZE + restBits >= 4) {
-				s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
+				s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing && i != 0) ? " " : "") + s;
 				chunk = chunk >> 4;
 				restBits -= 4;
 			}

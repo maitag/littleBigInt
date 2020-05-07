@@ -45,6 +45,9 @@ import SmallIntChunks;
 	}
 
 	@:to public function toString():String return this.toString();	
+	public function toHexString(spacing:Bool = true):String return this.toHexString(spacing);	
+	public function toBinaryString(spacing:Bool = true):String return this.toBinaryString(spacing);	
+	
 	@:to public function toInt():Int       return this.toSmallInt();
 	
 	
@@ -143,12 +146,13 @@ import SmallIntChunks;
 
 	@:op(A > B)
 	function greater(b:BigInt):Bool {
-		if (length > b.length) return true;
-		else if (length < b.length) return false;
+		if (isNegative != b.isNegative) return (isNegative) ? false : true;
+		else if (length > b.length) return (isNegative) ? false : true;
+		else if (length < b.length) return (isNegative) ? true : false;
 		else {
 			for (i in 0...length) {
-				if (get(length-i-1) > b.get(length-i-1)) return true;
-				else if (get(length-i-1) < b.get(length-i-1)) return false;
+				if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? false : true;
+				else if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? true : false;
 			}
 			return false;
 		}
@@ -156,12 +160,13 @@ import SmallIntChunks;
 	
 	@:op(A >= B)
 	function greaterOrEqual(b:BigInt):Bool {
-		if (length > b.length) return true;
-		else if (length < b.length) return false;
+		if (isNegative != b.isNegative) return (isNegative) ? false : true;
+		else if (length > b.length) return (isNegative) ? false : true;
+		else if (length < b.length) return (isNegative) ? true : false;
 		else {
 			for (i in 0...length) {
-				if (get(length-i-1) > b.get(length-i-1)) return true;
-				else if (get(length-i-1) < b.get(length-i-1)) return false;
+				if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? false : true;
+				else if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? true : false;
 			}
 			return true;
 		}
@@ -169,12 +174,13 @@ import SmallIntChunks;
 	
 	@:op(A < B)
 	function lesser(b:BigInt):Bool {
-		if (length < b.length) return true;
-		else if (length > b.length) return false;
+		if (isNegative != b.isNegative) return (isNegative) ? true : false;
+		else if (length < b.length) return (isNegative) ? false : true;
+		else if (length > b.length) return (isNegative) ? true : false;
 		else {
 			for (i in 0...length) {
-				if (get(length-i-1) < b.get(length-i-1)) return true;
-				else if (get(length-i-1) > b.get(length-i-1)) return false;
+				if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? false : true;
+				else if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? true : false;
 			}
 			return false;
 		}
@@ -182,12 +188,13 @@ import SmallIntChunks;
 	
 	@:op(A <= B)
 	function lesserOrEqual(b:BigInt):Bool {
-		if (length < b.length) return true;
-		else if (length > b.length) return false;
+		if (isNegative != b.isNegative) return (isNegative) ? true : false;
+		else if (length < b.length) return (isNegative) ? false : true;
+		else if (length > b.length) return (isNegative) ? true : false;
 		else {
 			for (i in 0...length) {
-				if (get(length-i-1) < b.get(length-i-1)) return true;
-				else if (get(length-i-1) > b.get(length-i-1)) return false;
+				if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? false : true;
+				else if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? true : false;
 			}
 			return true;
 		}
@@ -195,8 +202,8 @@ import SmallIntChunks;
 	
 	@:op(A == B)
 	function equal(b:BigInt):Bool {
-		if (length < b.length) return false;
-		else if (length > b.length) return false;
+		if (isNegative != b.isNegative) return false;
+		else if (length != b.length) return false;
 		else {
 			for (i in 0...length) {
 				if (get(length-i-1) != b.get(length-i-1)) return false;
