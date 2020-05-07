@@ -133,9 +133,10 @@ class SmallIntChunks {
 	// ---------- From/To String -------------------
 
 	static var regexSpaces = ~/\s+/g;
-	static var regexBinary = ~/^0b0*/;
-	static var regexOctal = ~/^0o0*/;
-	static var regexHex = ~/^0x0*/;
+	static var regexLeadingZeros = ~/^0*/g;
+	static var regexBinary = ~/^0b/;
+	static var regexOctal = ~/^0o/;
+	static var regexHex = ~/^0x/;
 	static var regexSign = ~/^-/;
 	
 	public static function createFromString(s:String):SmallIntChunks {
@@ -151,10 +152,16 @@ class SmallIntChunks {
 			smallIntChunks.isNegative = true;
 		}
 		
-		if (regexBinary.match(s)) return smallIntChunks.fromBinaryString(regexBinary.replace(s, ""));
-		else if (regexHex.match(s)) return smallIntChunks.fromHexString(regexHex.replace(s, ""));
-		else if (regexOctal.match(s)) return smallIntChunks.fromBaseString(regexOctal.replace(s, ""), 8);
-		else return smallIntChunks.fromBaseString(s);		
+		if (regexBinary.match(s)) 
+			smallIntChunks.fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""));
+		else if (regexHex.match(s))
+			smallIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
+		else if (regexOctal.match(s)) 
+			return smallIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
+		else smallIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
+		
+		if (smallIntChunks.isZero) smallIntChunks.isNegative = false;
+		return smallIntChunks;
 	}
 	
 	public inline function toString():String {
@@ -213,7 +220,7 @@ class SmallIntChunks {
 	
 	public inline function toBinaryString(spacing:Bool = true):String {
 		
-		if (length == 0) {
+		if (isZero) {
 			return ((spacing) ? [for (i in 0...8) "0"].join("") : "0");
 		}
 		
@@ -226,12 +233,13 @@ class SmallIntChunks {
 			chunk = get(i);
 			bit = 1;
 			while (bit < UPPESTBIT) {
-				s = (((bit & chunk) == 0) ? "0" : "1") + ((j++ % 8 == 0 && spacing && i != 0) ? " " : "") + s;
+				s = (((bit & chunk) == 0) ? "0" : "1") + ((j % 8 == 0 && spacing && j != 0) ? " " : "") + s;
+				j++;
 				bit = bit << 1;
 			}
 		}
-		
-		if (spacing) for (i in 0...(8 - j % 8)) s = "0" + s;
+		s = regexLeadingZeros.replace(s, "");
+		if (spacing && j % 8 != 0) for (i in 0...(8 - j % 8)) s = "0" + s;
 		
 		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
 	}
@@ -271,7 +279,7 @@ class SmallIntChunks {
 	
 	public function toHexString(spacing:Bool = true):String {
 		
-		if (length == 0) {
+		if (isZero) {
 			return ((spacing) ? [for (i in 0...4) "0"].join("") : "0");
 		}
 		

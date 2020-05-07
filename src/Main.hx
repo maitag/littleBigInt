@@ -61,8 +61,8 @@ class Main {
 
 
 		// Fibonacci
-		var fibo:BigInt = 2;
 		var fiboOld:BigInt = 1;
+		var fibo:BigInt = 2;
 		var tmp:BigInt;
 		
 		for (i in 0...1000) {
