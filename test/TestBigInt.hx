@@ -50,4 +50,58 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( (-16777215 : BigInt).toBinaryString(true), "-11111111 11111111 11111111" );
 	}
 
+	public function testComparing() {
+		assertTrue( ("-0x 0" : BigInt) == ("0x 0" : BigInt) );
+		assertTrue( ("0x 10" : BigInt) == ("0x 10" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) == ("0x ff ffff" : BigInt) );
+		assertTrue( ("-0x ff ffff" : BigInt) == ("-0x ff ffff" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) <= ("0x ff ffff" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) <= ("0x 100 0000" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) < ("0x 100 0000" : BigInt) );
+		assertTrue( ("-0x ff ffff" : BigInt) < ("0x 100 0000" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) >= ("0x ff ffff" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) >= ("0x ff ffff" : BigInt) );
+		assertTrue( ("0x 100 0000" : BigInt) >= ("0x ff ffff" : BigInt) );
+		assertTrue( ("-0x ff ffff" : BigInt) >= ("-0x ff ffff" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) >= ("-0x 0" : BigInt) );
+		assertTrue( ("-0x ff ffff" : BigInt) > ("-0x 100 0000" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) > ("-0x 100 0000" : BigInt) );
+		assertTrue( ("0x ff ffff" : BigInt) > ("-0x ff fffe" : BigInt) );
+		assertTrue( ("-0x 100 0000" : BigInt) != ("0x 100 0000" : BigInt) );
+		assertTrue( ("0x 100 0001" : BigInt) != ("0x 100 0000" : BigInt) );
+	}
+
+	public function testAddition() {
+		assertTrue( (0 : BigInt) + (0 : BigInt) == (0 : BigInt) );
+		assertTrue( (1 : BigInt) + (0 : BigInt) == (1 : BigInt) );
+		assertTrue( (1 : BigInt) + (1 : BigInt) == (2 : BigInt) );
+		assertTrue( (-1 : BigInt) + (0 : BigInt) == (-1 : BigInt) );
+		assertTrue( (0 : BigInt) + (-1 : BigInt) == (-1 : BigInt) );
+		assertTrue( (1 : BigInt) + (-1 : BigInt) == (0 : BigInt) );
+		assertTrue( (2 : BigInt) + (-1 : BigInt) == (1 : BigInt) );
+		assertTrue( (-1 : BigInt) + (-1 : BigInt) == (-2 : BigInt) );
+		assertTrue( (-1 : BigInt) + (3 : BigInt) == (2 : BigInt) );
+		assertTrue( (-2 : BigInt) + (-1 : BigInt) == (-3 : BigInt) );
+		assertTrue( ("0x ffff ffff" : BigInt) + (1 : BigInt) == ("0x 1 0000 0000" : BigInt) );
+		assertTrue( ("0x 1 0000 0000" : BigInt) + ("0x ffff ffff" : BigInt) == ("0x 1 ffff ffff" : BigInt) );
+	}
+	
+	public function testSubtraction() {
+		assertTrue( (0 : BigInt) - (0 : BigInt) == (0 : BigInt) );
+		assertTrue( (1 : BigInt) - (0 : BigInt) == (1 : BigInt) );
+		assertTrue( (1 : BigInt) - (1 : BigInt) == (0 : BigInt) );
+		assertTrue( (-1 : BigInt) - (0 : BigInt) == (-1 : BigInt) );
+		assertTrue( (1 : BigInt) - (-1 : BigInt) == (2 : BigInt) );
+		assertTrue( (-1 : BigInt) - (-1 : BigInt) == (0 : BigInt) );
+		assertTrue( (-2 : BigInt) - (-1 : BigInt) == (-1 : BigInt) );
+		assertTrue( (-1 : BigInt) - (-3 : BigInt) == (2 : BigInt) );
+		assertTrue( ("0x ffff ffff" : BigInt) - (1 : BigInt) == ("0x ffff fffe" : BigInt) );
+		assertTrue( ("0x 1 0000 0000" : BigInt) - ("0x ffff ffff" : BigInt) == ( 1 : BigInt) );
+		assertTrue( ("0x ffff ffff" : BigInt) - ("0x 1 0000 0000" : BigInt) == ( -1 : BigInt) );
+		assertTrue( ("0x ffff ffff" : BigInt) - ("0x 2 0000 0000" : BigInt) == ( "-0x 1 0000 0001" : BigInt) );
+		assertTrue( ("-0x 1 0000 0000" : BigInt) - ("0x ffff ffff" : BigInt) == ( "-0x 1 ffff ffff" : BigInt) );
+		assertTrue( ("-0x 1 0000 0000" : BigInt) - ("0x 0" : BigInt) == ( "-0x 1 0000 0000" : BigInt) );
+	}
+	
+	
 }

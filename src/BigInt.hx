@@ -56,11 +56,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A + B)
 	function add(b:BigInt):BigInt {
 		if (isNegative) {
-			if (b.isNegative) return - _add(this, b);
+			negate();
+			if (b.isNegative) return - _add(this, -b);
 			else return _subtract(b, this);
 		}
 		else {
-			if (b.isNegative) return _subtract(this, b);
+			if (b.isNegative) return _subtract(this, -b);
 			else return _add(this, b);
 		}
 	}
@@ -96,7 +97,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A - B)
 	function subtract(b:BigInt):BigInt {
 		if (isNegative) {
-			if (b.isNegative) return - _subtract(b, this);
+			negate();
+			if (b.isNegative) return _subtract(-b, this);
 			else return - _add(this, b);
 		}
 		else {
@@ -106,11 +108,16 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
-		if (a > b) return __subtract(a.clone(), b);
-		else {
-			var v = __subtract(b.clone(), a); // can contain zero chunks
+		var v:BigInt;
+		if (a > b) {
+			v = __subtract(a.clone(), b);
 			v.truncateZeroChunks();
-			return -v;
+			return v;
+		}
+		else {
+			v = __subtract(b.clone(), a);
+			v.truncateZeroChunks();
+			if (v.isZero) return v else return -v;
 		}
 	}
 
@@ -209,6 +216,18 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				if (get(length-i-1) != b.get(length-i-1)) return false;
 			}
 			return true;
+		}
+	}
+	
+	@:op(A != B)
+	function notEqual(b:BigInt):Bool {
+		if (isNegative != b.isNegative) return true;
+		else if (length != b.length) return true;
+		else {
+			for (i in 0...length) {
+				if (get(length-i-1) != b.get(length-i-1)) return true;
+			}
+			return false;
 		}
 	}
 	

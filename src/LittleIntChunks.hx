@@ -20,9 +20,9 @@ class LittleIntChunks {
 	// TODO: use a haxe-define for easy switch with conditional compiling here
 	
 	// for testing
-	// static public inline var BITSIZE:Int = 7;
-	// static public inline var UPPESTBIT:Int = 0x80;
-	// static public inline var BITMASK:Int = 0x7F;
+	//static public inline var BITSIZE:Int = 7;
+	//static public inline var UPPESTBIT:Int = 0x80;
+	//static public inline var BITMASK:Int = 0x7F;
 		
 	// save for multiplication is 15 Bit per LittleInt on all platforms
 	
@@ -238,8 +238,10 @@ class LittleIntChunks {
 				bit = bit << 1;
 			}
 		}
-		s = regexLeadingZeros.replace(s, "");
-		if (spacing && j % 8 != 0) for (i in 0...(8 - j % 8)) s = "0" + s;
+		if (spacing) {
+			if (j % 8 != 0) for (i in 0...(8 - j % 8)) s = "0" + s;
+		}
+		else s = regexLeadingZeros.replace(s, "");
 		
 		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
 	}
