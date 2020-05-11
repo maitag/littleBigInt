@@ -20,22 +20,22 @@ class LittleIntChunks {
 	// TODO: use a haxe-define for easy switch with conditional compiling here
 	
 	// for testing
-	//static public inline var BITSIZE:Int = 7;
-	//static public inline var UPPESTBIT:Int = 0x80;
-	//static public inline var BITMASK:Int = 0x7F;
+	static public inline var BITSIZE:Int = 7;
+	static public inline var UPPESTBIT:Int = 0x80;
+	static public inline var BITMASK:Int = 0x7F;
 		
 	// save for multiplication is 15 Bit per LittleInt on all platforms
 	
 	// if LittleInt is native 32 Bit Integer (neko):
-	static public inline var BITSIZE:Int = 15;
+/*	static public inline var BITSIZE:Int = 15;
 	static public inline var UPPESTBIT:Int = 0x8000;
 	static public inline var BITMASK:Int = 0x7FFF;
-	
+*/	
 	// if LittleInt is native 64 Bit Integer:
-	//static public inline var BITSIZE:Int = 31;
-	//static public inline var UPPEST:Int = 0x80000000;
-	//static public inline var MASK:Int = 0x7FFFFFFF;
-
+/*	static public inline var BITSIZE:Int = 31;
+	static public inline var UPPEST:Int = 0x80000000;
+	static public inline var MASK:Int = 0x7FFFFFFF;
+*/
 	
 	// --------------------------------------------------------------------
 	

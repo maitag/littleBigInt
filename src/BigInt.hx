@@ -236,16 +236,21 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	@:op(A * B)
 	function multicplicate(b:BigInt):BigInt {
-		if (this.length == 1 && b.length == 1) {
-			var littleIntChunks = new LittleIntChunks();
-			littleIntChunks.push(this.get(0) * b.get(0));
-			if (isNegative != b.isNegative) littleIntChunks.isNegative = true;
-			return littleIntChunks;
-		}
-		else return _mul(this, b);
+		return _mul(this, b);
 	}
 	
 	static function _mul(a:BigInt, b:BigInt):BigInt {
+		
+		if (a.length == 1 && b.length == 1) {
+			var littleIntChunks = new LittleIntChunks();
+			littleIntChunks.push(a.get(0) * b.get(0));
+			if (a.isNegative != b.isNegative) littleIntChunks.isNegative = true;
+			return littleIntChunks;
+		}
+		
+		var e = IntUtil.nextPowerOfTwo((a.length > b.length) ? a.length : b.length);
+		trace(a.length, b.length, "nextPowerOfTwo", e);
+		
 		
 		// TODO
 		
@@ -254,6 +259,15 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		
 		var bHigh:BigInt = b; //.splitHigh(e);
 		var bLow:BigInt = b; //.splitLow(e);
+		
+		trace(aHigh.toBinaryString(), aLow.toBinaryString());
+		trace(bHigh.toBinaryString(), bLow.toBinaryString());
+		
+		return 0;
+		
+		
+		// TODO
+		
 		
 		var p1:BigInt = _mul(aHigh, bHigh);
 		var p2:BigInt =  _mul(aLow , bLow);
