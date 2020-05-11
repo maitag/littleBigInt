@@ -247,17 +247,62 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	static function _mul(a:BigInt, b:BigInt):BigInt {
 		
-		var aHigh:BigInt = a;
-		var aLow:BigInt = a;
+		// TODO
 		
-		var bHigh:BigInt = b;
-		var bLow:BigInt = b;
+		var aHigh:BigInt = a; //.splitHigh(e);
+		var aLow:BigInt = a; //.splitLow(e);
+		
+		var bHigh:BigInt = b; //.splitHigh(e);
+		var bLow:BigInt = b; //.splitLow(e);
 		
 		var p1:BigInt = _mul(aHigh, bHigh);
 		var p2:BigInt =  _mul(aLow , bLow);
 		var p3:BigInt = _mul(aHigh + aLow, bHigh + bLow );
-		
 		// join( p1, p3-(p1+p2), p2 );
+		
+		if (aHigh == null || bHigh == null)
+		{
+			//p1 = 0;
+			if (aLow == null || bLow == null) {
+				//p2 = 0;
+				if (aHigh != null && bLow != null)
+					p3 = _mul(aHigh, bLow);
+				else
+					p3 = _mul(aLow, bHigh);
+			}
+			else {
+				//p2 = _mul(aLow, bLow);
+				if (aHigh == null && bHigh == null)
+					p3 = _mul(aLow, bLow);
+				else if (aHigh == null)
+					p3 = _mul(aLow, bHigh + bLow );
+				else 
+					p3 = _mul(aHigh + aLow, bLow  );
+			}
+			
+		}
+		else
+		{			
+			//p1 = _mul(aHigh, bHigh);
+			if (aLow == null || bLow == null) {
+				//p2 = 0;
+				if (aLow == null && bLow == null)
+					p3 = _mul(aHigh, bHigh );
+				else if (aLow == null)
+					p3 = _mul(aHigh, bHigh + bLow );
+				else
+					p3 = _mul(aHigh + aLow, bHigh  );
+			}
+			else {
+				p1 = _mul(aHigh, bHigh);
+				p2 = _mul(aLow, bLow);
+				p3 = _mul(aHigh + aLow, bHigh + bLow);
+				// ( p1, p3-(p1+p2), p2 );
+			}
+			
+		}
+		
+		
 		
 		return 0;
 	}

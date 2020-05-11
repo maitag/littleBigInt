@@ -8,7 +8,7 @@ package;
 class IntUtil 
 {
 	
-	#if macro_optimize_util   // --------------- macro optimization -------------------
+	#if macro_optimize_bitsize   // --------------- macro optimization -------------------
 
 	
 	public static macro function nextPowerOfTwo(i:haxe.macro.Expr, maxBitsize:Int = 32) {
@@ -31,7 +31,7 @@ class IntUtil
 	}
 	
 	
-	// how to make "private"? (no access from intBitsizeMacro then!)
+	// how to make "private"? (no access from bitsize and _bitsize itself!)
 	public static macro function _bitsize(i:haxe.macro.Expr, n:Int, delta:Int) {
 		if (delta == 0)
 			return macro throw('Error calculating intBitLength: ' + $i + ' has more bits than maxBitSize');

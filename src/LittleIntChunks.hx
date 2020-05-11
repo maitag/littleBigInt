@@ -53,7 +53,7 @@ class LittleIntChunks {
 	inline function get_length():Int return end - start;
 	
 	public var isZero(get, never):Bool;
-	inline function get_isZero():Bool return (length == 0);
+	inline function get_isZero():Bool return (start == end);
 	
 	
 	public inline function new() {
@@ -101,8 +101,7 @@ class LittleIntChunks {
 		var i = length;
 		while ( --i >= 0) {
 			if (get(i) == 0) {
-				if (remove) pop();
-				else end--;
+				if (remove) pop() else end--;
 			}
 			else i = 0;
 		}
