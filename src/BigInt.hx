@@ -232,4 +232,36 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
+	// ------- multiplication (https://en.wikipedia.org/wiki/Karatsuba_algorithm) -----
+	
+	@:op(A * B)
+	function multicplicate(b:BigInt):BigInt {
+		if (this.length == 1 && b.length == 1) {
+			var littleIntChunks = new LittleIntChunks();
+			littleIntChunks.push(this.get(0) * b.get(0));
+			if (isNegative != b.isNegative) littleIntChunks.isNegative = true;
+			return littleIntChunks;
+		}
+		else return _mul(this, b);
+	}
+	
+	static function _mul(a:BigInt, b:BigInt):BigInt {
+		
+		var aHigh:BigInt = a;
+		var aLow:BigInt = a;
+		
+		var bHigh:BigInt = b;
+		var bLow:BigInt = b;
+		
+		var p1:BigInt = _mul(aHigh, bHigh);
+		var p2:BigInt =  _mul(aLow , bLow);
+		var p3:BigInt = _mul(aHigh + aLow, bHigh + bLow );
+		
+		// join( p1, p3-(p1+p2), p2 );
+		
+		return 0;
+	}
+
+	
+	
 }

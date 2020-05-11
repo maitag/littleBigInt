@@ -9,6 +9,25 @@ class Main {
 
     public static function main() {
 
+		// testing bitlengt and nearest power of 2 functions
+		
+		for (i in 0...10) trace( i, IntUtil.bitsize(i, 8), IntUtil.nextPowerOfTwo(i, 8) );
+		
+		trace ( (0x80000000:UInt) );
+		
+		trace ( (0x7fffffff:UInt), IntUtil.bitsize(0x7fffffff, 32), IntUtil.nextPowerOfTwo(0x7fffffff, 32) );
+		trace ( (0x80000000:UInt), IntUtil.bitsize(0x80000000, 32), IntUtil.nextPowerOfTwo(0x80000000, 32) );
+		trace ( (0x80000001:UInt), IntUtil.bitsize(0x80000001, 32), "2 ^ 32 outside of maxBitsize Error");
+		
+		// -> throws error for reaching maxBitsize 32
+		//trace ( Util.nextPowerOfTwo(0x80000001, 32) );
+		
+		
+		
+		
+		//trace( (3:BigInt) * (2:BigInt));
+		
+		
 		// from integer
 		
 		var i:BigInt = 0x7FFFFFFF;

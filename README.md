@@ -6,7 +6,7 @@ another little pure haxe BigInt implementation (work in progress)
 
 - string in/output for binary and hexadecimal notation
 - addition and subtraction
-- comparing (>, <, >=, <=, ==)
+- comparing (>, <, >=, <=, ==, !=)
 - negation
 
 
@@ -18,10 +18,11 @@ another little pure haxe BigInt implementation (work in progress)
 - modulo
 - pow and modPow
 - binary operations
-- Bytes in/output
+
+- Bytes in/output (to store BigInts)
 
 
 ## todo
 
-- unit tests
 - optimization
+- performance testing/optimizing for all targets

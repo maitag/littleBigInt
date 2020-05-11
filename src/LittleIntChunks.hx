@@ -61,9 +61,9 @@ class LittleIntChunks {
 	}
 		
 	public inline function clone():LittleIntChunks {
-		var LittleIntChunks = new LittleIntChunks();
-		for (i in 0...length) LittleIntChunks.push(get(i));
-		return LittleIntChunks;
+		var littleIntChunks = new LittleIntChunks();
+		for (i in 0...length) littleIntChunks.push(get(i));
+		return littleIntChunks;
 	}
 	
 	// TODO
@@ -111,16 +111,16 @@ class LittleIntChunks {
 	// ---------- From/ToInteger -------------------
 
 	public static inline function createFromLittleInt(i:LittleInt):LittleIntChunks {
-		var LittleIntChunks = new LittleIntChunks();
+		var littleIntChunks = new LittleIntChunks();
 		if (i < 0) {
-			LittleIntChunks.isNegative = true;
+			littleIntChunks.isNegative = true;
 			i = -i;
 		}
 		while (i != 0) {
-			LittleIntChunks.push(i & BITMASK);
+			littleIntChunks.push(i & BITMASK);
 			i = i >> BITSIZE;
 		}
-		return LittleIntChunks;
+		return littleIntChunks;
 	}
 
 	public inline function toLittleInt():LittleInt {
@@ -141,7 +141,7 @@ class LittleIntChunks {
 	
 	public static function createFromString(s:String):LittleIntChunks {
 		
-		var LittleIntChunks = new LittleIntChunks();
+		var littleIntChunks = new LittleIntChunks();
 		
 		// make lowercase and parse out all spaces
 		s = regexSpaces.replace(s.toLowerCase(), "");
@@ -149,19 +149,19 @@ class LittleIntChunks {
 		// check sign
 		if (regexSign.match(s)) {
 			s = regexSign.replace(s, "");
-			LittleIntChunks.isNegative = true;
+			littleIntChunks.isNegative = true;
 		}
 		
 		if (regexBinary.match(s)) 
-			LittleIntChunks.fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""));
+			littleIntChunks.fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""));
 		else if (regexHex.match(s))
-			LittleIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
+			littleIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
 		else if (regexOctal.match(s)) 
-			return LittleIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
-		else LittleIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
+			return littleIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
+		else littleIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
 		
-		if (LittleIntChunks.isZero) LittleIntChunks.isNegative = false;
-		return LittleIntChunks;
+		if (littleIntChunks.isZero) littleIntChunks.isNegative = false;
+		return littleIntChunks;
 	}
 	
 	public inline function toString():String {
