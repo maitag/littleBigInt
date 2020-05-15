@@ -1,5 +1,17 @@
 class TestBigInt extends haxe.unit.TestCase
 {
+	public function testFromToInt() {
+		assertEquals( (0 : BigInt).toInt(), 0 );
+		assertEquals( (-1 : BigInt).toInt(), -1 );
+		assertEquals( (0x7FFFFFFF : BigInt).toInt(), 0x7FFFFFFF );
+		assertEquals( ("0x7FFFFFFF" : BigInt).toInt(), 0x7FFFFFFF );
+		assertEquals( (-0x7FFFFFFF : BigInt).toInt(), -0x7FFFFFFF );
+		assertEquals( ("-0x7FFFFFFF" : BigInt).toInt(), -0x7FFFFFFF );
+		#if neko
+		assertTrue( try { ("0x80000000" : BigInt).toInt(); false; } catch (e:Dynamic) true );
+		#end
+	}
+	
 	public function testFromHexString() {
 		assertTrue( (" 0x 0 " : BigInt) == 0 );
 		assertTrue( (" -0x 0 " : BigInt) == 0 );
@@ -20,6 +32,8 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( (16 : BigInt).toHexString(false), "10" );
 		assertEquals( (255 : BigInt).toHexString(true), "00ff" );
 		assertEquals( (255 : BigInt).toHexString(false), "ff" );
+		assertEquals( (256 : BigInt).toHexString(true), "0100" );
+		assertEquals( (256 : BigInt).toHexString(false), "100" );
 		assertEquals( (16777215 : BigInt).toHexString(false), "ffffff" );
 		assertEquals( (16777215 : BigInt).toHexString(true), "00ff ffff" );
 		assertEquals( (-16777215 : BigInt).toHexString(true), "-00ff ffff" );
@@ -45,6 +59,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( (16 : BigInt).toBinaryString(true), "00010000" );
 		assertEquals( (127 : BigInt).toBinaryString(true), "01111111" );
 		assertEquals( (127 : BigInt).toBinaryString(false), "1111111" );
+		assertEquals( (128 : BigInt).toBinaryString(false), "10000000" );
 		assertEquals( (16777215 : BigInt).toBinaryString(false), "111111111111111111111111" );
 		assertEquals( (16777215 : BigInt).toBinaryString(true), "11111111 11111111 11111111" );
 		assertEquals( (-16777215 : BigInt).toBinaryString(true), "-11111111 11111111 11111111" );

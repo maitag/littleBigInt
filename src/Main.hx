@@ -24,10 +24,11 @@ class Main {
 		
 		
 		
+		trace( ((  (127:BigInt) * (127:BigInt) ):Int) );
+		trace( ((  (129:BigInt) * (513:BigInt) ):Int) );
 		
-		// TODO: trace( (((128:BigInt)):Int) );
 		
-		trace( (((128:BigInt) * (2:BigInt)):Int) );
+		trace( (("0x112210F4B16C1CB1":BigInt) * ("0x787308E48F5E":BigInt)).toHexString() );
 		
 		
 		// from integer
@@ -82,7 +83,7 @@ class Main {
 
 
 		// Fibonacci
-		var fiboOld:BigInt = 1;
+/*		var fiboOld:BigInt = 1;
 		var fibo:BigInt = 2;
 		var tmp:BigInt;
 		
@@ -94,7 +95,7 @@ class Main {
 		trace('Fibonacci(1000) : 0x $fibo');
 		
         trace("--------------------------------------------");
-		
+*/		
 		
 /* 		
 		// old tests with thx.core's BigInts

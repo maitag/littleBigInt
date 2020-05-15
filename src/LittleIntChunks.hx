@@ -56,8 +56,9 @@ class LittleIntChunks {
 	inline function get_isZero():Bool return (start == end);
 	
 	
-	public inline function new() {
-		chunks = new LittleIntArray();
+	public inline function new(chunks:LittleIntArray = null) {
+		if (chunks != null)	this.chunks = chunks;
+		else this.chunks = new LittleIntArray();
 	}
 		
 	public inline function clone():LittleIntChunks {
@@ -66,19 +67,20 @@ class LittleIntChunks {
 		return littleIntChunks;
 	}
 	
-	// TODO
-/*	public inline function split(size:Int):LittleIntChunks {
-		// TODO
-		return LittleIntChunks;
+	public inline function splitHigh(e:Int):LittleIntChunks {
+		var littleIntChunks = new LittleIntChunks(chunks);
+		if (e >= length) return null;
+		littleIntChunks.start = start + e;
+		littleIntChunks.end = end;
+		return littleIntChunks;
 	}
-*/	
-/*	
-	// Multiplikaiton helper
-	public inline function join3(a:LittleIntChunks, b:LittleIntChunks, c:LittleIntChunks):LittleIntChunks {
-		// TODO
-		return LittleIntChunks;
+	public inline function splitLow(e:Int):LittleIntChunks {
+		var littleIntChunks = new LittleIntChunks(chunks);
+		littleIntChunks.start = start;
+		littleIntChunks.end = start + e;
+		return littleIntChunks;
 	}
-*/	
+		
 	public inline function get(i:Int):LittleInt {
 		return chunks[start + i];
 	}
@@ -110,23 +112,34 @@ class LittleIntChunks {
 	// ---------- From/ToInteger -------------------
 
 	public static inline function createFromLittleInt(i:LittleInt):LittleIntChunks {
+		if (i == 0) return null;
 		var littleIntChunks = new LittleIntChunks();
 		if (i < 0) {
 			littleIntChunks.isNegative = true;
+			//if (i == -i) throw('Error, Integer length at maximum'); // TODO: same for UInt
 			i = -i;
 		}
 		while (i != 0) {
 			littleIntChunks.push(i & BITMASK);
-			i = i >> BITSIZE;
+			i = i >>> BITSIZE;
 		}
 		return littleIntChunks;
 	}
 
 	public inline function toLittleInt():LittleInt {
 		if (length == 0) return 0;
-		// TODO: fill dependent of what is native Int-bitsize
-		else if (length > 1) throw('Error, BigInt is to Big for $BITSIZE bit Int');
-		else return (isNegative) ? -get(0) : get(0);
+		else {
+			var littleInt:LittleInt = 0;
+			var tmp:LittleInt = 0;
+			for (i in 0...length) {
+				tmp = get(i);
+				if ( (tmp << (i * BITSIZE)) >> (i * BITSIZE) != tmp )
+					throw('Error, BigInt with ${BITSIZE*(length-1)+IntUtil.bitsize(tmp)} bits is to big for native Integer length');
+				
+				littleInt += (tmp << (i * BITSIZE));
+			}
+			return (isNegative) ? -littleInt : littleInt;
+		}
 	}
 	
 	// ---------- From/To String -------------------
@@ -137,13 +150,17 @@ class LittleIntChunks {
 	static var regexOctal = ~/^0o/;
 	static var regexHex = ~/^0x/;
 	static var regexSign = ~/^-/;
+	static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
+	
 	
 	public static function createFromString(s:String):LittleIntChunks {
 		
-		var littleIntChunks = new LittleIntChunks();
-		
 		// make lowercase and parse out all spaces
 		s = regexSpaces.replace(s.toLowerCase(), "");
+		
+		if (regexZero.match(s)) return null;
+		
+		var littleIntChunks = new LittleIntChunks();
 		
 		// check sign
 		if (regexSign.match(s)) {
@@ -156,15 +173,17 @@ class LittleIntChunks {
 		else if (regexHex.match(s))
 			littleIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
 		else if (regexOctal.match(s)) 
-			return littleIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
+			littleIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
 		else littleIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
 		
-		if (littleIntChunks.isZero) littleIntChunks.isNegative = false;
 		return littleIntChunks;
 	}
 	
+	public static inline function getStringOfZeros(amount:Int):String {
+		return [for (i in 0...amount) "0"].join("");
+	}
+	
 	public inline function toString():String {
-		
 		//return toBaseString();
 		
 		// only binary and hexadecimal dummy output yet
@@ -188,7 +207,7 @@ class LittleIntChunks {
 		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
 		//   -> needs divMod
 		
-		return "not yet";
+		return "not yet implemented";
 	}
 	
 	// ---------- Parsing Binary String -------------------
@@ -219,9 +238,7 @@ class LittleIntChunks {
 	
 	public inline function toBinaryString(spacing:Bool = true):String {
 		
-		if (isZero) {
-			return ((spacing) ? [for (i in 0...8) "0"].join("") : "0");
-		}
+		if (isZero) return ((spacing) ? getStringOfZeros(8) : "0");
 		
 		var s = "";
 		var chunk:LittleInt;
@@ -237,12 +254,14 @@ class LittleIntChunks {
 				bit = bit << 1;
 			}
 		}
+		
 		if (spacing) {
-			if (j % 8 != 0) for (i in 0...(8 - j % 8)) s = "0" + s;
+			if (j % 8 != 0) s = getStringOfZeros(8 - j % 8) + s;
+			s = ~/^(0+\s)+/.replace(s, "");
 		}
 		else s = regexLeadingZeros.replace(s, "");
 		
-		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
+		return ((isNegative) ? "-" : "") + s;
 	}
 	
 	
@@ -280,9 +299,7 @@ class LittleIntChunks {
 	
 	public function toHexString(spacing:Bool = true):String {
 		
-		if (isZero) {
-			return ((spacing) ? [for (i in 0...4) "0"].join("") : "0");
-		}
+		if (isZero) return ((spacing) ? [for (i in 0...4) "0"].join("") : "0");
 		
 		var s = "";
 		var chunk:LittleInt = 0;
@@ -307,9 +324,13 @@ class LittleIntChunks {
 		
 		if (restBits > 0) s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
 
-		if (spacing && j % 4 != 0) for (i in 0...(4 - j % 4)) s = "0" + s;
+		if (spacing) {
+			if (j % 4 != 0) s = getStringOfZeros(4 - j % 4) + s;
+			s = ~/^(0+\s)+/.replace(s, "");
+		}
+		else s = regexLeadingZeros.replace(s, "");
 		
-		return ((isNegative) ? "-" : "") + ((spacing) ? ~/^(0+\s)+/.replace(s, "") :  ~/^0+/.replace(s, ""));
+		return ((isNegative) ? "-" : "") + s;
 	}
 	
 	
