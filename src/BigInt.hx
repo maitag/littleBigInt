@@ -34,10 +34,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 
 	inline function truncateZeroChunks(remove:Bool = false) this.truncateZeroChunks(remove);
 	
-	inline function negate() this.isNegative = ! this.isNegative;
-	//inline function setNegative() this.isNegative = true;
+	inline function setNegative() { this.isNegative = true; return this;}
 	
+	inline function copy():BigInt return new BigInt(this.copy());
+	inline function negCopy():BigInt return new BigInt(this.negCopy());
 	inline function clone():BigInt return new BigInt(this.clone());
+	inline function negClone():BigInt return new BigInt(this.negClone());
 
 	@:from static public function fromInt(i:LittleInt):BigInt {
 		return new BigInt( LittleIntChunks.createFromLittleInt(i) );
@@ -55,12 +57,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null) return "0";
 		return this.toString();	
 	}
-	public function toHexString(spacing:Bool = true):String {
-		if (this == null) return (spacing) ? LittleIntChunks.getStringOfZeros(4) : "0";
+	public function toHexString(spacing:Int = 0):String {
+		if (this == null) return (spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toHexString(spacing);	
 	}
-	public function toBinaryString(spacing:Bool = true):String {
-		if (this == null) return (spacing) ? LittleIntChunks.getStringOfZeros(8) : "0";
+	public function toBinaryString(spacing:Int = 0):String {
+		if (this == null) return (spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toBinaryString(spacing);	
 	}
 	
@@ -70,22 +72,21 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A + B) function opAdd(b:BigInt):BigInt return add(this, b);
 	
 	static inline function add(a:BigInt, b:BigInt):BigInt {
-		if (a == null) return b;
-		else if (b == null) return a;
+		if (a == null) return (b == null) ? null : b.copy();
+		else if (b == null) return a.copy();
 		else if (a.isNegative) {
-			a.negate();
-			if (b.isNegative) return - _add(a, -b);
-			else return _subtract(b, a);
+			if (b.isNegative) return _add(a, b).setNegative(); // -3 + -2
+			else return _subtract(b, a.negClone()); // -3 + 2
 		}
 		else {
-			if (b.isNegative) return _subtract(a, -b);
-			else return _add(a, b);
+			if (b.isNegative) return _subtract(a, b.negClone()); // 3 + -2
+			else return _add(a, b); // 3 + 2
 		}
 	}
 	
 	static inline function _add(a:BigInt, b:BigInt):BigInt {
-		if (a.length > b.length) return __add(a.clone(), b);
-		else return __add(b.clone(), a);
+		if (a.length > b.length) return __add(a.copy(), b);
+		else return __add(b.copy(), a);
 	}
 	
 	static inline function __add(a:BigInt, b:BigInt):BigInt {
@@ -114,30 +115,29 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A - B) function opSubtract(b:BigInt):BigInt return subtract(this, b);
 
 	static inline function subtract(a:BigInt, b:BigInt):BigInt {
-		if (a == null) return -b;
-		else if (b == null) return a;
+		if (a == null) return (b == null) ? null : b.negCopy();
+		else if (b == null) return a.copy();
 		else if (a.isNegative) {
-			a.negate();
-			if (b.isNegative) return _subtract(-b, a);
-			else return - _add(a, b);
+			if (b.isNegative) return _subtract(b.negClone(), a.negClone());// -3 - -2
+			else return _add(a, b).setNegative(); // -3 - 2
 		}
 		else {
-			if (b.isNegative) return _add(a, b);
-			else return _subtract(a, b);
+			if (b.isNegative) return _add(a, b.negClone()); // 3 - -2
+			else return _subtract(a, b);  // 3 - 2
 		}
 	}
 
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
 		var v:BigInt;
 		if (a > b) {
-			v = __subtract(a.clone(), b);
+			v = __subtract(a.copy(), b);
 			v.truncateZeroChunks();
 			return v;
 		}
 		else {
-			v = __subtract(b.clone(), a);
+			v = __subtract(b.copy(), a);
 			v.truncateZeroChunks();
-			if (v.isZero) return null else return -v;
+			if (v.isZero) return null else return v.setNegative();
 		}
 	}
 
@@ -166,9 +166,90 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(- B)
 	inline function negation():BigInt {
 		if (this == null) return null;
-		negate();
-		return this;
+		else return this.negCopy();
 	}
+	
+	
+	// ------- multiplication (https://en.wikipedia.org/wiki/Karatsuba_algorithm) -----
+	
+	@:op(A * B)
+	function opMulticplicate(b:BigInt):BigInt {
+		if (this.isNegative != b.isNegative)return mul(this, b).setNegative();
+		else return mul(this, b);
+	}
+	
+	static function mul(a:BigInt, b:BigInt):BigInt {
+		
+		if (a == null || b == null) return null;
+		
+		if (a.length == 1 && b.length == 1) {
+			//trace( a.get(0), b.get(0) );
+			return fromInt(a.get(0) * b.get(0));
+		}
+		
+		var e = IntUtil.nextPowerOfTwo((a.length > b.length) ? a.length : b.length) >>> 1;
+		//trace(a.length, b.length, 'half of nextPowerOfTwo=$e');
+		
+		var aHigh:BigInt = a.splitHigh(e);
+		var aLow:BigInt = a.splitLow(e);
+		
+		var bHigh:BigInt = b.splitHigh(e);
+		var bLow:BigInt = b.splitLow(e);
+		
+		trace("a : "+a.toBinaryString(7));
+		trace("ah: "+aHigh.toBinaryString(7), "al: "+aLow.toBinaryString(7));
+		trace("b : "+b.toBinaryString(7));
+		trace("bh: "+bHigh.toBinaryString(7), "bl: "+bLow.toBinaryString(7));
+
+		var p1:BigInt = mul(aHigh, bHigh); 
+		var p2:BigInt = mul(aLow , bLow);  
+		var p3:BigInt = mul(aHigh + aLow, bHigh + bLow ); 
+		
+		trace("p1", p1.toBinaryString());
+		trace("p2", p2.toBinaryString());
+		trace("p3", p3.toBinaryString());
+		
+		trace("p1+p2", (p1+p2).toBinaryString());
+		trace("p3-(p1+p2)", (p3-(p1+p2)).toBinaryString());
+		
+		trace("join", join(e,  p1, p3-(p1+p2), p2 ).toBinaryString(7) );
+		
+		return join(e, p1, p3-(p1+p2), p2 );
+		//return join(e, p1, mul(aHigh + aLow, bHigh + bLow ) - (p1 + p2), p2 );
+	}
+	
+	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {
+		var littleIntChunks = new LittleIntChunks();
+		
+		if (c == null) for (i in 0...e) littleIntChunks.push(0);
+		else
+		{	for (i in 0...e) {
+				if (i < c.length) littleIntChunks.push(c.get(i));
+				else {
+					if (b == null && a == null) break;
+					littleIntChunks.push(0);
+				}
+			}
+		}
+		
+		if (b == null) for (i in 0...e) littleIntChunks.push(0);
+		else
+		{	for (i in 0...e) {
+				if (i < b.length) littleIntChunks.push(b.get(i));
+				else {
+					if (a == null) break;
+					littleIntChunks.push(0);
+				}
+			}
+		}
+		
+		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
+
+		return littleIntChunks;
+	}
+	
+	
+	
 	
 	// ------- comparing -----------
 
@@ -274,84 +355,6 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			}
 			return false;
 		}
-	}
-	
-	
-	// ------- multiplication (https://en.wikipedia.org/wiki/Karatsuba_algorithm) -----
-	
-	@:op(A * B)
-	function opMulticplicate(b:BigInt):BigInt return mul(this, b);
-	
-	static function mul(a:BigInt, b:BigInt):BigInt {
-		
-		if (a == null || b == null) return null;
-		
-		if (a.length == 1 && b.length == 1) {
-/*			var littleIntChunks = new LittleIntChunks();
-			littleIntChunks.push(a.get(0) * b.get(0));
-			if (a.isNegative != b.isNegative) littleIntChunks.isNegative = true;
-			return littleIntChunks;
-*/		
-			trace( a.get(0), b.get(0) );
-			var result = fromInt(a.get(0) * b.get(0));
-			//if (a.isNegative != b.isNegative) result.negate();
-			return result;
-		}
-		
-		var e = IntUtil.nextPowerOfTwo((a.length > b.length) ? a.length : b.length) >>> 1;
-		//trace(a.length, b.length, 'half of nextPowerOfTwo=$e');
-		
-		var aHigh:BigInt = a.splitHigh(e);
-		var aLow:BigInt = a.splitLow(e);
-		
-		var bHigh:BigInt = b.splitHigh(e);
-		var bLow:BigInt = b.splitLow(e);
-		
-		//trace(aHigh.toBinaryString(), aLow.toBinaryString());
-		//trace(bHigh.toBinaryString(), bLow.toBinaryString());
-
-		var p1:BigInt = mul(aHigh, bHigh); 
-		var p2:BigInt = mul(aLow , bLow);  
-		var p3:BigInt = mul(aHigh + aLow, bHigh + bLow ); 
-		
-/*		trace("p1", p1.toBinaryString());
-		trace("p2", p2.toBinaryString());
-		trace("p3", p3.toBinaryString());
-		trace("result", p1.toBinaryString(), (p3-(p1+p2)).toBinaryString(), p2.toBinaryString());
-		trace("join", join(e,  p1, p3-(p1+p2), p2 ).toBinaryString() );
-*/		
-		return join(e, p1, p3-(p1+p2), p2 );
-		//return join(e, p1, mul(aHigh + aLow, bHigh + bLow ) - (p1 + p2), p2 );
-	}
-	
-	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {
-		var littleIntChunks = new LittleIntChunks();
-		
-		if (c == null) for (i in 0...e) littleIntChunks.push(0);
-		else
-		{	for (i in 0...e) {
-				if (i < c.length) littleIntChunks.push(c.get(i));
-				else {
-					if (b == null && a == null) break;
-					littleIntChunks.push(0);
-				}
-			}
-		}
-		
-		if (b == null) for (i in 0...e) littleIntChunks.push(0);
-		else
-		{	for (i in 0...e) {
-				if (i < b.length) littleIntChunks.push(b.get(i));
-				else {
-					if (a == null) break;
-					littleIntChunks.push(0);
-				}
-			}
-		}
-		
-		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
-
-		return littleIntChunks;
 	}
 	
 	

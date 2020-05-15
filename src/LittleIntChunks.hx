@@ -61,12 +61,36 @@ class LittleIntChunks {
 		else this.chunks = new LittleIntArray();
 	}
 		
-	public inline function clone():LittleIntChunks {
+	public inline function copy():LittleIntChunks {
 		var littleIntChunks = new LittleIntChunks();
 		for (i in 0...length) littleIntChunks.push(get(i));
+		littleIntChunks.isNegative = isNegative;
 		return littleIntChunks;
 	}
 	
+	public inline function negCopy():LittleIntChunks {
+		var littleIntChunks = new LittleIntChunks();
+		for (i in 0...length) littleIntChunks.push(get(i));
+		littleIntChunks.isNegative = ! isNegative;
+		return littleIntChunks;
+	}
+	
+	public inline function clone():LittleIntChunks {
+		var littleIntChunks = new LittleIntChunks(chunks);
+		littleIntChunks.start = start;
+		littleIntChunks.end = end;
+		littleIntChunks.isNegative = isNegative;
+		return littleIntChunks;
+	}
+	
+	public inline function negClone():LittleIntChunks {
+		var littleIntChunks = new LittleIntChunks(chunks);
+		littleIntChunks.start = start;
+		littleIntChunks.end = end;
+		littleIntChunks.isNegative = ! isNegative;
+		return littleIntChunks;
+	}
+		
 	public inline function splitHigh(e:Int):LittleIntChunks {
 		var littleIntChunks = new LittleIntChunks(chunks);
 		if (e >= length) return null;
@@ -236,9 +260,9 @@ class LittleIntChunks {
 		return this;
 	}
 	
-	public inline function toBinaryString(spacing:Bool = true):String {
+	public inline function toBinaryString(spacing:Int = 0):String {
 		
-		if (isZero) return ((spacing) ? getStringOfZeros(8) : "0");
+		if (isZero) return ((spacing>0) ? getStringOfZeros(spacing) : "0");
 		
 		var s = "";
 		var chunk:LittleInt;
@@ -249,14 +273,15 @@ class LittleIntChunks {
 			chunk = get(i);
 			bit = 1;
 			while (bit < UPPESTBIT) {
-				s = (((bit & chunk) == 0) ? "0" : "1") + ((j % 8 == 0 && spacing && j != 0) ? " " : "") + s;
+				if (spacing > 0) s = ((j % spacing == 0 && spacing>0 && j != 0) ? " " : "") + s;
+				s = (((bit & chunk) == 0) ? "0" : "1") + s;
 				j++;
 				bit = bit << 1;
 			}
 		}
 		
-		if (spacing) {
-			if (j % 8 != 0) s = getStringOfZeros(8 - j % 8) + s;
+		if (spacing > 0) {
+			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
 			s = ~/^(0+\s)+/.replace(s, "");
 		}
 		else s = regexLeadingZeros.replace(s, "");
@@ -297,9 +322,9 @@ class LittleIntChunks {
 		return this;
 	}
 	
-	public function toHexString(spacing:Bool = true):String {
+	public function toHexString(spacing:Int = 0):String {
 		
-		if (isZero) return ((spacing) ? [for (i in 0...4) "0"].join("") : "0");
+		if (isZero) return ((spacing > 0) ? getStringOfZeros(spacing) : "0");
 		
 		var s = "";
 		var chunk:LittleInt = 0;
@@ -309,7 +334,8 @@ class LittleIntChunks {
 		for (i in 0...length) {
 			chunk = (get(i) << restBits) + chunk;
 			while (BITSIZE + restBits >= 4) {
-				s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing && i != 0) ? " " : "") + s;
+				if (spacing > 0) s = ((j++ % spacing == 0 && i != 0) ? " " : "") + s;
+				s = hexaChars[chunk & 0x0F] + s;
 				chunk = chunk >> 4;
 				restBits -= 4;
 			}
@@ -322,10 +348,13 @@ class LittleIntChunks {
 			}
 		}
 		
-		if (restBits > 0) s = hexaChars[chunk & 0x0F] + ((j++ % 4 == 0 && spacing) ? " " : "") + s;
+		if (restBits > 0) {
+			if (spacing > 0) s = ((j++ % spacing == 0) ? " " : "") + s;
+			s = hexaChars[chunk & 0x0F] + s;
+		}
 
-		if (spacing) {
-			if (j % 4 != 0) s = getStringOfZeros(4 - j % 4) + s;
+		if (spacing > 0) {
+			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
 			s = ~/^(0+\s)+/.replace(s, "");
 		}
 		else s = regexLeadingZeros.replace(s, "");

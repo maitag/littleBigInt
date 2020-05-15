@@ -23,13 +23,16 @@ class Main {
 		//trace ( Util.nextPowerOfTwo(0x80000001, 32) );
 		
 		
+		//trace( ((  (0:BigInt) + (127:BigInt) ):Int) );
 		
-		trace( ((  (127:BigInt) * (127:BigInt) ):Int) );
-		trace( ((  (129:BigInt) * (513:BigInt) ):Int) );
+		//trace( ((  (127:BigInt) * (127:BigInt) ):Int) );
+		//trace( ((  (129:BigInt) * (513:BigInt) ):Int) );
 		
+		trace( ((  (171:BigInt) * (205:BigInt) ):Int) , "should be: 35055");
+				
+		//trace( (("0xAB":BigInt) * ("0xCD":BigInt)).toHexString() , "should be: 88EF");
 		
-		trace( (("0x112210F4B16C1CB1":BigInt) * ("0x787308E48F5E":BigInt)).toHexString() );
-		
+		//trace( (("0xABC":BigInt) * ("0xDEF":BigInt)).toHexString() , "should be: 959184");
 		
 		// from integer
 		

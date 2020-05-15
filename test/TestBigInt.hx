@@ -27,16 +27,16 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testToHexString() {
-		assertEquals( (0 : BigInt).toHexString(false), "0" );
-		assertEquals( (-1 : BigInt).toHexString(false), "-1" );
-		assertEquals( (16 : BigInt).toHexString(false), "10" );
-		assertEquals( (255 : BigInt).toHexString(true), "00ff" );
-		assertEquals( (255 : BigInt).toHexString(false), "ff" );
-		assertEquals( (256 : BigInt).toHexString(true), "0100" );
-		assertEquals( (256 : BigInt).toHexString(false), "100" );
-		assertEquals( (16777215 : BigInt).toHexString(false), "ffffff" );
-		assertEquals( (16777215 : BigInt).toHexString(true), "00ff ffff" );
-		assertEquals( (-16777215 : BigInt).toHexString(true), "-00ff ffff" );
+		assertEquals( (0 : BigInt).toHexString(), "0" );
+		assertEquals( (-1 : BigInt).toHexString(), "-1" );
+		assertEquals( (16 : BigInt).toHexString(), "10" );
+		assertEquals( (255 : BigInt).toHexString(2), "ff" );
+		assertEquals( (255 : BigInt).toHexString(), "ff" );
+		assertEquals( (256 : BigInt).toHexString(4), "0100" );
+		assertEquals( (256 : BigInt).toHexString(), "100" );
+		assertEquals( (16777215 : BigInt).toHexString(), "ffffff" );
+		assertEquals( (16777215 : BigInt).toHexString(4), "00ff ffff" );
+		assertEquals( (-16777215 : BigInt).toHexString(8), "-00ffffff" );
 	}
 
 	public function testFromBinaryString() {
@@ -54,15 +54,15 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 
 	public function testToBinaryString() {
-		assertEquals( (0 : BigInt).toBinaryString(false), "0" );
-		assertEquals( (-1 : BigInt).toBinaryString(false), "-1" );
-		assertEquals( (16 : BigInt).toBinaryString(true), "00010000" );
-		assertEquals( (127 : BigInt).toBinaryString(true), "01111111" );
-		assertEquals( (127 : BigInt).toBinaryString(false), "1111111" );
-		assertEquals( (128 : BigInt).toBinaryString(false), "10000000" );
-		assertEquals( (16777215 : BigInt).toBinaryString(false), "111111111111111111111111" );
-		assertEquals( (16777215 : BigInt).toBinaryString(true), "11111111 11111111 11111111" );
-		assertEquals( (-16777215 : BigInt).toBinaryString(true), "-11111111 11111111 11111111" );
+		assertEquals( (0 : BigInt).toBinaryString(), "0" );
+		assertEquals( (-1 : BigInt).toBinaryString(), "-1" );
+		assertEquals( (16 : BigInt).toBinaryString(8), "00010000" );
+		assertEquals( (127 : BigInt).toBinaryString(4), "0111 1111" );
+		assertEquals( (127 : BigInt).toBinaryString(), "1111111" );
+		assertEquals( (128 : BigInt).toBinaryString(), "10000000" );
+		assertEquals( (16777215 : BigInt).toBinaryString(), "111111111111111111111111" );
+		assertEquals( (16777215 : BigInt).toBinaryString(8), "11111111 11111111 11111111" );
+		assertEquals( (-16777215 : BigInt).toBinaryString(8), "-11111111 11111111 11111111" );
 	}
 
 	public function testComparing() {
