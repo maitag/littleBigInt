@@ -12,7 +12,7 @@ package;
 typedef LittleInt = Int;
 typedef LittleIntArray = Array<LittleInt>; // TODO: can be optimized later for JS here (UInt32Array for example)
 
-
+@:access(BigInt)
 class LittleIntChunks {
 	
 	// chunksize need to be Little enough to multiplicate 2 LittleInts without leaving range
@@ -175,32 +175,30 @@ class LittleIntChunks {
 	static var regexHex = ~/^0x/;
 	static var regexSign = ~/^-/;
 	static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
-	
-	
-	public static function createFromString(s:String):LittleIntChunks {
+		
+	public static function createFromString(s:String):BigInt {
 		
 		// make lowercase and parse out all spaces
 		s = regexSpaces.replace(s.toLowerCase(), "");
 		
 		if (regexZero.match(s)) return null;
 		
-		var littleIntChunks = new LittleIntChunks();
+		var neg = false;
 		
 		// check sign
 		if (regexSign.match(s)) {
 			s = regexSign.replace(s, "");
-			littleIntChunks.isNegative = true;
+			neg = true;
 		}
 		
 		if (regexBinary.match(s)) 
-			littleIntChunks.fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""));
+			return fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""), neg);
 		else if (regexHex.match(s))
-			littleIntChunks.fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""));
+			return fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""), neg);
 		else if (regexOctal.match(s)) 
-			littleIntChunks.fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8);
-		else littleIntChunks.fromBaseString(regexLeadingZeros.replace(s, ""));
-		
-		return littleIntChunks;
+			return fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8, neg);
+		else
+			return fromBaseString(regexLeadingZeros.replace(s, ""), neg);
 	}
 	
 	public static inline function getStringOfZeros(amount:Int):String {
@@ -217,12 +215,21 @@ class LittleIntChunks {
 	
 	// ------ Parsing String from Number to a defined Base ------------
 	
-	inline function fromBaseString(s:String, base:Int = 10):LittleIntChunks {
+	static inline function fromBaseString(s:String, base:Int = 10, neg:Bool):BigInt {
 		
-		// TODO: parsing any base needs bigint multiplication first
-
-		throw ("Only supported Binary and Hex stringinput yet");
-		return null;
+		var i = s.length;
+		var b:BigInt = 1;
+		var value:BigInt = 0;
+		var offset:Int;
+		
+		while (i > 0) {
+			offset = hexaChars.indexOf(s.charAt(--i));
+			if (offset == -1 || offset >= base) throw('Error, base $base string can only contain "${hexaChars.join("")}"');
+			//value = value + b * offset;
+			value = value + BigInt.mul(b, offset);
+			b = b * base; 
+		}
+		return (neg) ? value.setNegative() : value;
 	}
 	
 	inline function toBaseString(base:Int = 10):String {
@@ -236,8 +243,10 @@ class LittleIntChunks {
 	
 	// ---------- Parsing Binary String -------------------
 	
-	public inline function fromBinaryString(s:String):LittleIntChunks {
+	static public inline function fromBinaryString(s:String, neg:Bool):BigInt {
 		
+		var littleIntChunks = new LittleIntChunks();
+		littleIntChunks.isNegative = neg;
 		var i = s.length;
 		var bit:Int = 1;
 		var chunk:Int = 0;
@@ -250,14 +259,14 @@ class LittleIntChunks {
 			}
 			bit = bit << 1;
 			if (bit == UPPESTBIT) {
-				push(chunk);
+				littleIntChunks.push(chunk);
 				bit = 1;
 				chunk = 0;
 			}
 		}
 		
-		if (bit > 1) push(chunk);
-		return this;
+		if (bit > 1) littleIntChunks.push(chunk);
+		return new BigInt(littleIntChunks);
 	}
 	
 	public inline function toBinaryString(spacing:Int = 0):String {
@@ -294,8 +303,10 @@ class LittleIntChunks {
 	
 	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
 	
-	public inline function fromHexString(s:String):LittleIntChunks {
+	static public inline function fromHexString(s:String, neg:Bool):BigInt {
 		
+		var littleIntChunks = new LittleIntChunks();
+		littleIntChunks.isNegative = neg;
 		var i = s.length;
 		var bit:Int = 1;
 		var chunk:Int = 0;
@@ -307,7 +318,7 @@ class LittleIntChunks {
 			chunk += offset * bit;
 			bit = bit << 4;
 			if (bit >= UPPESTBIT) {
-				push(chunk & BITMASK);
+				littleIntChunks.push(chunk & BITMASK);
 				
 				if (bit == UPPESTBIT) bit = 1;
 				else if (bit == UPPESTBIT << 1) bit = 1 << 1;
@@ -318,8 +329,8 @@ class LittleIntChunks {
 			}
 		}
 		
-		if (chunk != 0) push(chunk);
-		return this;
+		if (chunk != 0) littleIntChunks.push(chunk);
+		return new BigInt(littleIntChunks);
 	}
 	
 	public function toHexString(spacing:Int = 0):String {

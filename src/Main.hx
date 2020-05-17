@@ -37,6 +37,19 @@ class Main {
 
 		
 		
+		// from decimal string
+		
+		var x:BigInt = "255";
+		trace('x = $x');
+		
+		
+		// from octal string
+		
+		var y:BigInt = "0o10";
+		trace('y = $y');
+		
+		
+		
 		// from binary
 		
 		var a:BigInt = "0b 1111 1111";

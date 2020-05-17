@@ -9,7 +9,6 @@ import LittleIntChunks;
  * 
  */
 
-
 abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	inline function new(littleIntChunks:LittleIntChunks) {
@@ -41,9 +40,11 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function clone():BigInt return new BigInt(this.clone());
 	inline function negClone():BigInt return new BigInt(this.negClone());
 
+	
 	@:from static public function fromInt(i:LittleInt):BigInt {
-		return new BigInt( LittleIntChunks.createFromLittleInt(i) );
+		return new BigInt(LittleIntChunks.createFromLittleInt(i));
 	}
+	
 	@:to public function toInt():LittleInt {
 		if (this == null) return 0;
 		return this.toLittleInt();
@@ -51,12 +52,15 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 
 	@:from static public function fromString(s:String):BigInt {
-		return new BigInt( LittleIntChunks.createFromString(s) );
+		return LittleIntChunks.createFromString(s);
 	}
+	
 	@:to public function toString():String {
 		if (this == null) return "0";
 		return this.toString();	
 	}
+
+	
 	public function toHexString(spacing:Int = 0):String {
 		if (this == null) return (spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toHexString(spacing);	
@@ -174,7 +178,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	@:op(A * B)
 	function opMulticplicate(b:BigInt):BigInt {
-		if (this.isNegative != b.isNegative)return mul(this, b).setNegative();
+		if (this.isNegative != b.isNegative) return mul(this, b).setNegative();
 		else return mul(this, b);
 	}
 	
