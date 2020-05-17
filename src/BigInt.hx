@@ -216,7 +216,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			if (c.length > e) b = b + c.splitHigh(e);
 		}
 		
-		if (b == null) for (i in 0...e) littleIntChunks.push(0);
+		if (b == null) {
+			if (a != null) for (i in 0...e) littleIntChunks.push(0);
+		}
 		else
 		{	for (i in 0...e) {
 				if (i < b.length) littleIntChunks.push(b.get(i));

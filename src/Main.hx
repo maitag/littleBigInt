@@ -80,6 +80,7 @@ class Main {
 		trace('a<b', (a < b));
 		
 		// ------- Multiplicattion -----
+		trace( ((  ("0xaabbccddeeff":BigInt) * (3:BigInt) )) , "should be: 200336699CCFD");
 		trace( ((  (171:BigInt) * (205:BigInt) ):Int) , "should be: 35055");
 		trace( (("0xAB":BigInt) * ("0xCD":BigInt)).toHexString() , "should be: 88EF");
 		trace( (("0xABC":BigInt) * ("0xDEF":BigInt)).toHexString() , "should be: 959184");

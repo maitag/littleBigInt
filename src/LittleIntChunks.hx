@@ -98,11 +98,18 @@ class LittleIntChunks {
 		littleIntChunks.end = end;
 		return littleIntChunks;
 	}
+	
 	public inline function splitLow(e:Int):LittleIntChunks {
-		var littleIntChunks = new LittleIntChunks(chunks);
-		littleIntChunks.start = start;
-		littleIntChunks.end = start + e;
-		return littleIntChunks;
+		var i = 0;
+		if (start + e > end) e = end - start;
+		while (i < e && get(i) == 0) i++;//TODO .. can be smaller !!!
+		if (i == e) return null;
+		else {
+			var littleIntChunks = new LittleIntChunks(chunks);
+			littleIntChunks.start = start;
+			littleIntChunks.end = start + e;//TODO .. can be smaller !!!
+			return littleIntChunks;
+		}
 	}
 		
 	public inline function get(i:Int):LittleInt {
