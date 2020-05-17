@@ -181,44 +181,23 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	static function mul(a:BigInt, b:BigInt):BigInt {
 		
 		if (a == null || b == null) return null;
-		
-		if (a.length == 1 && b.length == 1) {
-			//trace( a.get(0), b.get(0) );
-			return fromInt(a.get(0) * b.get(0));
-		}
+		if (a.length == 1 && b.length == 1) return fromInt(a.get(0) * b.get(0));
 		
 		var e = IntUtil.nextPowerOfTwo((a.length > b.length) ? a.length : b.length) >>> 1;
-		//trace(a.length, b.length, 'half of nextPowerOfTwo=$e');
 		
 		var aHigh:BigInt = a.splitHigh(e);
 		var aLow:BigInt = a.splitLow(e);
-		
 		var bHigh:BigInt = b.splitHigh(e);
 		var bLow:BigInt = b.splitLow(e);
 		
-		trace("a : "+a.toBinaryString(7));
-		trace("ah: "+aHigh.toBinaryString(7), "al: "+aLow.toBinaryString(7));
-		trace("b : "+b.toBinaryString(7));
-		trace("bh: "+bHigh.toBinaryString(7), "bl: "+bLow.toBinaryString(7));
-
 		var p1:BigInt = mul(aHigh, bHigh); 
 		var p2:BigInt = mul(aLow , bLow);  
-		var p3:BigInt = mul(aHigh + aLow, bHigh + bLow ); 
 		
-		trace("p1", p1.toBinaryString());
-		trace("p2", p2.toBinaryString());
-		trace("p3", p3.toBinaryString());
-		
-		trace("p1+p2", (p1+p2).toBinaryString());
-		trace("p3-(p1+p2)", (p3-(p1+p2)).toBinaryString());
-		
-		trace("join", join(e,  p1, p3-(p1+p2), p2 ).toBinaryString(7) );
-		
-		return join(e, p1, p3-(p1+p2), p2 );
-		//return join(e, p1, mul(aHigh + aLow, bHigh + bLow ) - (p1 + p2), p2 );
+		return join(e, p1, mul(aHigh + aLow, bHigh + bLow) - (p1 + p2), p2 );
 	}
 	
 	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {
+		
 		var littleIntChunks = new LittleIntChunks();
 		
 		if (c == null) for (i in 0...e) littleIntChunks.push(0);
@@ -230,6 +209,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 					littleIntChunks.push(0);
 				}
 			}
+			if (c.length > e) b = b + c.splitHigh(e);
 		}
 		
 		if (b == null) for (i in 0...e) littleIntChunks.push(0);
@@ -241,6 +221,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 					littleIntChunks.push(0);
 				}
 			}
+			if (b.length > e) a = a + b.splitHigh(e);
 		}
 		
 		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));

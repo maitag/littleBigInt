@@ -23,20 +23,10 @@ class Main {
 		//trace ( Util.nextPowerOfTwo(0x80000001, 32) );
 		
 		
-		//trace( ((  (0:BigInt) + (127:BigInt) ):Int) );
-		
-		//trace( ((  (127:BigInt) * (127:BigInt) ):Int) );
-		//trace( ((  (129:BigInt) * (513:BigInt) ):Int) );
-		
-		trace( ((  (171:BigInt) * (205:BigInt) ):Int) , "should be: 35055");
-				
-		//trace( (("0xAB":BigInt) * ("0xCD":BigInt)).toHexString() , "should be: 88EF");
-		
-		//trace( (("0xABC":BigInt) * ("0xDEF":BigInt)).toHexString() , "should be: 959184");
 		
 		// from integer
 		
-/*		var i:BigInt = 0x7FFFFFFF;
+		var i:BigInt = 0x7FFFFFFF;
 		trace('i = $i');
 
 		i = i + 1;
@@ -75,7 +65,12 @@ class Main {
 		// comparing
 		trace('a>b', (a > b));
 		trace('a<b', (a < b));
-*/		
+		
+		// ------- Multiplicattion -----
+		trace( ((  (171:BigInt) * (205:BigInt) ):Int) , "should be: 35055");
+		trace( (("0xAB":BigInt) * ("0xCD":BigInt)).toHexString() , "should be: 88EF");
+		trace( (("0xABC":BigInt) * ("0xDEF":BigInt)).toHexString() , "should be: 959184");
+		
 		
 		
 		
@@ -86,7 +81,7 @@ class Main {
 
 
 		// Fibonacci
-/*		var fiboOld:BigInt = 1;
+		var fiboOld:BigInt = 1;
 		var fibo:BigInt = 2;
 		var tmp:BigInt;
 		
@@ -98,7 +93,7 @@ class Main {
 		trace('Fibonacci(1000) : 0x $fibo');
 		
         trace("--------------------------------------------");
-*/		
+		
 		
 /* 		
 		// old tests with thx.core's BigInts

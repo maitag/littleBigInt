@@ -6,13 +6,13 @@ another little pure haxe BigInt implementation (work in progress)
 
 - string in/output for binary and hexadecimal notation
 - addition and subtraction
+- multiplication (Karatsuba)
 - comparing (>, <, >=, <=, ==, !=)
 - negation
 
 
 ## missing features
 
-- multiplication (Karazuba)
 - string in/output for any base
 - division with remainder
 - modulo
