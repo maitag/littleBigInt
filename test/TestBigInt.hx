@@ -118,5 +118,24 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( ("-0x 1 0000 0000" : BigInt) - ("0x 0" : BigInt) == ( "-0x 1 0000 0000" : BigInt) );
 	}
 	
+	public function testMultiplication() {
+		assertEquals( ( (0 : BigInt) * (0 : BigInt) ).toInt(), 0 );
+		assertEquals( ( (1 : BigInt) * (0 : BigInt) ).toInt(), 0 );
+		assertEquals( ( (0 : BigInt) * (1 : BigInt) ).toInt(), 0 );
+		assertEquals( ( (1 : BigInt) * (1 : BigInt) ).toInt(), 1 );
+		assertEquals( ( (2 : BigInt) * (2 : BigInt) ).toInt(), 4 );
+		assertEquals( ( (6 : BigInt) * (7 : BigInt) ).toInt(), 42 );
+		assertEquals( ( (12 : BigInt) * (-9 : BigInt) ).toInt(), -108 );
+		assertEquals( ( (-8 : BigInt) * (111 : BigInt) ).toInt(), -888 );
+		assertEquals( ( ( -14 : BigInt) * ( -23 : BigInt) ).toInt(), 322 );
+		var a:BigInt = "0x123456789abcdef112233445566778899aabbccddeeff987654321fedcba987654321";
+		var b:BigInt = "0x73b5c003fe76cc41a904bcd6f325e56cd974bb1a8e653e0ff76cf3b1936cde63110af";
+		var c:BigInt = "0x83a6f80da5817994858b95127c284366b38bc087d0f522993e797cb39a6b7a70ec441e6fc8853782d1c4fe22ecf3f93fd26f0eaa57f9c785f5a44581cecd96d7861bbf38f";
+		assertEquals( ( a * b ).toString(), c.toString() );
+		assertTrue( a * b == (a-3) * b + (b * 3) );
+		var d:BigInt = 0;
+		for (i in 0...1234) d += c;
+		assertEquals( ( c * 1234 ).toString(), d.toString() );
+	}
 	
 }

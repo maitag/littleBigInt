@@ -20,22 +20,22 @@ class LittleIntChunks {
 	// TODO: use a haxe-define for easy switch with conditional compiling here
 	
 	// for testing
-	static public inline var BITSIZE:Int = 7;
-	static public inline var UPPESTBIT:Int = 0x80;
-	static public inline var BITMASK:Int = 0x7F;
+	//static public inline var BITSIZE:Int = 7;
+	//static public inline var UPPESTBIT:Int = 0x80;
+	//static public inline var BITMASK:Int = 0x7F;
 		
 	// save for multiplication is 15 Bit per LittleInt on all platforms
 	
-	// if LittleInt is native 32 Bit Integer (neko):
-/*	static public inline var BITSIZE:Int = 15;
-	static public inline var UPPESTBIT:Int = 0x8000;
-	static public inline var BITMASK:Int = 0x7FFF;
-*/	
-	// if LittleInt is native 64 Bit Integer:
-/*	static public inline var BITSIZE:Int = 31;
-	static public inline var UPPEST:Int = 0x80000000;
-	static public inline var MASK:Int = 0x7FFFFFFF;
-*/
+	#if bigint64 // if LittleInt is native 64 Bit Integer:
+		static public inline var BITSIZE:Int = 31;
+		static public inline var UPPEST:Int = 0x80000000;
+		static public inline var MASK:Int = 0x7FFFFFFF;
+
+	#else // if LittleInt is native 32 Bit Integer (neko):
+		static public inline var BITSIZE:Int = 15;
+		static public inline var UPPESTBIT:Int = 0x8000;
+		static public inline var BITMASK:Int = 0x7FFF;
+	#end
 	
 	// --------------------------------------------------------------------
 	
@@ -46,14 +46,14 @@ class LittleIntChunks {
 	var start:Int = 0;
 	var end:Int = 0;
 	
-	// on need: number how much zero-chunks would be right (1 -> like ^0x8000)
+	// on need: number how much zero-chunks would be right
 	//public var exp:Int = 0; 
 	
 	public var length(get, never):Int;
 	inline function get_length():Int return end - start;
 	
-	public var isZero(get, never):Bool;
-	inline function get_isZero():Bool return (start == end);
+	//public var isZero(get, never):Bool;
+	//inline function get_isZero():Bool return (start == end);
 	
 	
 	public inline function new(chunks:LittleIntArray = null) {
@@ -102,12 +102,12 @@ class LittleIntChunks {
 	public inline function splitLow(e:Int):LittleIntChunks {
 		var i = 0;
 		if (start + e > end) e = end - start;
-		while (i < e && get(i) == 0) i++;//TODO .. can be smaller !!!
+		while (i < e && get(i) == 0) i++;
 		if (i == e) return null;
 		else {
 			var littleIntChunks = new LittleIntChunks(chunks);
 			littleIntChunks.start = start;
-			littleIntChunks.end = start + e;//TODO .. can be smaller !!!
+			littleIntChunks.end = start + e;
 			return littleIntChunks;
 		}
 	}
@@ -278,7 +278,7 @@ class LittleIntChunks {
 	
 	public inline function toBinaryString(spacing:Int = 0):String {
 		
-		if (isZero) return ((spacing>0) ? getStringOfZeros(spacing) : "0");
+		//if (isZero) return ((spacing>0) ? getStringOfZeros(spacing) : "0");
 		
 		var s = "";
 		var chunk:LittleInt;
@@ -342,7 +342,7 @@ class LittleIntChunks {
 	
 	public function toHexString(spacing:Int = 0):String {
 		
-		if (isZero) return ((spacing > 0) ? getStringOfZeros(spacing) : "0");
+		//if (isZero) return ((spacing > 0) ? getStringOfZeros(spacing) : "0");
 		
 		var s = "";
 		var chunk:LittleInt = 0;
@@ -352,7 +352,10 @@ class LittleIntChunks {
 		for (i in 0...length) {
 			chunk = (get(i) << restBits) + chunk;
 			while (BITSIZE + restBits >= 4) {
-				if (spacing > 0) s = ((j++ % spacing == 0 && i != 0) ? " " : "") + s;
+				if (spacing > 0) {
+					s = ((j != 0 && j % spacing == 0) ? " " : "") + s;
+					j++;
+				}
 				s = hexaChars[chunk & 0x0F] + s;
 				chunk = chunk >> 4;
 				restBits -= 4;

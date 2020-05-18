@@ -11,7 +11,7 @@ class IntUtil
 	#if macro_optimize_bitsize   // --------------- macro optimization -------------------
 
 	
-	public static macro function nextPowerOfTwo(i:haxe.macro.Expr, maxBitsize:Int = 32) {
+	public static macro function nextPowerOfTwo(i:haxe.macro.Expr, maxBitsize:Int = #if bigint64 64 #else 32 #end) {
 		return macro {
 			((
 				if (($i:UInt) < 3) $i;
@@ -25,7 +25,7 @@ class IntUtil
 		}
 	}
 	
-	public static macro function bitsize(i:haxe.macro.Expr, maxBitsize:Int = 32) {
+	public static macro function bitsize(i:haxe.macro.Expr, maxBitsize:Int = #if bigint64 64 #else 32 #end) {
 		maxBitsize = maxBitsize >> 1;
 		return macro (($i:UInt) < 3) ? ($i:UInt) : IntUtil._bitsize(($i:UInt), $v{maxBitsize}, $v{maxBitsize});
 	}
@@ -50,7 +50,7 @@ class IntUtil
 	#else  // --------------- no macro optimization -----------------------
 	
 	
-	public static function nextPowerOfTwo(i:UInt, maxBitsize:Int = 32):UInt {
+	public static function nextPowerOfTwo(i:UInt, maxBitsize:Int = #if bigint64 64 #else 32 #end):UInt {
 		if (i < 3) return i;
 		else {
 			var bitsize = _bitsize(i - 1, maxBitsize >> 1, maxBitsize >> 1);
@@ -60,7 +60,7 @@ class IntUtil
 		}
 	}
 	
-	public static function bitsize(i:UInt, maxBitsize:Int = 32):Int {
+	public static function bitsize(i:UInt, maxBitsize:Int = #if bigint64 64 #else 32 #end):Int {
 		if (i < 3) return i;
 		else {
 			maxBitsize = maxBitsize >> 1;

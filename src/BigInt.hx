@@ -21,8 +21,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	public var length(get, never):Int;
 	inline function get_length():Int return this.length;
 	
-	public var isZero(get, never):Bool;
-	inline function get_isZero():Bool return this.isZero;
+	//public var isZero(get, never):Bool;
+	//inline function get_isZero():Bool return this.isZero;
 
 	inline function get(i:Int):LittleInt return this.get(i);
 	inline function set(i:Int, v:Int) this.set(i,v);
@@ -141,7 +141,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		else {
 			v = __subtract(b.copy(), a);
 			v.truncateZeroChunks();
-			if (v.isZero) return null else return v.setNegative();
+			if (v.length == 0) return null else return v.setNegative();
 		}
 	}
 
@@ -178,7 +178,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	@:op(A * B)
 	function opMulticplicate(b:BigInt):BigInt {
-		if (this.isNegative != b.isNegative) return mul(this, b).setNegative();
+		if (this == null || b == null) return null;
+		if (isNegative != b.isNegative) return mul(this, b).setNegative();
 		else return mul(this, b);
 	}
 	

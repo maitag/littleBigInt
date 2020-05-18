@@ -22,8 +22,6 @@ class Main {
 		// -> throws error for reaching maxBitsize 32
 		//trace ( Util.nextPowerOfTwo(0x80000001, 32) );
 		
-		
-		
 		// from integer
 		
 		var i:BigInt = 0x7FFFFFFF;
