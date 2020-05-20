@@ -16,7 +16,7 @@ class Fibonacci {
 			fiboOld = tmp;
 		}
 			
-		haxe.Log.trace('Fibonacci(10000):\t' + Std.int((Timer.stamp() - time)*1000) + "\tms" , null);
+		haxe.Log.trace('Fibonacci(10000):\t' + Std.int((Timer.stamp() - time)*1000) + "\tms" , #if (haxe_ver >= "4.0.0") null #else {fileName:"",lineNumber:0,className:"",methodName:"",customParams:[]} #end);
 	}
 	
 }
