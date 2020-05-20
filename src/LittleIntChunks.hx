@@ -205,7 +205,7 @@ class LittleIntChunks {
 		else if (regexOctal.match(s)) 
 			return fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8, neg);
 		else
-			return fromBaseString(regexLeadingZeros.replace(s, ""), neg);
+			return fromBaseString(regexLeadingZeros.replace(s, ""), 10, neg);
 	}
 	
 	public static inline function getStringOfZeros(amount:Int):String {
