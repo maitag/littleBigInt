@@ -106,10 +106,10 @@ class Test extends hxp.Script {
 			Log.info("\n------------ run "+target.toUpperCase()+" -------------------");
 			
 			var time = Timer.stamp();
+			
 			run(target, base);
 			
-			time = Timer.stamp() - time;
-			trace('Fibonacci(10000):\t' + Std.int(time*1000) + "\tms");
+			Log.info('Fibonacci(10000):\t' + Std.int(Timer.stamp() - time*1000) + "\tms");
 		}
 		
 	}
