@@ -169,7 +169,7 @@ class Test extends hxp.Script {
 				if (System.hostPlatform == WINDOWS) {
 					System.runCommand ("bin/cpp",  '${base.main}-Debug.exe', []);
 				}
-				else System.runCommand ("bin/cpp",  '${base.main}', []);
+				else System.runCommand ("bin/cpp",  './${base.main}', []);
 			
 			default: Log.error ("Unknown target \"" + target + "\"");
 			
