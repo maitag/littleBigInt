@@ -1,6 +1,5 @@
 #! /usr/local/bin/hxp
 import hxp.*;
-import haxe.Timer;
 
 /*
  * HXP script for crossplatform testing little BigInt
@@ -105,11 +104,7 @@ class Test extends hxp.Script {
 			base.main = "Fibonacci";
 			Log.info("\n------------ run "+target.toUpperCase()+" -------------------");
 			
-			var time = Timer.stamp();
-			
 			run(target, base);
-			
-			Log.info('Fibonacci(10000):\t' + Std.int((Timer.stamp() - time)*1000) + "\tms");
 		}
 		
 	}
