@@ -76,7 +76,7 @@ class Test extends hxp.Script {
 		}
 			
 		for (target in targets) {
-			Log.info("\n------------ "+target.toUpperCase()+" ---------------------");
+			Log.info("\n------------ "+target.toUpperCase()+" ------------");
 			run(target, base);
 		}
 	}
@@ -102,7 +102,7 @@ class Test extends hxp.Script {
 		for (target in targets)
 		{
 			base.main = "Fibonacci";
-			Log.info("\n------------ run "+target.toUpperCase()+" -------------------");
+			Log.info("\n------------ run "+target.toUpperCase()+" ------------");
 			
 			run(target, base);
 		}
@@ -150,12 +150,24 @@ class Test extends hxp.Script {
 			case "hl":
 				var hlPath = Sys.getEnv ("HLPATH");
 				
-				// using hl from lime ;) ... TODO!
+				// try to use hl from haxelib lime if not hashlink installpath found
 				if (hlPath == null) {
-					hlPath = Path.combine (Sys.getEnv ("HAXEPATH"), "lib/lime/7,7,0/templates/bin/hl/windows/");
+					hlPath = Haxelib.getPath(new Haxelib("lime"));
+					if (hlPath == null) {
+						Log.warn("Can't get path to hashlink binary. Check environment variable 'HLPATH' or simple install Lime to alternatively use hashlink from there !");
+					}
+					else {
+						hlPath = Path.combine (hlPath, "templates/bin/hl");
+						switch (System.hostPlatform) {
+							case LINUX: hlPath = Path.combine (hlPath, "linux");
+							case WINDOWS: hlPath = Path.combine (hlPath, "windows");
+							case MAC: hlPath = Path.combine (hlPath, "mac");
+						}
+						Log.info("using hashlink from Lime library: " + hlPath);
+					}
 				}
-				
-				System.runCommand ("bin/hl", Path.combine (hlPath, "hl"), [ '${base.main.toLowerCase()}.hl' ]);
+				if (hlPath != null)
+					System.runCommand ("bin/hl", Path.combine (hlPath, "hl"), [ '${base.main.toLowerCase()}.hl' ]);
 			
 			case "node"|"js":
 				System.runCommand ("bin/node", "node", [ '${base.main.toLowerCase()}.js' ]);
