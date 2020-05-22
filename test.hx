@@ -101,21 +101,22 @@ class Test extends hxp.Script {
 		
 		for (benchmark in benchmarks)
 		{
+			Log.info("--------------------> " + benchmark + ":");
 			for (target in targets)
 			{
-				base.main = benchmark;
 				Log.info("build " + target + " target...");
-				
+				base.main = benchmark;
 				build(target, base);
 			}
 			
 			for (target in targets)
 			{
+				Log.info("\n---" + target.toUpperCase()+" ---");
 				base.main = benchmark;
-				Log.info("\n------" + benchmark + " on "+target.toUpperCase()+" ------");
-				
 				run(target, base);
 			}
+			
+			Log.info("\n");
 		}
 	}
 
