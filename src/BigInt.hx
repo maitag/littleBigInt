@@ -237,6 +237,45 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
+	// ------- division -----
+	
+	@:op(A / B)
+	function opDivMod(b:BigInt):BigInt {
+		return divMod(this, b).quotient;
+	}
+	
+	// ------- division with remainder -----
+
+	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
+		
+		if (b == null) throw ("Error '/', divisor can't be 0");
+		if (a == null) return { quotient:null, remainder:null };
+		
+		if (b.length <= 2) {
+			if (a.length <= 2) return {
+				quotient: fromInt( Std.int(a.toInt() / b.toInt() )),
+				remainder:fromInt( Std.int(a.toInt() % b.toInt() ))
+			}
+			else return divModLittle(a, b);
+		}
+		else return divModLong(a, b);
+	}
+	
+	static public function divModLittle(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
+		// TODO
+		
+		// ...
+		
+		return { quotient:null, remainder:null };
+	}
+	
+	static public function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
+		// TODO
+		
+		// ...
+		
+		return { quotient:null, remainder:null };
+	}
 	
 	
 	// ------- comparing -----------
