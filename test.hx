@@ -31,6 +31,14 @@ class Test extends hxp.Script {
 		
 		// remove double targets
 		targets = removeDoubles(targets);
+		
+		// fetch all benchmarks classnames from folder
+		var benchmarks = new Array<String>();
+		for (b in System.readDirectory("benchmarks")) {
+			var r = ~/([^\/\\]+).hx$/;
+			if (r.match(b)) benchmarks.push(r.matched(1));
+		}
+
 				
 		switch (command) {
 			
@@ -48,7 +56,7 @@ class Test extends hxp.Script {
 				test(targets);
 				
 			case "bench" | "benchmark":
-				benchmark(targets);
+				benchmark(targets, benchmarks);
 			
 			default:
 				Log.error("Expected \"hxp <test|(bench|benchmark)> <all|neko|hl|js|cpp>\"");
@@ -82,7 +90,7 @@ class Test extends hxp.Script {
 	}
 
 	
-	private function benchmark (targets:Array<String>) {
+	private function benchmark (targets:Array<String>, benchmarks:Array<String>) {
 		
 		Log.info("perform benchmark tests for targets: " + targets.join(", ") + "\n");
 		
@@ -91,22 +99,24 @@ class Test extends hxp.Script {
 			debug: false
 		});
 		
-		for (target in targets)
+		for (benchmark in benchmarks)
 		{
-			base.main = "Fibonacci";
-			Log.info("build " + target + " target...");
+			for (target in targets)
+			{
+				base.main = benchmark;
+				Log.info("build " + target + " target...");
+				
+				build(target, base);
+			}
 			
-			build(target, base);
+			for (target in targets)
+			{
+				base.main = benchmark;
+				Log.info("\n------" + benchmark + " on "+target.toUpperCase()+" ------");
+				
+				run(target, base);
+			}
 		}
-		
-		for (target in targets)
-		{
-			base.main = "Fibonacci";
-			Log.info("\n------------ run "+target.toUpperCase()+" ------------");
-			
-			run(target, base);
-		}
-		
 	}
 
 	
@@ -166,7 +176,7 @@ class Test extends hxp.Script {
 							case MAC: hlPath = Path.combine (hlPath, "mac");
 						}
 						
-						Log.info("Can't get path to hashlink binary ('HLPATH' env) so copying hashlink from Lime library: " + hlPath);
+						//Log.info("Can't get path to hashlink binary ('HLPATH' env) so copying hashlink from Lime library: " + hlPath);
 						System.recursiveCopy(hlPath, "bin/hl");
 						
 						if (System.hostPlatform == WINDOWS)
