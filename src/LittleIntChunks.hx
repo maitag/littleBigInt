@@ -130,6 +130,17 @@ class LittleIntChunks {
 		return chunks.pop();
 	}
 	
+	public inline function unshift(v:LittleInt) {
+		if (v >= UPPESTBIT) {
+			chunks.unshift(v >>> BITSIZE);
+			chunks.unshift(v & BITMASK);
+			end += 2;
+		} else {
+			chunks.unshift(v);
+			end++;			
+		}
+	}
+	
 	public inline function truncateZeroChunks(remove:Bool = false) {
 		var i = length;
 		while ( --i >= 0) {

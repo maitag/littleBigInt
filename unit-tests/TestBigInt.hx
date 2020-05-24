@@ -138,4 +138,32 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( ( c * 1234 ).toString(), d.toString() );
 	}
 	
+	public function testDivision() {
+		assertEquals( ( (0 : BigInt) / (10 : BigInt) ).toInt(), 0 );
+		
+		var result = BigInt.divMod( 9, 4 );
+		assertEquals( result.quotient.toInt(), 2 );
+		assertEquals( result.remainder.toInt(), 1 );
+		
+		result = BigInt.divMod( -9, 4 );
+		assertEquals( result.quotient.toInt(), -2 );
+		assertEquals( result.remainder.toInt(), -1 );
+		
+		result = BigInt.divMod( 9, -4 );
+		assertEquals( result.quotient.toInt(), -2 );
+		assertEquals( result.remainder.toInt(), 1 );
+		
+		result = BigInt.divMod( -9, -4 );
+		assertEquals( result.quotient.toInt(), 2 );
+		assertEquals( result.remainder.toInt(), -1 );
+		
+		result = BigInt.divMod( "0x ff ffff ffff", "0x 33" );
+		assertEquals( result.quotient.toHexString(), "505050505");
+		assertEquals( result.remainder.toInt(), 0 );
+		
+		result = BigInt.divMod( "0x 100 0000 0000", "0x 33" );
+		assertEquals( result.quotient.toHexString(), "505050505");
+		assertEquals( result.remainder.toInt(), 1 );
+	}
+	
 }

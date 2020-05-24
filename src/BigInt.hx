@@ -27,6 +27,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function get(i:Int):LittleInt return this.get(i);
 	inline function set(i:Int, v:Int) this.set(i,v);
 	inline function push(v:LittleInt) this.push(v);
+	inline function unshift(v:LittleInt) this.unshift(v);
 
 	inline function splitHigh(e:Int):BigInt return this.splitHigh(e);
 	inline function splitLow(e:Int):BigInt return this.splitLow(e);
@@ -241,6 +242,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	@:op(A / B)
 	function opDivMod(b:BigInt):BigInt {
+		if (b == null) throw ("Error '/', divisor can't be 0");
 		return divMod(this, b).quotient;
 	}
 	
@@ -248,25 +250,35 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 
 	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 		
-		if (b == null) throw ("Error '/', divisor can't be 0");
 		if (a == null) return { quotient:null, remainder:null };
 		
 		if (b.length <= 2) {
 			if (a.length <= 2) return {
-				quotient: fromInt( Std.int(a.toInt() / b.toInt() )),
+				quotient: fromInt( Std.int(a.toInt() / b.toInt() )), // optimize!
 				remainder:fromInt( Std.int(a.toInt() % b.toInt() ))
 			}
-			else return divModLittle(a, b);
+			else if (b.length == 1)
+				return divModLittle(a, b.toInt());
+			else
+				return divModLong(a, b);
 		}
 		else return divModLong(a, b);
 	}
 	
-	static public function divModLittle(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
-		// TODO
+	static public function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
 		
-		// ...
-		
-		return { quotient:null, remainder:null };
+		var i = a.length - 1;
+		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
+		var q:BigInt = Std.int( x / v );
+		var r:LittleInt = Std.int( x % v );
+		do {
+			x = (r << LittleIntChunks.BITSIZE) | a.get(--i);
+			q.unshift(Std.int( x / v )); //<- can be 2 chunks
+			r = Std.int( x % v );
+			
+		} while (i > 0);
+				
+		return { quotient:q, remainder:r };
 	}
 	
 	static public function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
