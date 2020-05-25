@@ -157,6 +157,8 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( result.quotient.toInt(), 2 );
 		assertEquals( result.remainder.toInt(), -1 );
 		
+		// divModLittle
+		
 		result = BigInt.divMod( "0x ff ffff ffff", "0x 33" );
 		assertEquals( result.quotient.toHexString(), "505050505");
 		assertEquals( result.remainder.toInt(), 0 );
@@ -164,6 +166,28 @@ class TestBigInt extends haxe.unit.TestCase
 		result = BigInt.divMod( "0x 100 0000 0000", "0x 33" );
 		assertEquals( result.quotient.toHexString(), "505050505");
 		assertEquals( result.remainder.toInt(), 1 );
+		
+		// divModLong
+		var divident:Array<BigInt>= [-9,-9, 9, 9, "-0xffffffffff", "-0xffffffffff", "0xffffffffff", "0xffffffffff" ];
+		var divisor:Array<BigInt> = [-4, 4,-4, 4,          -0x34 ,           0x34 ,         -0x34 ,          0x34  ];
+		
+		divident = divident.concat( [-4, 4,-4, 4,          -0x34 ,           0x34 ,         -0x34 ,          0x34  ] );
+		divisor  = divisor.concat ( [-9,-9, 9, 9, "-0xffffffffff", "-0xffffffffff", "0xffffffffff", "0xffffffffff" ] );
+		
+		divident = divident.concat( ["-0x 123456789", " 0x 123456789", "-0x 123456789", "0x 123456789" ] );
+		divisor  = divisor.concat ( ["-0xffffffffff", "-0xffffffffff", " 0xffffffffff", "0xffffffffff" ] );
+		
+		divident = divident.concat( ["-0xffffffffff", "-0xffffffffff", " 0xffffffffff", "0xffffffffff" ] );
+		divisor  = divisor.concat ( ["-0x 123456789", " 0x 123456789", "-0x 123456789", "0x 123456789" ] );
+		
+		for (i in 0...divident.length) {
+			var a = divident[i];
+			var b = divisor[i];
+			var result = BigInt.divMod(a, b);
+			assertTrue( result.quotient * b + result.remainder == a );
+		}
+		
+		
 	}
 	
 }

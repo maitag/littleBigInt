@@ -7,13 +7,13 @@ another little pure haxe BigInt implementation (work in progress)
 - string input for any base(<= 16)
 - addition and subtraction
 - multiplication (Karatsuba)
+- division with remainder
 - comparing (>, <, >=, <=, ==, !=)
 - negation
 
 
 ## missing features
 
-- division with remainder
 - string output for any base
 - modulo
 - pow and modPow
@@ -37,5 +37,5 @@ then simple call `hpx help` into projectfolder to see options.
 
 ## todo
 
-- optimization
+- optimization (with bytearrays!)
 - performance testing/optimizing for all targets

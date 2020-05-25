@@ -73,7 +73,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
-	// ------- addition -----------
+	// --------------------------------------------------------------------
+	// -------------------- addition --------------------------------------
+	// --------------------------------------------------------------------	
 	
 	@:op(A + B) function opAdd(b:BigInt):BigInt return add(this, b);
 	
@@ -116,7 +118,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (v > 0) a.push(v);
 	}
 	
-	// ------- subtraction -----------
+	
+	// --------------------------------------------------------------------
+	// -------------------- subtraction -----------------------------------
+	// --------------------------------------------------------------------	
 	
 	@:op(A - B) function opSubtract(b:BigInt):BigInt return subtract(this, b);
 
@@ -176,7 +181,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
-	// ------- multiplication (https://en.wikipedia.org/wiki/Karatsuba_algorithm) -----
+	// --------------------------------------------------------------------
+	// -------------------- multiplication --------------------------------
+	// --------------------------------------------------------------------	
+	// (katatsuba: https://en.wikipedia.org/wiki/Karatsuba_algorithm) -----
 	
 	@:op(A * B)
 	function opMulticplicate(b:BigInt):BigInt {
@@ -239,36 +247,66 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
-	// ------- division -----
+	// --------------------------------------------------------------------
+	// -------------------- division --------------------------------------
+	// --------------------------------------------------------------------	
 	
 	@:op(A / B)
 	function opDivMod(b:BigInt):BigInt {
-		if (b == null) throw ("Error '/', divisor can't be 0");
 		return divMod(this, b).quotient;
 	}
 	
 	// ------- division with remainder -----
 
 	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
-		
-		if (a == null) return { quotient:null, remainder:null };
+			
+		if (b == null) throw ("Error '/', divisor can't be 0");
+		else if (a == null) return { quotient:null, remainder:null }; // handle null
+		else if (a == b) return { quotient:1, remainder:null }; // handle equal
+		else {
+			// handle signs
+			var ret:{quotient:BigInt, remainder:BigInt};
+			
+			if (a.isNegative) {
+				if (b.isNegative) {
+					ret = _divMod(a.negClone(), b.negClone());
+					if (ret.remainder != null) ret.remainder.setNegative();
+				}
+				else {
+					ret = _divMod(a.negClone(), b);
+					if (ret.quotient != null) ret.quotient.setNegative();
+					if (ret.remainder != null) ret.remainder.setNegative();
+				}
+			}
+			else {
+				if (b.isNegative) {
+					ret = _divMod(a, b.negClone());
+					if (ret.quotient != null) ret.quotient.setNegative();
+				}
+				else return _divMod(a, b);
+			}
+			
+			return ret;
+		}
+	}
+	
+	static public inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 		
 		if (b.length <= 2) {
 			if (a.length <= 2) return {
 				quotient: fromInt( Std.int(a.toInt() / b.toInt() )), // optimize!
 				remainder:fromInt( Std.int(a.toInt() % b.toInt() ))
 			}
-			else if (b.length == 1)
+			else if (b.length == 1) {
+				if (b.get(0) == 1) return { quotient:a, remainder:null };
 				return divModLittle(a, b.toInt());
-			else
-				return divModLong(a, b);
+			}
+			else return divModLong(a, b);
 		}
 		else return divModLong(a, b);
 	}
 	
-	static public function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
-	//static public function divModLittle(a:BigInt, v:LittleInt, to:Int = 0):{quotient:BigInt, remainder:BigInt} {
-		
+	static public inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
 		var i = a.length - 1;
 		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
 		var q:BigInt = Std.int( x / v );
@@ -279,43 +317,35 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			r = Std.int( x % v );
 		}
 		while (i > 0);
-		//while (i > to);
-						
 		return { quotient:q, remainder:r };
 	}
 	
+	
+	static inline function divFast(a:BigInt, v:LittleInt):BigInt {
+		
+		if (a == null) return null; // handle null
+		else if (a == v) return 1; // handle equal
+		else return _divMod(a, v).quotient; // TODO: optimize here to faster fetch only quotient and do without sign-check
+	}
+	
 	static public function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
-		// TODO
-		var i = 0;
+		
 		var e = b.length - 1;
 		var r:BigInt;
 		var x:LittleInt = b.get(e);
-		//var q:BigInt = divModLittle(a, x, e).quotient;
-		var q:BigInt = a.splitHigh(e) / x;
-		var qn:BigInt;
+		//var q:BigInt = a.splitHigh(e) / x;
+		var q:BigInt = divFast(a.splitHigh(e) , x);
 		do {
-			r = a - (q * b); trace("r = " + r);
-			// q = q + (r / d / 2);
-			//q = q + ( divModLittle(r, d) >> 1 );
-/*			if (r.isNegative) { //trace("XX",divModLittle( divModLittle(r, x).quotient, 2 ).quotient);
-				qn = q - divModLittle( r, x, e).quotient;
-				//trace("qn= " + qn);
-				q = (q + qn) / 2 ;
-				r.setPositive();
-			}
-			else {
-				trace(r.length > e);
-				qn = q + divModLittle( r, x, e).quotient;
-				q = (q + qn) / 2 ;
-			}
-*/			
+			r = a - (q * b); //trace("r = " + r);
 			if (r != null) {
-				qn = q - r.splitHigh(e) / x;
-				q = (q + qn) / 2;
+				// optimize with special divModLittle and add/subtract without cloning
+				//q = ( q * 2 - r.splitHigh(e) / x) / 2;
+				//q = ( q * 2 - divFast(r.splitHigh(e), x)) / 2;
+				q = ( q * 2 - divFast(r.splitHigh(e), x));	q.shiftOneBitRight();
 				r.setPositive();
 			}
 		}
-		while (r >= b && i++ < 100);
+		while (r >= b);
 		
 		if (r != null) {
 			r = a - (q * b );
@@ -327,8 +357,29 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return { quotient:q, remainder:r };
 	}
 	
+	// --------------------------------------------------------------------
+	// -------------------- binary operations -----------------------------
+	// --------------------------------------------------------------------
 	
-	// ------- comparing -----------
+	public function shiftOneBitRight() {
+		if (this != null) {
+			var i:Int = length - 1;
+			var v = get(i);
+			var restBit:Bool = ((v & 1) > 0);
+			v = v >>> 1;
+			if (v != 0) set(i, v) else this.pop();
+			while (i-- > 0) {
+				v = get(i);
+				if (restBit) v |= LittleIntChunks.UPPESTBIT;
+				restBit = ((v & 1) > 0);
+				set(i, v >>> 1);
+			}
+		}
+	}
+	
+	// --------------------------------------------------------------------
+	// -------------------- comparing -------------------------------------
+	// --------------------------------------------------------------------
 
 	@:op(A > B)
 	function greater(b:BigInt):Bool {
