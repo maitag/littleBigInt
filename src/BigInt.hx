@@ -35,6 +35,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function truncateZeroChunks(remove:Bool = false) this.truncateZeroChunks(remove);
 	
 	inline function setNegative() { this.isNegative = true; return this;}
+	inline function setPositive() { this.isNegative = false; return this;}
 	
 	inline function copy():BigInt return new BigInt(this.copy());
 	inline function negCopy():BigInt return new BigInt(this.negCopy());
@@ -266,6 +267,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	static public function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
+	//static public function divModLittle(a:BigInt, v:LittleInt, to:Int = 0):{quotient:BigInt, remainder:BigInt} {
 		
 		var i = a.length - 1;
 		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
@@ -275,18 +277,54 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			x = (r << LittleIntChunks.BITSIZE) | a.get(--i);
 			q.unshift(Std.int( x / v )); //<- can be 2 chunks
 			r = Std.int( x % v );
-			
-		} while (i > 0);
-				
+		}
+		while (i > 0);
+		//while (i > to);
+						
 		return { quotient:q, remainder:r };
 	}
 	
 	static public function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 		// TODO
+		var i = 0;
+		var e = b.length - 1;
+		var r:BigInt;
+		var x:LittleInt = b.get(e);
+		//var q:BigInt = divModLittle(a, x, e).quotient;
+		var q:BigInt = a.splitHigh(e) / x;
+		var qn:BigInt;
+		do {
+			r = a - (q * b); trace("r = " + r);
+			// q = q + (r / d / 2);
+			//q = q + ( divModLittle(r, d) >> 1 );
+/*			if (r.isNegative) { //trace("XX",divModLittle( divModLittle(r, x).quotient, 2 ).quotient);
+				qn = q - divModLittle( r, x, e).quotient;
+				//trace("qn= " + qn);
+				q = (q + qn) / 2 ;
+				r.setPositive();
+			}
+			else {
+				trace(r.length > e);
+				qn = q + divModLittle( r, x, e).quotient;
+				q = (q + qn) / 2 ;
+			}
+*/			
+			if (r != null) {
+				qn = q - r.splitHigh(e) / x;
+				q = (q + qn) / 2;
+				r.setPositive();
+			}
+		}
+		while (r >= b && i++ < 100);
 		
-		// ...
-		
-		return { quotient:null, remainder:null };
+		if (r != null) {
+			r = a - (q * b );
+			if (r.isNegative) {
+				q = q - 1;
+				r = r + b;
+			}
+		}
+		return { quotient:q, remainder:r };
 	}
 	
 	
