@@ -35,6 +35,6 @@ then simple call `hpx help` into projectfolder to see options.
 
 ## todo
 
-- optimization for multiplication and division
+- optimization for division
 - optimization with bytearrays
 - more unit-tests and benchmarks

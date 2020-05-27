@@ -133,8 +133,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	static inline function addAtPosition(a:BigInt, v:LittleInt, position:Int):Void {
+		var x:Int;
 		for (i in position...a.length) {
-			var x:Int = a.get(i) + v;
+			x = a.get(i) + v;
 			if (x & LittleIntChunks.UPPESTBIT == 0) {
 				a.set(i, x);
 				v = 0;
@@ -221,12 +222,28 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		else return mul(this, b);
 	}
 	
-	// TODO: optimized function mulLittle
+	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {
+		
+		if (v < 0) v = -v;
+		var x:Int = 0;
+		var b = new BigInt(new LittleIntChunks());
+		for (i in 0...a.length) {
+			x = a.get(i) * v + x;
+			b.push(x & LittleIntChunks.BITMASK);
+			x = x >>> LittleIntChunks.BITSIZE;
+		}
+		if (x > 0) b.push(x);
+		return(b);
+	}
 	
 	static function mul(a:BigInt, b:BigInt):BigInt {
 		
 		if (a == null || b == null) return null;
-		if (a.length == 1 && b.length == 1) return fromInt(a.get(0) * b.get(0));
+		if (a.length == 1) {
+			if (b.length == 1) return fromInt(a.get(0) * b.get(0));
+			else return mulLittle(b, a.get(0));
+		}
+		else if (b.length == 1) return mulLittle(a, b.get(0));
 		
 		var e = IntUtil.nextPowerOfTwo((a.length > b.length) ? a.length : b.length) >>> 1;
 		
@@ -320,7 +337,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 	}
 	
-	static public inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
+	static inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 		
 		if (b.length <= 2) {
 			if (a.length <= 2) return {
@@ -336,7 +353,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		else return divModLong(a, b);
 	}
 	
-	static public inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
+	static inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
+		
 		var i = a.length - 1;
 		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
 		var q:BigInt = Std.int( x / v );
@@ -358,7 +376,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		else return _divMod(a, v).quotient; // TODO: optimize here to faster fetch only quotient and do without sign-check
 	}
 	
-	static public function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
+	static function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 		
 		var e = b.length - 1;
 		var r:BigInt;
