@@ -32,12 +32,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function splitHigh(e:Int):BigInt return this.splitHigh(e);
 	inline function splitLow(e:Int):BigInt return this.splitLow(e);
 
-	inline function truncateZeroChunks(remove:Bool = false) this.truncateZeroChunks(remove);
+	inline function truncateZeroChunks(remove:Bool) this.truncateZeroChunks(remove);
 	
 	inline function setNegative():BigInt { this.isNegative = true; return this;}
 	inline function setPositive():BigInt { this.isNegative = false; return this;}
-	
-	inline function _copy():LittleIntChunks return this.copy();
 	
 	inline function copy():BigInt return new BigInt(this.copy());
 	inline function negCopy():BigInt return new BigInt(this.negCopy());
@@ -107,34 +105,41 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	// -------------------- addition --------------------------------------
 	// --------------------------------------------------------------------	
 	
-	@:op(A + B) function opAdd(b:BigInt):BigInt return addCopy(this, b);
+	@:op(A + B) function opAdd(b:BigInt):BigInt return _add(this, b);
 	
-	static inline function addCopy(a:BigInt, b:BigInt):BigInt {
+/*	@:op(A += B) 
+	public inline function add(b:BigInt):BigInt {
+		return this = _add(this, b);
+	}
+*/	
+	static inline function _add(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.copy();
 		else if (b == null) return a.copy();
 		else if (a.isNegative) {
-			if (b.isNegative) return _addCopy(a, b).setNegative(); // -3 + -2
-			else return _subtract(b, a.negClone()); // -3 + 2
+			if (b.isNegative) return __add(a, b).setNegative(); // -3 + -2
+			else return __subtract(b, a.negClone()); // -3 + 2
 		}
 		else {
-			if (b.isNegative) return _subtract(a, b.negClone()); // 3 + -2
-			else return _addCopy(a, b); // 3 + 2
+			if (b.isNegative) return __subtract(a, b.negClone()); // 3 + -2
+			else return __add(a, b); // 3 + 2
 		}
 	}
 	
-	static inline function _addCopy(a:BigInt, b:BigInt):BigInt {
-		if (a.length > b.length) return _add(a.copy(), b);
-		else return _add(b.copy(), a);
+	static inline function __add(a:BigInt, b:BigInt):BigInt {
+		if (a.length > b.length) {
+			return addLong(a.copy(), b);
+		}
+		else return addLong(b.copy(), a);
 	}
 	
-	static inline function _add(a:BigInt, b:BigInt):BigInt {
+	static inline function addLong(a:BigInt, b:BigInt):BigInt {
 		for (position in 0...b.length) {
-			addAtPosition(a, b.get(position), position);
+			addLittle(a, b.get(position), position);
 		}
 		return a;
 	}
 	
-	static inline function addAtPosition(a:BigInt, v:LittleInt, position:Int):Void {
+	static inline function addLittle(a:BigInt, v:LittleInt, position:Int):Void {
 		var x:Int;
 		for (i in position...a.length) {
 			x = a.get(i) + v;
@@ -146,73 +151,54 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			a.set(i, x & LittleIntChunks.BITMASK);
 			v = 1;
 		}
-		//if (v > 0) {
-		if (v > 0 || position == a.length) {
-			a.push(v);
-		}
-	}
-	
-	// modify value in place
-	public inline function add(b:BigInt):BigInt {
-		if (this == null) {
-			if (b == null) return null;
-			else {
-				this = b._copy();
-				return this;
-			}
-		}
-		else if (b == null) return this;
-		else if (isNegative) {
-			if (b.isNegative) return _add(this, b).setNegative(); // -3 + -2
-			else return _subtract(b, negClone()); // -3 + 2
-		}
-		else {
-			if (b.isNegative) return _subtract(this, b.negClone()); // 3 + -2
-			else return _add(this, b); // 3 + 2
-		}
+		if (v > 0) a.push(v);
 	}
 	
 	// --------------------------------------------------------------------
 	// -------------------- subtraction -----------------------------------
 	// --------------------------------------------------------------------	
 	
-	@:op(A - B) function opSubtract(b:BigInt):BigInt return subtract(this, b);
+	@:op(A - B) function opSubtract(b:BigInt):BigInt return _subtract(this, b);
 
-	static inline function subtract(a:BigInt, b:BigInt):BigInt {
+/*	@:op(A -= B) public inline function subtract(b:BigInt):BigInt {
+		return this = _subtract(this, b);
+	}
+*/	
+	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.negCopy();
 		else if (b == null) return a.copy();
 		else if (a.isNegative) {
-			if (b.isNegative) return _subtract(b.negClone(), a.negClone());// -3 - -2
-			else return _addCopy(a, b).setNegative(); // -3 - 2
+			if (b.isNegative) return __subtract(b.negClone(), a.negClone());// -3 - -2
+			else return __add(a, b).setNegative(); // -3 - 2
 		}
 		else {
-			if (b.isNegative) return _addCopy(a, b.negClone()); // 3 - -2
-			else return _subtract(a, b);  // 3 - 2
-		}
-	}
-
-	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
-		var v:BigInt;
-		if (a > b) {
-			v = __subtract(a.copy(), b);
-			v.truncateZeroChunks();
-			return v;
-		}
-		else {
-			v = __subtract(b.copy(), a);
-			v.truncateZeroChunks();
-			if (v.length == 0) return null else return v.setNegative();
+			if (b.isNegative) return __add(a, b.negClone()); // 3 - -2
+			else return __subtract(a, b);  // 3 - 2
 		}
 	}
 
 	static inline function __subtract(a:BigInt, b:BigInt):BigInt {
+		var v:BigInt;
+		if (a > b) {
+			v = subtractLong(a.copy(), b);
+			v.truncateZeroChunks(false);
+			return v;
+		}
+		else {
+			v = subtractLong(b.copy(), a);
+			v.truncateZeroChunks(false);
+			if (v.length == 0) return null else return v.setNegative();
+		}
+	}
+
+	static inline function subtractLong(a:BigInt, b:BigInt):BigInt {
 		for (position in 0...b.length) {
-			subtractAtPosition(a, b.get(position), position);
+			subtractLittle(a, b.get(position), position);
 		}
 		return a;
 	}
 
-	static inline function subtractAtPosition(a:BigInt, v:LittleInt, position:Int):Void {		
+	static inline function subtractLittle(a:BigInt, v:LittleInt, position:Int):Void {		
 		for (i in position...a.length) {
 			var x:Int = a.get(i);
 			if (x >= v) {
@@ -248,6 +234,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {
 		
+		if (v == 1) return a.copy();
 		if (v < 0) v = -v;
 		var x:Int = 0;
 		var b = new BigInt(new LittleIntChunks());
@@ -397,7 +384,16 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		
 		if (a == null) return null; // handle null
 		else if (a == v) return 1; // handle equal
-		else return _divMod(a, v).quotient; // TODO: optimize here to faster fetch only quotient and do without sign-check
+		else {
+			//return _divMod(a, v).quotient;
+			
+			// optimized to faster fetch only quotient and do without sign-check
+			if (a.length <= 2) return Std.int(a.toInt() / v );
+			else  {
+				if (v == 1) return null;
+				else return divModLittle(a, v).quotient;
+			}
+		}
 	}
 	
 	static function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
@@ -409,7 +405,6 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		do {
 			r = a - (q * b); //trace("r = " + r);
 			if (r != null) {
-				// optimize with special divModLittle and add/subtract without cloning
 				q.shiftOneBitLeft();
 				q = q - divFast(r.splitHigh(e), x);
 				q.shiftOneBitRight();
@@ -421,7 +416,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (r != null) {
 			r = a - (q * b );
 			if (r.isNegative) {
-				q = q - 1;
+				//q = q - 1;
+				subtractLittle(q, 1, 0);
 				r = r + b;
 			}
 		}

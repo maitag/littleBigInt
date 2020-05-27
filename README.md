@@ -1,5 +1,5 @@
 # littleBigInt
-another little pure haxe BigInt implementation
+little pure haxe BigInt implementation
 
 ## what is implemented yet:
 
@@ -35,6 +35,5 @@ then simple call `hpx help` into projectfolder to see options.
 
 ## todo
 
-- optimization for division
 - optimization with bytearrays
 - more unit-tests and benchmarks

@@ -8,7 +8,6 @@ package;
  * 
  */
 
-
 typedef LittleInt = Int;
 typedef LittleIntArray = Array<LittleInt>; // TODO: can be optimized later for JS here (UInt32Array for example)
 
@@ -46,14 +45,8 @@ class LittleIntChunks {
 	var start:Int = 0;
 	var end:Int = 0;
 	
-	// on need: number how much zero-chunks would be right
-	//public var exp:Int = 0; 
-	
 	public var length(get, never):Int;
 	inline function get_length():Int return end - start;
-	
-	//public var isZero(get, never):Bool;
-	//inline function get_isZero():Bool return (start == end);
 	
 	
 	public inline function new(chunks:LittleIntArray = null) {
@@ -130,7 +123,7 @@ class LittleIntChunks {
 		return chunks.pop();
 	}
 	
-	public inline function unshift(v:LittleInt) {
+	public inline function unshift(v:LittleInt) {		
 		if (v >= UPPESTBIT) {
 			chunks.unshift(v >>> BITSIZE);
 			chunks.unshift(v & BITMASK);
@@ -141,7 +134,7 @@ class LittleIntChunks {
 		}
 	}
 	
-	public inline function truncateZeroChunks(remove:Bool = false) {
+	public inline function truncateZeroChunks(remove:Bool) {		
 		var i = length;
 		while ( --i >= 0) {
 			if (get(i) == 0) {
@@ -154,6 +147,7 @@ class LittleIntChunks {
 	// ---------- From/ToInteger -------------------
 
 	public static inline function createFromLittleInt(i:LittleInt):LittleIntChunks {
+		
 		if (i == 0) return null;
 		var littleIntChunks = new LittleIntChunks();
 		if (i < 0) {
@@ -169,6 +163,7 @@ class LittleIntChunks {
 	}
 
 	public inline function toLittleInt():LittleInt {
+		
 		if (length == 0) return 0;
 		else {
 			var littleInt:LittleInt = 0;
@@ -195,10 +190,11 @@ class LittleIntChunks {
 	static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
 		
 	public static function createFromBaseString(s:String, base:Null<Int> = null):BigInt {
-		
+
 		// make lowercase and parse out all spaces
 		s = regexSpaces.replace(s.toLowerCase(), "");
 		
+		// checking zero
 		if (regexZero.match(s)) return null;
 		
 		// check sign
@@ -244,8 +240,7 @@ class LittleIntChunks {
 		while (i > 0) {
 			offset = hexaChars.indexOf(s.charAt(--i));
 			if (offset == -1 || offset >= base) throw('Error, base $base string can only contain "${hexaChars.join("")}"');
-			//value = value + b * offset;
-			value = value + BigInt.mul(b, offset);
+			value = value + BigInt.mulLittle(b, offset);
 			b = b * base; 
 		}
 		return (neg) ? value.setNegative() : value;
@@ -410,7 +405,6 @@ class LittleIntChunks {
 		
 		return ((isNegative) ? "-" : "") + s;
 	}
-	
-	
+		
 
 }

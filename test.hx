@@ -75,6 +75,7 @@ class Test extends hxp.Script {
 			libs: [ "hx3compat" ],
 			#end
 			main: "Test",
+			dce: FULL,
 			debug: false
 		});
 		
@@ -96,6 +97,7 @@ class Test extends hxp.Script {
 		
 		var base = new HXML ({
 			cp: [ "src", "benchmarks" ],
+			dce: FULL,
 			debug: false
 		});
 		
