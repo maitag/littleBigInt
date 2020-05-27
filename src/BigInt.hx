@@ -34,8 +34,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 
 	inline function truncateZeroChunks(remove:Bool = false) this.truncateZeroChunks(remove);
 	
-	inline function setNegative() { this.isNegative = true; return this;}
-	inline function setPositive() { this.isNegative = false; return this;}
+	inline function setNegative():BigInt { this.isNegative = true; return this;}
+	inline function setPositive():BigInt { this.isNegative = false; return this;}
 	
 	inline function copy():BigInt return new BigInt(this.copy());
 	inline function negCopy():BigInt return new BigInt(this.negCopy());
@@ -54,22 +54,50 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 
 	@:from static public function fromString(s:String):BigInt {
-		return LittleIntChunks.createFromString(s);
+		return LittleIntChunks.createFromBaseString(s);
 	}
 	
 	@:to public function toString():String {
 		if (this == null) return "0";
-		return this.toString();	
+		return this.toBaseString(10);	
 	}
-
 	
-	public function toHexString(spacing:Int = 0):String {
-		if (this == null) return (spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
-		return this.toHexString(spacing);	
+
+	static public function fromBinaryString(s:String):BigInt {
+		return LittleIntChunks.createFromBaseString(s, 2);
 	}
-	public function toBinaryString(spacing:Int = 0):String {
-		if (this == null) return (spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
-		return this.toBinaryString(spacing);	
+	
+	static public function fromHexString(s:String):BigInt {
+		return LittleIntChunks.createFromBaseString(s, 16);
+	}
+	
+	static public function fromOctalString(s:String):BigInt {
+		return LittleIntChunks.createFromBaseString(s, 8);
+	}
+	
+	static public function fromBaseString(s:String, base:Int = 10):BigInt {
+		return LittleIntChunks.createFromBaseString(s, base);
+	}
+	
+	
+	public function toBinaryString(spacing:Int = 0, leadingZeros:Bool = true):String {
+		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
+		return this.toBinaryString(spacing, leadingZeros);	
+	}	
+	
+	public function toOctalString(spacing:Int = 0, leadingZeros:Bool = true):String {
+		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
+		return this.toBaseString(8, spacing, leadingZeros);	
+	}	
+	
+	public function toHexString(spacing:Int = 0, leadingZeros:Bool = true):String {
+		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
+		return this.toHexString(spacing, leadingZeros);	
+	}
+	
+	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
+		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
+		return this.toBaseString(base, spacing, leadingZeros);	
 	}
 	
 	
@@ -192,6 +220,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (isNegative != b.isNegative) return mul(this, b).setNegative();
 		else return mul(this, b);
 	}
+	
+	// TODO: optimized function mulLittle
 	
 	static function mul(a:BigInt, b:BigInt):BigInt {
 		
@@ -333,15 +363,14 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var e = b.length - 1;
 		var r:BigInt;
 		var x:LittleInt = b.get(e);
-		//var q:BigInt = a.splitHigh(e) / x;
 		var q:BigInt = divFast(a.splitHigh(e) , x);
 		do {
 			r = a - (q * b); //trace("r = " + r);
 			if (r != null) {
 				// optimize with special divModLittle and add/subtract without cloning
-				//q = ( q * 2 - r.splitHigh(e) / x) / 2;
-				//q = ( q * 2 - divFast(r.splitHigh(e), x)) / 2;
-				q = ( q * 2 - divFast(r.splitHigh(e), x));	q.shiftOneBitRight();
+				q.shiftOneBitLeft();
+				q = q - divFast(r.splitHigh(e), x);
+				q.shiftOneBitRight();
 				r.setPositive();
 			}
 		}
@@ -374,6 +403,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				restBit = ((v & 1) > 0);
 				set(i, v >>> 1);
 			}
+		}
+	}
+	
+	public function shiftOneBitLeft() {
+		if (this != null) {
+			var v:LittleInt = 0;
+			for (i in 0...length) {
+				v = (get(i) << 1) | ((v & LittleIntChunks.UPPESTBIT > 0) ? 1 : 0) ;
+				set(i, v & LittleIntChunks.BITMASK);
+			}
+			if (v & LittleIntChunks.UPPESTBIT > 0) push(1);
 		}
 	}
 	

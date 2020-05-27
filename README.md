@@ -1,10 +1,9 @@
 # littleBigInt
-another little pure haxe BigInt implementation (work in progress)
+another little pure haxe BigInt implementation
 
 ## what is implemented yet:
 
-- string in/output for binary and hexadecimal notation
-- string input for any base(<= 16)
+- string in/output for any base(<= 16)
 - addition and subtraction
 - multiplication (Karatsuba)
 - division with remainder
@@ -14,7 +13,6 @@ another little pure haxe BigInt implementation (work in progress)
 
 ## missing features
 
-- string output for any base
 - modulo
 - pow and modPow
 - binary operations
@@ -37,5 +35,6 @@ then simple call `hpx help` into projectfolder to see options.
 
 ## todo
 
-- optimization (with bytearrays!)
-- performance testing/optimizing for all targets
+- optimization for multiplication and division
+- optimization with bytearrays
+- more unit-tests and benchmarks

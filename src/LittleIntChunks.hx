@@ -194,47 +194,48 @@ class LittleIntChunks {
 	static var regexSign = ~/^-/;
 	static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
 		
-	public static function createFromString(s:String):BigInt {
+	public static function createFromBaseString(s:String, base:Null<Int> = null):BigInt {
 		
 		// make lowercase and parse out all spaces
 		s = regexSpaces.replace(s.toLowerCase(), "");
 		
 		if (regexZero.match(s)) return null;
 		
-		var neg = false;
-		
 		// check sign
+		var neg = false;
 		if (regexSign.match(s)) {
 			s = regexSign.replace(s, "");
 			neg = true;
 		}
 		
-		if (regexBinary.match(s)) 
-			return fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""), neg);
-		else if (regexHex.match(s))
-			return fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""), neg);
-		else if (regexOctal.match(s)) 
-			return fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8, neg);
-		else
-			return fromBaseString(regexLeadingZeros.replace(s, ""), 10, neg);
+		if (base != null) {
+			return fromBaseString(regexLeadingZeros.replace(s, ""), base, neg);
+		}
+		else {
+
+			if (regexBinary.match(s)) 
+				return fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""), neg);
+			else if (regexHex.match(s))
+				return fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""), neg);
+			else if (regexOctal.match(s)) 
+				return fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8, neg);
+			else
+				return fromBaseString(regexLeadingZeros.replace(s, ""), 10, neg);
+		}
 	}
 	
 	public static inline function getStringOfZeros(amount:Int):String {
 		return [for (i in 0...amount) "0"].join("");
 	}
 	
-	public inline function toString():String {
-		//return toBaseString();
-		
-		// only binary and hexadecimal dummy output yet
-		//return toBinaryString();
-		return toHexString();		
-	}
-	
 	// ------ Parsing String from Number to a defined Base ------------
 	
 	static inline function fromBaseString(s:String, base:Int = 10, neg:Bool):BigInt {
 		
+		// TODO: optional param for custom chars (only hexaChars yet)
+		if (base < 2)  throw('Error, base $base need to be greater or equal 2');
+		if (base > 16) throw('Error, base $base for string output is to great. Max value can be ${hexaChars.length}');
+
 		var i = s.length;
 		var b:BigInt = 1;
 		var value:BigInt = 0;
@@ -250,16 +251,36 @@ class LittleIntChunks {
 		return (neg) ? value.setNegative() : value;
 	}
 	
-	inline function toBaseString(base:Int = 10):String {
+	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
 		
-		// TODO:
-		//   split bigint like:  a*10^3 + b*10^2 + c*10^1 + d*10^0
-		//   -> needs divMod
+		// TODO: optional param for custom chars (only hexaChars yet)
+		if (base < 2)  throw('Error, base $base need to be greater or equal 2');
+		if (base > 16) throw('Error, base $base for string output is to great. Max value can be ${hexaChars.length}');
 		
-		return "not yet implemented";
+		var s = "";
+		var a = new BigInt(this).clone().setPositive();
+		var j:Int = 0;
+		var ret:{quotient:BigInt, remainder:BigInt};
+		
+		while (a != null) {
+			ret = BigInt.divMod(a, base);
+			a = ret.quotient;
+			if (spacing > 0) {
+				s = ((j != 0 && j % spacing == 0) ? " " : "") + s;
+				j++;
+			}
+			s = hexaChars[ret.remainder.toInt()] + s;			
+		}
+		
+		if (leadingZeros && spacing > 0) {
+			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
+			s = ~/^(0+\s)+/.replace(s, "");
+		}
+
+		return ((isNegative) ? "-" : "") + s;
 	}
 	
-	// ---------- Parsing Binary String -------------------
+	// ---------- fast parsing Binary String -------------------
 	
 	static public inline function fromBinaryString(s:String, neg:Bool):BigInt {
 		
@@ -287,9 +308,7 @@ class LittleIntChunks {
 		return new BigInt(littleIntChunks);
 	}
 	
-	public inline function toBinaryString(spacing:Int = 0):String {
-		
-		//if (isZero) return ((spacing>0) ? getStringOfZeros(spacing) : "0");
+	public inline function toBinaryString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		
 		var s = "";
 		var chunk:LittleInt;
@@ -307,7 +326,7 @@ class LittleIntChunks {
 			}
 		}
 		
-		if (spacing > 0) {
+		if (leadingZeros && spacing > 0) {
 			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
 			s = ~/^(0+\s)+/.replace(s, "");
 		}
@@ -317,7 +336,7 @@ class LittleIntChunks {
 	}
 	
 	
-	// ---------- Parsing Hexadecimal String -------------------
+	// ---------- fast parsing Hexadecimal String -------------------
 	
 	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
 	
@@ -351,9 +370,7 @@ class LittleIntChunks {
 		return new BigInt(littleIntChunks);
 	}
 	
-	public function toHexString(spacing:Int = 0):String {
-		
-		//if (isZero) return ((spacing > 0) ? getStringOfZeros(spacing) : "0");
+	public function toHexString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		
 		var s = "";
 		var chunk:LittleInt = 0;
@@ -385,7 +402,7 @@ class LittleIntChunks {
 			s = hexaChars[chunk & 0x0F] + s;
 		}
 
-		if (spacing > 0) {
+		if (leadingZeros && spacing > 0) {
 			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
 			s = ~/^(0+\s)+/.replace(s, "");
 		}
