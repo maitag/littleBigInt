@@ -306,7 +306,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	
 	// --------------------------------------------------------------------
-	// -------------------- division --------------------------------------
+	// ---------------- division and modulo -------------------------------
 	// --------------------------------------------------------------------	
 	
 	@:op(A / B)
@@ -314,12 +314,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return divMod(this, b).quotient;
 	}
 	
+	@:op(A % B)
+	function opModulo(b:BigInt):BigInt {
+		return divMod(this, b).remainder;
+	}
+	
 	// ------- division with remainder -----
 
 	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 			
 		if (b == null) throw ("Error '/', divisor can't be 0");
-		else if (a == null) return { quotient:null, remainder:null }; // handle null
+		else if (a == null) return { quotient:null, remainder:b }; // handle null
 		else if (a == b) return { quotient:1, remainder:null }; // handle equal
 		else {
 			// handle signs

@@ -2,8 +2,8 @@
 import hxp.*;
 
 /*
- * HXP script for crossplatform testing little BigInt
- * (https://github.com/openfl/hxp) 
+ * HXP script (https://github.com/openfl/hxp) for easy crossplatform testing and benchmarks
+ *  by Sylvio Sell - Rostock 2020
  * 
  * install with:
  * 
@@ -31,14 +31,6 @@ class Test extends hxp.Script {
 		
 		// remove double targets
 		targets = removeDoubles(targets);
-		
-		// fetch all benchmarks classnames from folder
-		var benchmarks = new Array<String>();
-		for (b in System.readDirectory("benchmarks")) {
-			var r = ~/([^\/\\]+).hx$/;
-			if (r.match(b)) benchmarks.push(r.matched(1));
-		}
-
 				
 		switch (command) {
 			
@@ -56,8 +48,19 @@ class Test extends hxp.Script {
 				test(targets);
 				
 			case "bench" | "benchmark":
-				benchmark(targets, benchmarks);
-			
+				// fetch all benchmarks classnames from folder
+				var benchmarks = new Array<String>();
+				var benchFiles = System.readDirectory("benchmarks");
+				if (benchFiles != null) {
+					for (b in benchFiles) {
+						var r = ~/([^\/\\]+).hx$/;
+						if (r.match(b)) benchmarks.push(r.matched(1));
+					}
+					if (benchmarks.length != 0)	benchmark(targets, benchmarks);
+					else Log.error("No .hx files into 'benchmarks' folder");
+				}
+				else Log.error("No 'benchmarks' directory found");
+				
 			default:
 				Log.error("Expected \"hxp <test|(bench|benchmark)> <all|neko|hl|js|cpp>\"");
 		}
@@ -72,12 +75,16 @@ class Test extends hxp.Script {
 		var base = new HXML ({
 			cp: [ "src", "unit-tests" ],
 			#if (haxe_ver >= "4.0.0")
-			libs: [ "hx3compat" ],
+			libs: [ "hx3compat" ],  // need for old unit-tests
 			#end
 			main: "Test",
 			dce: FULL,
 			debug: false
 		});
+		
+		#if (haxe_ver >= "4.0.0")
+		base.define("no-deprecation-warnings"); // need for old unit-test
+		#end
 		
 		for (target in targets) {
 			Log.info("build " + target + " target...");

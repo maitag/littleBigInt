@@ -7,24 +7,24 @@ little pure haxe BigInt implementation
 - addition and subtraction
 - multiplication (Karatsuba)
 - division with remainder
+- modulo
 - comparing (>, <, >=, <=, ==, !=)
 - negation
 
 
 ## missing features
 
-- modulo
-- pow and modPow
 - binary operations
+- pow and modPow
 
-- Bytes in/output (to store BigInts)
+- Bytes in/output for storing BigInts
 
 
 ## testing
 
-To perform benchmarks or unit-tests call the `text.hx` hxp script. 
+To perform benchmarks or unit-tests call the `text.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
   
-install hxp via:
+install [hxp](https://lib.haxe.org/p/hxp) via:
 ```
 haxelib install hxp
 haxelib run hxp --install-hxp-alias

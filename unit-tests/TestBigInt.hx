@@ -256,6 +256,27 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(a * b == c);
 	}
 	
+	public function testModulo() {
+		assertEquals( ( (0 : BigInt) % (10 : BigInt) ).toInt(), 10 );
+		assertEquals( ( (0 : BigInt) % (-10 : BigInt) ).toInt(), -10 );
+		
+		assertEquals( ( (1 : BigInt) % ( 10 : BigInt) ).toInt(), 1 );
+		assertEquals( ( (1 : BigInt) % (-10 : BigInt) ).toInt(), 1 );
+		assertEquals( ( (-1 : BigInt) % ( 10 : BigInt) ).toInt(), -1 );
+		assertEquals( ( (-1 : BigInt) % (-10 : BigInt) ).toInt(), -1 );
+		
+		assertEquals( ( (11 : BigInt) % ( 10 : BigInt) ).toInt(), 1 );
+		assertEquals( ( (11 : BigInt) % (-10 : BigInt) ).toInt(), 1 );
+		assertEquals( ( (-11 : BigInt) % ( 10 : BigInt) ).toInt(), -1 );
+		assertEquals( ( (-11 : BigInt) % (-10 : BigInt) ).toInt(), -1 );
+		
+		assertEquals( ( ( "2938289887273578834588723405828340070292347195862712329756482349" : BigInt) % (2 : BigInt) ).toInt(), 1 );
+		assertEquals( ( ( "2938289887273578834588723405828340070292347195862712329756482349" : BigInt) % ( "2938289887273578834588723405828340070292347195862712329756482300" : BigInt) ).toInt(), 49 );
+		assertEquals( ( ( "2938289887273578834588723405828340070292347195862712329756482349" : BigInt) % ("-2938289887273578834588723405828340070292347195862712329756482300" : BigInt) ).toInt(), 49 );
+		assertEquals( ( ("-2938289887273578834588723405828340070292347195862712329756482349" : BigInt) % ( "2938289887273578834588723405828340070292347195862712329756482300" : BigInt) ).toInt(),-49 );
+		assertEquals( ( ("-2938289887273578834588723405828340070292347195862712329756482349" : BigInt) % ("-2938289887273578834588723405828340070292347195862712329756482300" : BigInt) ).toInt(),-49 );
+	}
+	
 	public function testDivision() {
 		assertEquals( ( (0 : BigInt) / (10 : BigInt) ).toInt(), 0 );
 		
