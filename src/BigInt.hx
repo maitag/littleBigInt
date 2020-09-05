@@ -325,6 +325,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			
 		if (b == null) throw ("Error '/', divisor can't be 0");
 		else if (a == null) return { quotient:null, remainder:null }; // handle null
+		else if (b == 1) return { quotient:a.copy(), remainder:null }; // handle /1
 		else if (a == b) return { quotient:1, remainder:null }; // handle equal
 		else {
 			// handle signs

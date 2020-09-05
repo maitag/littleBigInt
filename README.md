@@ -8,6 +8,7 @@ little pure haxe BigInt implementation
 - multiplication (Karatsuba)
 - division with remainder
 - modulo
+- pow and powMod
 - comparing (>, <, >=, <=, ==, !=)
 - negation
 
@@ -15,8 +16,6 @@ little pure haxe BigInt implementation
 ## missing features
 
 - binary operations
-- pow and modPow
-
 - Bytes in/output for storing BigInts
 
 
