@@ -257,8 +257,8 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testModulo() {
-		assertEquals( ( (0 : BigInt) % (10 : BigInt) ).toInt(), 10 );
-		assertEquals( ( (0 : BigInt) % (-10 : BigInt) ).toInt(), -10 );
+		assertEquals( ( (0 : BigInt) % (10 : BigInt) ).toInt(), 0 );
+		assertEquals( ( (0 : BigInt) % (-10 : BigInt) ).toInt(), 0 );
 		
 		assertEquals( ( (1 : BigInt) % ( 10 : BigInt) ).toInt(), 1 );
 		assertEquals( ( (1 : BigInt) % (-10 : BigInt) ).toInt(), 1 );
@@ -331,6 +331,31 @@ class TestBigInt extends haxe.unit.TestCase
 			var result = BigInt.divMod(a, b);
 			assertTrue( result.quotient * b + result.remainder == a );
 		}		
+	}
+	
+	public function testPow() {
+		assertEquals( ( (0 : BigInt).pow("9844190321790980841789") ).toInt(), 0 );
+		assertEquals( ( (1 : BigInt).pow("9844190321790980841789") ).toInt(), 1 );
+		assertTrue(("9844190321790980841789" : BigInt).pow(0) == 1);
+		assertTrue(("9844190321790980841789" : BigInt).pow(1) == "9844190321790980841789");
+		assertTrue((252 : BigInt).pow(124) == "5938367311357894783707160053746995174420310205828475852414076013938629891503128283948631773358868260990930862750953888472307867713712589898179153244476868510006056477315240397220674879224085413293137093058033640525738900314887652830363105200755814422450693335653967468344026614374568850656084361216");
+		assertTrue((-252 : BigInt).pow(14) == "4164928698882469942515671324688384");
+		assertTrue((-252 : BigInt).pow(13) == "-16527494836835198184585997320192");
+	}
+	
+	public function testPowMod() {
+		assertEquals( ( (0 : BigInt).powMod("9844190321790980841789","20194965098495006574") ).toInt(), 0 );
+		assertEquals( ( (1 : BigInt).powMod("9844190321790980841789","20194965098495006574") ).toInt(), 1 );
+		assertEquals( ( ( 4 : BigInt).powMod(13,  497) ).toInt(),  445 );
+		assertEquals( ( ( 4 : BigInt).powMod(13, -497) ).toInt(),  445 );
+		assertEquals( ( (-4 : BigInt).powMod(13,  497) ).toInt(), -445 );
+		assertEquals( ( (-4 : BigInt).powMod(13, -497) ).toInt(), -445 );
+		assertTrue(("9844190321790980841789" : BigInt).powMod(1,"20194965098495006574") == "9242318823912640251");
+		assertTrue(("4139543763576876256978864589462346353452" : BigInt).powMod("1322448978334799562386783579042534564354","19096727818566719527493245743456") == "17450867125893875188144890320704");
+		assertTrue(("-4139543763576876256978864589462346353452" : BigInt).powMod("1322448978334799562386783579042534564354","19096727818566719527493245743456") == "17450867125893875188144890320704");
+		assertTrue(("163353452" : BigInt).powMod("37904",1) == 0);
+		assertTrue(("163353452" : BigInt).powMod(0, 1) == 0);
+		assertTrue(("163353452" : BigInt).powMod(0, 14) == 1);
 	}
 	
 	public function testDivisionBy1IsTheIdentity() {

@@ -324,7 +324,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
 			
 		if (b == null) throw ("Error '/', divisor can't be 0");
-		else if (a == null) return { quotient:null, remainder:b }; // handle null
+		else if (a == null) return { quotient:null, remainder:null }; // handle null
 		else if (a == b) return { quotient:1, remainder:null }; // handle equal
 		else {
 			// handle signs
@@ -427,6 +427,70 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			}
 		}
 		return { quotient:q, remainder:r };
+	}
+	
+	// --------------------------------------------------------------------
+	// ---------------------- pow and powMod ------------------------------
+	// --------------------------------------------------------------------
+	public function pow(exponent:BigInt):BigInt {
+		if (exponent < 0) throw ("Error 'powMod', exponent can't be negative");
+		if (exponent == null) return 1;
+		if (this == null) return null;
+		
+		if (length == 1) if (get(0) == 1) return 1;
+		if (exponent.length == 1) if (exponent.get(0) == 1) return this.copy();
+		
+		var bit:Int;
+		var e:Int;
+		var maxBits:Int;
+
+		var result:BigInt = 1;
+		var base:BigInt = this; // need .copy() here?
+		
+		for (i in 0...exponent.length) {
+			e = exponent.get(i);
+			bit = 1;
+			if (i == exponent.length - 1) maxBits = 1 << IntUtil.bitsize(e);
+			else maxBits = LittleIntChunks.UPPESTBIT;
+			while (bit < maxBits) {
+				if (bit & e != 0) result = result * base;
+				base = base * base;
+				bit = bit << 1;
+			}
+		}
+		return result;
+	}
+	
+	public function powMod(exponent:BigInt, modulus:BigInt):BigInt {
+		if (exponent < 0) throw ("Error 'powMod', exponent can't be negative");
+		if (modulus == null) throw ("Error 'powMod', modulus can't be 0");
+		if (modulus == 1) return null;
+		
+		if (exponent == null) return 1;
+		if (this == null) return null;
+		
+		if (length == 1) if (get(0) == 1) return 1;
+		if (exponent.length == 1) if (exponent.get(0) == 1) return divMod(this, modulus).remainder;
+		
+		var bit:Int;
+		var e:Int;
+		var maxBits:Int;
+
+		var result:BigInt = 1;
+		var base:BigInt = divMod(this, modulus).remainder;
+		
+		for (i in 0...exponent.length) {
+			e = exponent.get(i);
+			bit = 1;
+			if (i == exponent.length - 1) maxBits = 1 << IntUtil.bitsize(e);
+			else maxBits = LittleIntChunks.UPPESTBIT;
+			while (bit < maxBits) {
+				if (bit & e != 0) result = divMod(result * base, modulus).remainder;
+				base = divMod(base * base, modulus).remainder;
+				bit = bit << 1;
+			}
+		}
+		return result;
 	}
 	
 	// --------------------------------------------------------------------
