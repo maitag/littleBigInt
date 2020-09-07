@@ -525,6 +525,66 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 	}
 	
+	@:op(A & B)
+	function opAND(b:BigInt):BigInt {
+		if (this == null || b == null) return null;
+		else {
+			var result:BigInt = null;
+			var r:LittleInt;
+			var l = (length < b.length) ? length : b.length;
+			for (i in 0...l) {
+				r = this.get(l-i-1) & b.get(l-i-1);
+				if (result != null) {
+					result.unshift(r);
+				}
+				else if (r != 0) {
+					result = new BigInt(new LittleIntChunks());
+					result.unshift(r);
+				} 
+			}
+			if (this.isNegative && b.isNegative) result.setNegative();
+			return result;
+		}
+	}
+	
+	@:op(A | B)
+	function opOR(b:BigInt):BigInt {
+		if (this == null || b == null) return null;
+		else {
+			var result:BigInt = new BigInt(new LittleIntChunks());
+			var l = (length < b.length) ? length : b.length;
+			for (i in 0...l) {
+				result.push(this.get(i) | b.get(i));
+			}
+			if (length < b.length)
+				for (i in l...b.length) result.push(b.get(i));
+			else if (length > b.length)
+				for (i in l...length) result.push(this.get(i));
+			
+			if (this.isNegative || b.isNegative) result.setNegative();
+			return result;
+		}
+	}
+	
+	@:op(A ^ B)
+	function opXOR(b:BigInt):BigInt {
+		if (this == null || b == null) return null;
+		else {
+			var result:BigInt = new BigInt(new LittleIntChunks());
+			var l = (length < b.length) ? length : b.length;
+			for (i in 0...l) {
+				result.push(this.get(i) ^ b.get(i));
+			}
+			if (length < b.length)
+				for (i in l...b.length) result.push(b.get(i));
+			else if (length > b.length)
+				for (i in l...length) result.push(this.get(i));
+			
+			if (this.isNegative != b.isNegative) result.setNegative();
+			return result;
+		}
+	}
+	
 	// --------------------------------------------------------------------
 	// -------------------- comparing -------------------------------------
 	// --------------------------------------------------------------------
