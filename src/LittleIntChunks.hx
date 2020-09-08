@@ -114,8 +114,8 @@ class LittleIntChunks {
 	}
 	
 	public inline function push(v:LittleInt) {
-		chunks.push(v);
 		end++;
+		chunks.push(v);
 	}
 	
 	public inline function pop():LittleInt {
@@ -124,14 +124,8 @@ class LittleIntChunks {
 	}
 	
 	public inline function unshift(v:LittleInt) {		
-		if (v >= UPPESTBIT) {
-			chunks.unshift(v >>> BITSIZE);
-			chunks.unshift(v & BITMASK);
-			end += 2;
-		} else {
-			chunks.unshift(v);
-			end++;			
-		}
+		end++;			
+		chunks.unshift(v);
 	}
 	
 	public inline function truncateZeroChunks(remove:Bool) {		

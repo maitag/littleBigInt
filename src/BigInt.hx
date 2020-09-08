@@ -105,6 +105,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	// -------------------- addition --------------------------------------
 	// --------------------------------------------------------------------	
 	
+	public function abs():BigInt {
+		if (this == null) return null;
+		else if (isNegative) return negCopy();
+		else return copy();
+	}
+	
+
+	// --------------------------------------------------------------------
+	// -------------------- addition --------------------------------------
+	// --------------------------------------------------------------------	
+	
 	@:op(A + B) function opAdd(b:BigInt):BigInt return _add(this, b);
 	
 /*	@:op(A += B) 
@@ -376,9 +387,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
 		var q:BigInt = Std.int( x / v );
 		var r:LittleInt = Std.int( x % v );
+		var c:Int;
 		do {
 			x = (r << LittleIntChunks.BITSIZE) | a.get(--i);
-			q.unshift(Std.int( x / v )); //<- can be 2 chunks
+			
+			c = Std.int( x / v ); // <- can be 2 chunks
+			if (c >= LittleIntChunks.UPPESTBIT) {
+				q.unshift(c >>> LittleIntChunks.BITSIZE);
+				q.unshift(c & LittleIntChunks.BITMASK);
+			}
+			else q.unshift(c);
+			
 			r = Std.int( x % v );
 		}
 		while (i > 0);
@@ -438,8 +457,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (exponent == null) return 1;
 		if (this == null) return null;
 		
-		if (length == 1) if (get(0) == 1) return 1;
-		if (exponent.length == 1) if (exponent.get(0) == 1) return this.copy();
+		if (length == 1 && get(0) == 1) return 1;
+		if (exponent.length == 1 && exponent.get(0) == 1) return this.copy();
 		
 		var bit:Int;
 		var e:Int;
@@ -470,8 +489,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (exponent == null) return 1;
 		if (this == null) return null;
 		
-		if (length == 1) if (get(0) == 1) return 1;
-		if (exponent.length == 1) if (exponent.get(0) == 1) return divMod(this, modulus).remainder;
+		if (length == 1 && get(0) == 1) return 1;
+		if (exponent.length == 1 && exponent.get(0) == 1) return divMod(this, modulus).remainder;
 		
 		var bit:Int;
 		var e:Int;
@@ -522,6 +541,70 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				set(i, v & LittleIntChunks.BITMASK);
 			}
 			if (v & LittleIntChunks.UPPESTBIT > 0) push(1);
+		}
+	}
+	
+	@:op(A >>> B)
+	function opShiftRightUnsigned(b:Int):BigInt {
+		return opShiftRight(b);
+	}
+	
+	@:op(A >> B)
+	function opShiftRight(b:Int):BigInt {
+		if (this == null) return null;
+		else if (b == 0) return this.copy();
+		else if (b < 0) return opShiftLeft(-b);
+		else {
+			var result:BigInt = new BigInt(new LittleIntChunks());
+			var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
+			var r:Int = b - l * LittleIntChunks.BITSIZE;
+			
+			if (r == 0)
+				for (i in l...length) result.push(get(i));
+			else {
+				var v:Int;
+				var restBits:Int = 0;
+				var i = length;
+				while (i-- > l) {
+					v = get(i);
+					if (result.length > 0 || ((v >>> r) | restBits) > 0)
+						result.unshift((v >>> r) | restBits);
+					restBits = (v << (LittleIntChunks.BITSIZE - r)) & LittleIntChunks.BITMASK;
+				}
+			}
+			
+			if (result.length == 0) return null;
+			else {
+				if (isNegative) result.setNegative();
+				return result;
+			}
+		}
+	}
+	
+	@:op(A << B)
+	function opShiftLeft(b:Int):BigInt {
+		if (this == null) return null;
+		else if (b == 0) return this.copy();
+		else if (b < 0) return opShiftRight(-b);
+		else {
+			var result:BigInt = new BigInt(new LittleIntChunks());
+			var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
+			var r:Int = b - l * LittleIntChunks.BITSIZE;
+			for (i in 0...l) result.push(0);
+			if (r == 0)
+				for (i in 0...length) result.push(get(i));
+			else {
+				var v:Int;
+				var restBits:Int = 0;
+				for (i in 0...length) {
+					v = get(i);
+					result.push( ((v << r) & LittleIntChunks.BITMASK) | restBits);
+					restBits = v >>> (LittleIntChunks.BITSIZE - r);
+				}
+				if (restBits > 0) result.push(restBits);
+			}
+			if (isNegative) result.setNegative();
+			return result;
 		}
 	}
 	

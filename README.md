@@ -10,12 +10,13 @@ little pure haxe BigInt implementation
 - modulo
 - pow and powMod
 - comparing (>, <, >=, <=, ==, !=)
-- negation
+- negation, abs
+- binary operations (&, |, ^)
+
 
 
 ## missing features
 
-- binary operations
 - Bytes in/output for storing BigInts
 
 
@@ -34,5 +35,5 @@ then simple call `hpx help` into projectfolder to see options.
 
 ## todo
 
-- optimization with bytearrays
+- targetspecific optimization
 - more unit-tests and benchmarks

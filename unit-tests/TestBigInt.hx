@@ -179,6 +179,15 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( b == -a);
 	}
 
+   public function testAbs() {
+		assertTrue((0 : BigInt).abs() == 0);
+		assertTrue(("-0" : BigInt).abs() == 0);
+		assertTrue((54 : BigInt).abs() == 54);
+		assertTrue((-54 : BigInt).abs() == 54);
+		assertTrue(("13412564654613034984065434" : BigInt).abs() == "13412564654613034984065434");
+		assertTrue(("-13412564654613034984065434" : BigInt).abs() == "13412564654613034984065434");
+   }
+
 	public function testAddition() {
 		assertTrue( (0 : BigInt) + (0 : BigInt) == (0 : BigInt) );
 		assertTrue( (1 : BigInt) + (0 : BigInt) == (1 : BigInt) );
@@ -431,8 +440,6 @@ class TestBigInt extends haxe.unit.TestCase
 
 	public function testCarriesOverCorrectly() {
 		assertTrue(("9007199254740991" : BigInt) + 1 == "9007199254740992");
-		//assertTrue(("999999999999999999999000000000000000000000" : BigInt) + ("1000000000000000000000" : BigInt) == ("1e42" : BigInt));
-		//assertTrue(("1e20" : BigInt) + "9007199254740972" == "100009007199254740972");
 		assertTrue(("-9007199254740983" : BigInt) + "-9999999999999998" == "-19007199254740981");
 		assertTrue(("100000000000000000000000000000000000" : BigInt) - "999999999999999999" == "99999999999999999000000000000000001");
 		assertTrue(("50000005000000" : BigInt) * "10000001" == "500000100000005000000");
@@ -451,5 +458,22 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(("10000000000000000" : BigInt) + "10" == "10000000000000010");
 		assertTrue(("10000000000000000" : BigInt) + "10000000000000000" == "20000000000000000");
 	}
+   
+   public function testShiftingLeftAndRight() {
+		assertTrue((-5 : BigInt) >> 2 == -1);
+		assertTrue((5 : BigInt) >> -2 == 20);
+		assertTrue((5 : BigInt) << -2 == 1);
+		assertTrue((1024 : BigInt) << 100 == "1298074214633706907132624082305024");
+		assertTrue(("2596148429267413814265248164610049" : BigInt) >> 100 == 2048);
+		assertTrue(("8589934592" : BigInt) >> -50 == "9671406556917033397649408");
+		assertTrue(("38685626227668133590597632" : BigInt) << -50 == "34359738368");
+   }
+
+   public function testBitwiseOperations() {
+		assertTrue(("435783453" : BigInt) & "902345074" == "298352912");
+		assertTrue(("435783453" : BigInt) | "902345074" == "1039775615");
+		assertTrue(("435783453" : BigInt) ^ "902345074" == "741422703");
+		assertTrue(("12" : BigInt) ^ -5 == "-9");
+   }
    
 }
