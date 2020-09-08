@@ -12,11 +12,6 @@ little pure haxe BigInt implementation
 - comparing (>, <, >=, <=, ==, !=)
 - negation, abs
 - binary operations (&, |, ^)
-
-
-
-## missing features
-
 - Bytes in/output for storing BigInts
 
 

@@ -1,4 +1,5 @@
 package;
+import haxe.io.Bytes;
 
 /**
  * underlaying class of BigInt-abstract
@@ -164,7 +165,7 @@ class LittleIntChunks {
 			var tmp:LittleInt = 0;
 			for (i in 0...length) {
 				tmp = get(i);
-				if ( (tmp << (i * BITSIZE)) >> (i * BITSIZE) != tmp )
+				if ( ((tmp << (i * BITSIZE)) >>> (i * BITSIZE)) != tmp )
 					throw('Error, BigInt with ${BITSIZE*(length-1)+IntUtil.bitsize(tmp)} bits is to big for native Integer length');
 				
 				littleInt += (tmp << (i * BITSIZE));
@@ -386,7 +387,8 @@ class LittleIntChunks {
 			}
 		}
 		
-		if (restBits > 0) {
+		//if (restBits > 0) {
+		if (restBits > 0 && chunk > 0) {
 			if (spacing > 0) s = ((j++ % spacing == 0) ? " " : "") + s;
 			s = hexaChars[chunk & 0x0F] + s;
 		}
@@ -400,5 +402,82 @@ class LittleIntChunks {
 		return ((isNegative) ? "-" : "") + s;
 	}
 		
+	static public inline function fromBytes(b:Bytes):BigInt {
+		
+		if (b.length == 1 && b.get(0) == 0) return null;
+		
+		var littleIntChunks = new LittleIntChunks();
+		
+		var l:Int = b.length;
+		if (b.get(l-1) == 0) {
+			littleIntChunks.isNegative = true;
+			l--;
+		}
+		var bit:Int = 1;
+		var chunk:Int = 0;
+		var offset:Int;
+		
+		var i:Int = 0;
+		while (i < l) {
+			offset = b.get(i++);
+			chunk += offset * bit;
+			bit = bit << 8;
+			if (bit >= UPPESTBIT) {
+				littleIntChunks.push(chunk & BITMASK);
+				
+				if (bit == UPPESTBIT) bit = 1;
+				else if (bit == UPPESTBIT << 1) bit = 1 << 1;
+				else if (bit == UPPESTBIT << 2) bit = 1 << 2;
+				else if (bit == UPPESTBIT << 3) bit = 1 << 3;
+				else if (bit == UPPESTBIT << 4) bit = 1 << 4;
+				else if (bit == UPPESTBIT << 5) bit = 1 << 5;
+				else if (bit == UPPESTBIT << 6) bit = 1 << 6;
+				else bit = 1 << 7;
+				
+				chunk = chunk >> BITSIZE;
+			}
+		}
+		
+		if (chunk != 0) littleIntChunks.push(chunk);
+		return new BigInt(littleIntChunks);
+	}
 
+	public function toBytes():Bytes {
+		
+		var numBits:Int = (length - 1) * BITSIZE + IntUtil.bitsize(get(length-1));
+		var numBytes:Int = Std.int((numBits - 1) / 8) + 1;
+		
+		if (isNegative) numBytes++;
+		var b = Bytes.alloc(numBytes);
+		
+		var chunk:LittleInt = 0;
+		var restBits:Int = 0;
+		var j:Int = 0;
+		for (i in 0...length) {
+			chunk = (get(i) << restBits) + chunk;
+			while (BITSIZE + restBits >= 8) {
+				b.set(j++, chunk & 0xFF);
+				chunk = chunk >> 8;
+				restBits -= 8;
+			}
+			restBits = BITSIZE + restBits;
+			
+			switch (restBits) {
+				case 0: chunk = 0;
+				case 1: chunk &= 1;
+				case 2: chunk &= 3;
+				case 3: chunk &= 7;
+				case 4: chunk &= 15;
+				case 5: chunk &= 31;
+				case 6: chunk &= 63;
+				default: chunk &= 127;
+			}
+		}
+		
+		if (restBits > 0 && chunk > 0) b.set(j++, chunk);
+		if (isNegative) b.set(j++, 0);
+		
+		return b;
+	}
+	
 }

@@ -1,6 +1,7 @@
 package;
 
 import LittleIntChunks;
+import haxe.io.Bytes;
 
 /**
  * pure Haxe BigInt implementation
@@ -98,6 +99,20 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toBaseString(base, spacing, leadingZeros);	
+	}
+	
+	
+	static public function fromBytes(b:Bytes):BigInt {
+		return LittleIntChunks.fromBytes(b);
+	}
+
+	public function toBytes():Bytes {
+		if (this == null) {
+			var b = Bytes.alloc(1);
+			b.set(0, 0);
+			return b;
+		}
+		else return this.toBytes();	
 	}
 	
 	
