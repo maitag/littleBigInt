@@ -85,6 +85,7 @@ class Test extends hxp.Script {
 		#if (haxe_ver >= "4.0.0")
 		base.define("no-deprecation-warnings"); // need for old unit-test
 		#end
+		base.define("macro_optimize_bitsize");
 		
 		for (target in targets) {
 			Log.info("build " + target + " target...");
@@ -107,6 +108,7 @@ class Test extends hxp.Script {
 			dce: FULL,
 			debug: false
 		});
+		base.define("macro_optimize_bitsize");
 		
 		for (benchmark in benchmarks)
 		{

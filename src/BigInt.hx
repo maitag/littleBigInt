@@ -26,7 +26,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	//inline function get_isZero():Bool return this.isZero;
 
 	inline function get(i:Int):LittleInt return this.get(i);
-	inline function set(i:Int, v:Int) this.set(i,v);
+	inline function set(i:Int, v:LittleInt) this.set(i,v);
 	inline function push(v:LittleInt) this.push(v);
 	inline function unshift(v:LittleInt) this.unshift(v);
 

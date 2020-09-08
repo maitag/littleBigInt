@@ -1,6 +1,9 @@
 # littleBigInt
 little pure haxe BigInt implementation
 
+Tested on hashlink, cpp, neko and javascript targets  
+works with haxe > 3.4.4  
+
 ## what is implemented yet:
 
 - string in/output for any base(<= 16)
@@ -15,6 +18,9 @@ little pure haxe BigInt implementation
 - Bytes in/output for storing BigInts
 
 
+Please tell me if you miss something ~^ 
+  
+  
 ## testing
 
 To perform benchmarks or unit-tests call the `text.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
@@ -25,10 +31,15 @@ haxelib install hxp
 haxelib run hxp --install-hxp-alias
 ```
 
-then simple call `hpx help` into projectfolder to see options.
+then simple call `hpx test hl neko ...` or  
+`hpx help` into projectfolder to see more targetspecific options.
 
 
 ## todo
 
-- targetspecific optimization
+- fixing bugs for larger chunk-BITSIZEs
 - more unit-tests and benchmarks
+  
+- js optimization to work with fully 2^53 precision
+- trying all targets with haxe.Int64 chunks
+- more targetspecific optimization

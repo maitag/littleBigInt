@@ -1,5 +1,4 @@
 package;
-import haxe.io.Bytes;
 
 /**
  * underlaying class of BigInt-abstract
@@ -9,8 +8,8 @@ import haxe.io.Bytes;
  * 
  */
 
-typedef LittleInt = Int;
-typedef LittleIntArray = Array<LittleInt>; // TODO: can be optimized later for JS here (UInt32Array for example)
+typedef LittleInt = Int; // TODO: replace by Int64 (needs some fixes at place where only used Int yet!)
+typedef LittleIntArray = Array<LittleInt>; // TODO: optimized later for JS here (e.g. UInt32Array or )
 
 @:access(BigInt)
 class LittleIntChunks {
@@ -32,9 +31,17 @@ class LittleIntChunks {
 		static public inline var BITMASK:Int = 0x7FFFFFFF;
 
 	#else // if LittleInt is native 32 Bit Integer (neko):
+		
+		// TODO: fixing bugs with greater BITSIZE !!!
+		//#if js
+		//static public inline var BITSIZE:Int = 26;
+		//static public inline var UPPESTBIT:Int = 0x4000000;
+		//static public inline var BITMASK:Int = 0x3FFFFFF;
+		//#else		
 		static public inline var BITSIZE:Int = 15;
 		static public inline var UPPESTBIT:Int = 0x8000;
 		static public inline var BITMASK:Int = 0x7FFF;
+		//#end
 	#end
 	
 	// --------------------------------------------------------------------
@@ -278,7 +285,7 @@ class LittleIntChunks {
 		littleIntChunks.isNegative = neg;
 		var i = s.length;
 		var bit:Int = 1;
-		var chunk:Int = 0;
+		var chunk:LittleInt = 0;
 		
 		while (i > 0) {
 			switch (s.charAt(--i)) {
@@ -336,7 +343,7 @@ class LittleIntChunks {
 		littleIntChunks.isNegative = neg;
 		var i = s.length;
 		var bit:Int = 1;
-		var chunk:Int = 0;
+		var chunk:LittleInt = 0;
 		var offset:Int;
 		
 		while (i > 0) {
@@ -355,7 +362,7 @@ class LittleIntChunks {
 				chunk = chunk >> BITSIZE;
 			}
 		}
-		
+		// TODO: chunk can be greater then BITSIZE here also ?
 		if (chunk != 0) littleIntChunks.push(chunk);
 		return new BigInt(littleIntChunks);
 	}
@@ -402,7 +409,7 @@ class LittleIntChunks {
 		return ((isNegative) ? "-" : "") + s;
 	}
 		
-	static public inline function fromBytes(b:Bytes):BigInt {
+	static public inline function fromBytes(b:haxe.io.Bytes):BigInt {
 		
 		if (b.length == 1 && b.get(0) == 0) return null;
 		
@@ -414,7 +421,7 @@ class LittleIntChunks {
 			l--;
 		}
 		var bit:Int = 1;
-		var chunk:Int = 0;
+		var chunk:LittleInt = 0;
 		var offset:Int;
 		
 		var i:Int = 0;
@@ -438,17 +445,21 @@ class LittleIntChunks {
 			}
 		}
 		
-		if (chunk != 0) littleIntChunks.push(chunk);
+		if (chunk != 0) {
+			// TODO: chunk can be greater then BITSIZE
+			littleIntChunks.push(chunk);
+		}
+		
 		return new BigInt(littleIntChunks);
 	}
 
-	public function toBytes():Bytes {
+	public function toBytes():haxe.io.Bytes {
 		
 		var numBits:Int = (length - 1) * BITSIZE + IntUtil.bitsize(get(length-1));
 		var numBytes:Int = Std.int((numBits - 1) / 8) + 1;
 		
 		if (isNegative) numBytes++;
-		var b = Bytes.alloc(numBytes);
+		var b = haxe.io.Bytes.alloc(numBytes);
 		
 		var chunk:LittleInt = 0;
 		var restBits:Int = 0;
