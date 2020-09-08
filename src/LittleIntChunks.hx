@@ -172,7 +172,8 @@ class LittleIntChunks {
 			var tmp:LittleInt = 0;
 			for (i in 0...length) {
 				tmp = get(i);
-				if ( ((tmp << (i * BITSIZE)) >>> (i * BITSIZE)) != tmp )
+				// TODO : BIG INT 6 4 (^_^)
+				if ( ((tmp << (i * BITSIZE)) >> (i * BITSIZE)) != tmp )
 					throw('Error, BigInt with ${BITSIZE*(length-1)+IntUtil.bitsize(tmp)} bits is to big for native Integer length');
 				
 				littleInt += (tmp << (i * BITSIZE));
