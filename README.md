@@ -1,8 +1,8 @@
 # littleBigInt
-little pure haxe BigInt implementation
+pure haxe implementation for arbitrary size integer
 
 Tested on hashlink, cpp, neko and javascript targets  
-works with haxe > 3.4.4  
+and works with haxe > 3.4.4  
 
 ## what is implemented yet:
 
@@ -38,6 +38,8 @@ then simple call `hpx test hl neko ...` or
 ## todo
 
 - fixing bugs for larger chunk-BITSIZEs
+- implementing complement operator `~` 
+- make all bitwise-ops two's complement compatible
 - more unit-tests and benchmarks
   
 - js optimization to work with fully 2^53 precision
