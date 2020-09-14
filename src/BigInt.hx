@@ -112,7 +112,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			b.set(0, 0);
 			return b;
 		}
-		else return this.toBytes();	
+		return this.toBytes();	
 	}
 	
 	
@@ -122,8 +122,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	public function abs():BigInt {
 		if (this == null) return null;
-		else if (isNegative) return negCopy();
-		else return copy();
+		if (isNegative) return negCopy();
+		return copy();
 	}
 	
 
@@ -140,22 +140,18 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 */	
 	static inline function _add(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.copy();
-		else if (b == null) return a.copy();
-		else if (a.isNegative) {
+		if (b == null) return a.copy();
+		if (a.isNegative) {
 			if (b.isNegative) return __add(a, b).setNegative(); // -3 + -2
-			else return __subtract(b, a.negClone()); // -3 + 2
+			return __subtract(b, a.negClone()); // -3 + 2
 		}
-		else {
-			if (b.isNegative) return __subtract(a, b.negClone()); // 3 + -2
-			else return __add(a, b); // 3 + 2
-		}
+		if (b.isNegative) return __subtract(a, b.negClone()); // 3 + -2
+		return __add(a, b); // 3 + 2
 	}
 	
 	static inline function __add(a:BigInt, b:BigInt):BigInt {
-		if (a.length > b.length) {
-			return addLong(a.copy(), b);
-		}
-		else return addLong(b.copy(), a);
+		if (a.length > b.length) return addLong(a.copy(), b);
+		return addLong(b.copy(), a);
 	}
 	
 	static inline function addLong(a:BigInt, b:BigInt):BigInt {
@@ -192,15 +188,13 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 */	
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.negCopy();
-		else if (b == null) return a.copy();
-		else if (a.isNegative) {
+		if (b == null) return a.copy();
+		if (a.isNegative) {
 			if (b.isNegative) return __subtract(b.negClone(), a.negClone());// -3 - -2
-			else return __add(a, b).setNegative(); // -3 - 2
+			return __add(a, b).setNegative(); // -3 - 2
 		}
-		else {
-			if (b.isNegative) return __add(a, b.negClone()); // 3 - -2
-			else return __subtract(a, b);  // 3 - 2
-		}
+		if (b.isNegative) return __add(a, b.negClone()); // 3 - -2
+		return __subtract(a, b);  // 3 - 2
 	}
 
 	static inline function __subtract(a:BigInt, b:BigInt):BigInt {
@@ -242,7 +236,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(- B)
 	inline function negation():BigInt {
 		if (this == null) return null;
-		else return this.negCopy();
+		return this.negCopy();
 	}
 	
 	
@@ -255,7 +249,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function opMulticplicate(b:BigInt):BigInt {
 		if (this == null || b == null) return null;
 		if (isNegative != b.isNegative) return mul(this, b).setNegative();
-		else return mul(this, b);
+		return mul(this, b);
 	}
 	
 	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {		
@@ -344,36 +338,33 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	// ------- division with remainder -----
 
-	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {			
+	static inline public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {			
 		if (b == null) throw ("Error '/', divisor can't be 0");
-		else if (a == null) return { quotient:null, remainder:null }; // handle null
-		else if (b == 1) return { quotient:a.copy(), remainder:null }; // handle /1
-		else if (a == b) return { quotient:1, remainder:null }; // handle equal
-		else {
-			// handle signs
-			var ret:{quotient:BigInt, remainder:BigInt};
-			
-			if (a.isNegative) {
-				if (b.isNegative) {
-					ret = _divMod(a.negClone(), b.negClone());
-					if (ret.remainder != null) ret.remainder.setNegative();
-				}
-				else {
-					ret = _divMod(a.negClone(), b);
-					if (ret.quotient != null) ret.quotient.setNegative();
-					if (ret.remainder != null) ret.remainder.setNegative();
-				}
+		if (a == null) return { quotient:null, remainder:null }; // handle null
+		if (b == 1) return { quotient:a.copy(), remainder:null }; // handle /1
+		if (a == b) return { quotient:1, remainder:null }; // handle equal
+		
+		// handle in depend of signs
+		var ret:{quotient:BigInt, remainder:BigInt};
+		if (a.isNegative) {
+			if (b.isNegative) {
+				ret = _divMod(a.negClone(), b.negClone());
+				if (ret.remainder != null) ret.remainder.setNegative();
 			}
 			else {
-				if (b.isNegative) {
-					ret = _divMod(a, b.negClone());
-					if (ret.quotient != null) ret.quotient.setNegative();
-				}
-				else return _divMod(a, b);
+				ret = _divMod(a.negClone(), b);
+				if (ret.quotient != null) ret.quotient.setNegative();
+				if (ret.remainder != null) ret.remainder.setNegative();
 			}
-			
-			return ret;
 		}
+		else {
+			if (b.isNegative) {
+				ret = _divMod(a, b.negClone());
+				if (ret.quotient != null) ret.quotient.setNegative();
+			}
+			else ret = _divMod(a, b);
+		}		
+		return ret;
 	}
 	
 	static inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {		
@@ -382,13 +373,13 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				quotient: fromInt( Std.int(a.toInt() / b.toInt() )), // optimize!
 				remainder:fromInt( Std.int(a.toInt() % b.toInt() ))
 			}
-			else if (b.length == 1) {
+			if (b.length == 1) {
 				if (b.get(0) == 1) return { quotient:a, remainder:null };
 				return divModLittle(a, b.toInt());
 			}
-			else return divModLong(a, b);
+			return divModLong(a, b);
 		}
-		else return divModLong(a, b);
+		return divModLong(a, b);
 	}
 	
 	static inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {		
@@ -397,6 +388,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var q:BigInt = Std.int( x / v );
 		var r:LittleInt = Std.int( x % v );
 		var c:Int;
+		
 		do {
 			x = (r << LittleIntChunks.BITSIZE) | a.get(--i);
 			
@@ -410,22 +402,20 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			r = Std.int( x % v );
 		}
 		while (i > 0);
+		
 		return { quotient:q, remainder:r };
 	}
 	
 	
 	static inline function divFast(a:BigInt, v:LittleInt):BigInt {		
 		if (a == null) return null; // handle null
-		else if (a == v) return 1; // handle equal
+		if (a == v) return 1; // handle equal
+
+		// optimized to faster fetch only quotient and do without sign-check
+		if (a.length <= 2) return Std.int(a.toInt() / v );
 		else {
-			//return _divMod(a, v).quotient;
-			
-			// optimized to faster fetch only quotient and do without sign-check
-			if (a.length <= 2) return Std.int(a.toInt() / v );
-			else  {
-				if (v == 1) return null;
-				else return divModLittle(a, v).quotient;
-			}
+			if (v == 1) return null;
+			return divModLittle(a, v).quotient;
 		}
 	}
 	
@@ -434,8 +424,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var r:BigInt;
 		var x:LittleInt = b.get(e);
 		var q:BigInt = divFast(a.splitHigh(e) , x);
+		
 		do {
-			r = a - (q * b); //trace("r = " + r);
+			r = a - (q * b);
 			if (r != null) {
 				q.shiftOneBitLeft();
 				q = q - divFast(r.splitHigh(e), x);
@@ -448,8 +439,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (r != null) {
 			r = a - (q * b );
 			if (r.isNegative) {
-				//q = q - 1;
-				subtractLittle(q, 1, 0);
+				subtractLittle(q, 1, 0); //q = q - 1;
 				r = r + b;
 			}
 		}
@@ -580,11 +570,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			}
 		}
 		
-		if (result.length == 0) return null;
-		else {
-			if (isNegative) result.setNegative();
-			return result;
-		}
+		if (result.length == 0) return null;		
+		if (isNegative) result.setNegative();
+		return result;
 	}
 	
 	@:op(A << B)
@@ -677,7 +665,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function greater(b:BigInt):Bool {
 		if (this == null) {
 			if (b == null) return false;
-			else return (b.isNegative) ? true : false;
+			return (b.isNegative) ? true : false;
 		}
 		if (b == null) return (isNegative) ? false : true;
 		if (isNegative != b.isNegative) return (isNegative) ? false : true;
@@ -715,7 +703,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function lesser(b:BigInt):Bool {
 		if (this == null) {
 			if (b == null) return false;
-			else return (b.isNegative) ? false : true;
+			return (b.isNegative) ? false : true;
 		}
 		if (b == null) return (isNegative) ? true : false;
 		if (isNegative != b.isNegative) return (isNegative) ? true : false;
@@ -734,7 +722,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function lesserOrEqual(b:BigInt):Bool {
 		if (this == null) {
 			if (b == null) return true;
-			else return (b.isNegative) ? false : true;
+			return (b.isNegative) ? false : true;
 		}
 		if (b == null) return (isNegative) ? true : false;
 		if (isNegative != b.isNegative) return (isNegative) ? true : false;
