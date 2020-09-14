@@ -135,7 +135,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 /*	@:op(A += B) 
 	public inline function add(b:BigInt):BigInt {
-		return this = _add(this, b);
+		return this;
 	}
 */	
 	static inline function _add(a:BigInt, b:BigInt):BigInt {
@@ -258,8 +258,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		else return mul(this, b);
 	}
 	
-	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {
-		
+	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {		
 		if (v == 1) return a.copy();
 		if (v < 0) v = -v;
 		var x:Int = 0;
@@ -273,14 +272,13 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return(b);
 	}
 	
-	static function mul(a:BigInt, b:BigInt):BigInt {
-		
+	static function mul(a:BigInt, b:BigInt):BigInt {		
 		if (a == null || b == null) return null;
 		if (a.length == 1) {
 			if (b.length == 1) return fromInt(a.get(0) * b.get(0));
-			else return mulLittle(b, a.get(0));
+			return mulLittle(b, a.get(0));
 		}
-		else if (b.length == 1) return mulLittle(a, b.get(0));
+		if (b.length == 1) return mulLittle(a, b.get(0));
 		
 		var e = IntUtil.nextPowerOfTwo((a.length > b.length) ? a.length : b.length) >>> 1;
 		
@@ -295,8 +293,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return join(e, p1, mul(aHigh + aLow, bHigh + bLow) - (p1 + p2), p2 );
 	}
 	
-	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {
-		
+	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {		
 		var littleIntChunks = new LittleIntChunks();
 		
 		if (c == null) for (i in 0...e) littleIntChunks.push(0);
@@ -347,8 +344,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	// ------- division with remainder -----
 
-	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
-			
+	static public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {			
 		if (b == null) throw ("Error '/', divisor can't be 0");
 		else if (a == null) return { quotient:null, remainder:null }; // handle null
 		else if (b == 1) return { quotient:a.copy(), remainder:null }; // handle /1
@@ -380,8 +376,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 	}
 	
-	static inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
-		
+	static inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {		
 		if (b.length <= 2) {
 			if (a.length <= 2) return {
 				quotient: fromInt( Std.int(a.toInt() / b.toInt() )), // optimize!
@@ -396,8 +391,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		else return divModLong(a, b);
 	}
 	
-	static inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {
-		
+	static inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {		
 		var i = a.length - 1;
 		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
 		var q:BigInt = Std.int( x / v );
@@ -420,8 +414,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
-	static inline function divFast(a:BigInt, v:LittleInt):BigInt {
-		
+	static inline function divFast(a:BigInt, v:LittleInt):BigInt {		
 		if (a == null) return null; // handle null
 		else if (a == v) return 1; // handle equal
 		else {
@@ -436,8 +429,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 	}
 	
-	static function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {
-		
+	static function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {		
 		var e = b.length - 1;
 		var r:BigInt;
 		var x:LittleInt = b.get(e);
@@ -567,120 +559,114 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A >> B)
 	function opShiftRight(b:Int):BigInt {
 		if (this == null) return null;
-		else if (b == 0) return this.copy();
-		else if (b < 0) return opShiftLeft(-b);
+		if (b == 0) return this.copy();
+		if (b < 0) return opShiftLeft(-b);
+
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
+		var r:Int = b - l * LittleIntChunks.BITSIZE;
+		
+		if (r == 0)
+			for (i in l...length) result.push(get(i));
 		else {
-			var result:BigInt = new BigInt(new LittleIntChunks());
-			var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
-			var r:Int = b - l * LittleIntChunks.BITSIZE;
-			
-			if (r == 0)
-				for (i in l...length) result.push(get(i));
-			else {
-				var v:Int;
-				var restBits:Int = 0;
-				var i = length;
-				while (i-- > l) {
-					v = get(i);
-					if (result.length > 0 || ((v >>> r) | restBits) > 0)
-						result.unshift((v >>> r) | restBits);
-					restBits = (v << (LittleIntChunks.BITSIZE - r)) & LittleIntChunks.BITMASK;
-				}
-			}
-			
-			if (result.length == 0) return null;
-			else {
-				if (isNegative) result.setNegative();
-				return result;
+			var v:Int;
+			var restBits:Int = 0;
+			var i = length;
+			while (i-- > l) {
+				v = get(i);
+				if (result.length > 0 || ((v >>> r) | restBits) > 0)
+					result.unshift((v >>> r) | restBits);
+				restBits = (v << (LittleIntChunks.BITSIZE - r)) & LittleIntChunks.BITMASK;
 			}
 		}
-	}
-	
-	@:op(A << B)
-	function opShiftLeft(b:Int):BigInt {
-		if (this == null) return null;
-		else if (b == 0) return this.copy();
-		else if (b < 0) return opShiftRight(-b);
+		
+		if (result.length == 0) return null;
 		else {
-			var result:BigInt = new BigInt(new LittleIntChunks());
-			var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
-			var r:Int = b - l * LittleIntChunks.BITSIZE;
-			for (i in 0...l) result.push(0);
-			if (r == 0)
-				for (i in 0...length) result.push(get(i));
-			else {
-				var v:Int;
-				var restBits:Int = 0;
-				for (i in 0...length) {
-					v = get(i);
-					result.push( ((v << r) & LittleIntChunks.BITMASK) | restBits);
-					restBits = v >>> (LittleIntChunks.BITSIZE - r);
-				}
-				if (restBits > 0) result.push(restBits);
-			}
 			if (isNegative) result.setNegative();
 			return result;
 		}
 	}
 	
+	@:op(A << B)
+	inline function opShiftLeft(b:Int):BigInt {
+		if (this == null) return null;
+		if (b == 0) return this.copy();
+		if (b < 0) return opShiftRight(-b);
+		
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
+		var r:Int = b - l * LittleIntChunks.BITSIZE;
+		for (i in 0...l) result.push(0);
+		if (r == 0)
+			for (i in 0...length) result.push(get(i));
+		else {
+			var v:Int;
+			var restBits:Int = 0;
+			for (i in 0...length) {
+				v = get(i);
+				result.push( ((v << r) & LittleIntChunks.BITMASK) | restBits);
+				restBits = v >>> (LittleIntChunks.BITSIZE - r);
+			}
+			if (restBits > 0) result.push(restBits);
+		}
+		if (isNegative) result.setNegative();
+		return result;
+	}
+	
 	@:op(A & B)
 	function opAND(b:BigInt):BigInt {
 		if (this == null || b == null) return null;
-		else {
-			var result:BigInt = null;
-			var r:LittleInt;
-			var l = (length < b.length) ? length : b.length;
-			for (i in 0...l) {
-				r = this.get(l-i-1) & b.get(l-i-1);
-				if (result != null) {
-					result.unshift(r);
-				}
-				else if (r != 0) {
-					result = new BigInt(new LittleIntChunks());
-					result.unshift(r);
-				} 
-			}
-			if (this.isNegative && b.isNegative) result.setNegative();
-			return result;
+
+		var result:BigInt = null;
+		var r:LittleInt;
+		var i = (length < b.length) ? length : b.length;
+		while (i-- > 0) {
+			r = this.get(i) & b.get(i);
+			if (result != null)
+				result.unshift(r);
+			else if (r != 0) {
+				result = new BigInt(new LittleIntChunks());
+				result.unshift(r);
+			} 
 		}
+		if (this.isNegative && b.isNegative) result.setNegative();
+		return result;
 	}
 	
 	@:op(A | B)
 	function opOR(b:BigInt):BigInt {
 		if (this == null || b == null) return null;
-		else {
-			var result:BigInt = new BigInt(new LittleIntChunks());
-			var l = (length < b.length) ? length : b.length;
-			for (i in 0...l) {
-				result.push(this.get(i) | b.get(i));
-			}
-			if (length < b.length)
-				for (i in l...b.length) result.push(b.get(i));
-			else if (length > b.length)
-				for (i in l...length) result.push(this.get(i));
-			
-			if (this.isNegative || b.isNegative) result.setNegative();
-			return result;
+		
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l = (length < b.length) ? length : b.length;
+		for (i in 0...l) {
+			result.push(this.get(i) | b.get(i));
 		}
+		if (length < b.length)
+			for (i in l...b.length) result.push(b.get(i));
+		else if (length > b.length)
+			for (i in l...length) result.push(this.get(i));
+		
+		if (this.isNegative || b.isNegative) result.setNegative();
+		return result;
 	}
 	
 	@:op(A ^ B)
 	function opXOR(b:BigInt):BigInt {
 		if (this == null || b == null) return null;
-		else {
-			var result:BigInt = new BigInt(new LittleIntChunks());
-			var l = (length < b.length) ? length : b.length;
-			for (i in 0...l) {
-				result.push(this.get(i) ^ b.get(i));
-			}
-			if (length < b.length)
-				for (i in l...b.length) result.push(b.get(i));
-			else if (length > b.length)
-				for (i in l...length) result.push(this.get(i));
-			
-			if (this.isNegative != b.isNegative) result.setNegative();
-			return result;
+		
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l = (length < b.length) ? length : b.length;
+		for (i in 0...l) {
+			result.push(this.get(i) ^ b.get(i));
 		}
+		if (length < b.length)
+			for (i in l...b.length) result.push(b.get(i));
+		else if (length > b.length)
+			for (i in l...length) result.push(this.get(i));
+		
+		if (this.isNegative != b.isNegative) result.setNegative();
+		return result;
 	}
 	
 	// --------------------------------------------------------------------
@@ -693,36 +679,36 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			if (b == null) return false;
 			else return (b.isNegative) ? true : false;
 		}
-		else if (b == null) return (isNegative) ? false : true;
-		else if (isNegative != b.isNegative) return (isNegative) ? false : true;
-		else if (length > b.length) return (isNegative) ? false : true;
-		else if (length < b.length) return (isNegative) ? true : false;
-		else {
-			for (i in 0...length) {
-				if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? false : true;
-				else if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? true : false;
-			}
-			return false;
+		if (b == null) return (isNegative) ? false : true;
+		if (isNegative != b.isNegative) return (isNegative) ? false : true;
+		if (length > b.length) return (isNegative) ? false : true;
+		if (length < b.length) return (isNegative) ? true : false;
+
+		var i = length;
+		while (i-- > 0) {
+			if (get(i) > b.get(i)) return (isNegative) ? false : true;
+			if (get(i) < b.get(i)) return (isNegative) ? true : false;
 		}
+		return false;
 	}
 	
 	@:op(A >= B)
 	function greaterOrEqual(b:BigInt):Bool {
 		if (this == null) {
 			if (b == null) return true;
-			else return (b.isNegative) ? true : false;
+			return (b.isNegative) ? true : false;
 		}
-		else if (b == null) return (isNegative) ? false : true;
-		else if (isNegative != b.isNegative) return (isNegative) ? false : true;
-		else if (length > b.length) return (isNegative) ? false : true;
-		else if (length < b.length) return (isNegative) ? true : false;
-		else {
-			for (i in 0...length) {
-				if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? false : true;
-				else if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? true : false;
-			}
-			return true;
+		if (b == null) return (isNegative) ? false : true;
+		if (isNegative != b.isNegative) return (isNegative) ? false : true;
+		if (length > b.length) return (isNegative) ? false : true;
+		if (length < b.length) return (isNegative) ? true : false;
+
+		var i = length;
+		while (i-- > 0) {
+			if (get(i) > b.get(i)) return (isNegative) ? false : true;
+			if (get(i) < b.get(i)) return (isNegative) ? true : false;
 		}
+		return true;		
 	}
 	
 	@:op(A < B)
@@ -731,17 +717,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			if (b == null) return false;
 			else return (b.isNegative) ? false : true;
 		}
-		else if (b == null) return (isNegative) ? true : false;
-		else if (isNegative != b.isNegative) return (isNegative) ? true : false;
-		else if (length < b.length) return (isNegative) ? false : true;
-		else if (length > b.length) return (isNegative) ? true : false;
-		else {
-			for (i in 0...length) {
-				if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? false : true;
-				else if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? true : false;
-			}
-			return false;
+		if (b == null) return (isNegative) ? true : false;
+		if (isNegative != b.isNegative) return (isNegative) ? true : false;
+		if (length < b.length) return (isNegative) ? false : true;
+		if (length > b.length) return (isNegative) ? true : false;
+
+		var i = length;
+		while (i-- > 0) {
+			if (get(i) < b.get(i)) return (isNegative) ? false : true;
+			if (get(i) > b.get(i)) return (isNegative) ? true : false;
 		}
+		return false;
 	}
 	
 	@:op(A <= B)
@@ -750,45 +736,45 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			if (b == null) return true;
 			else return (b.isNegative) ? false : true;
 		}
-		else if (b == null) return (isNegative) ? true : false;
-		else if (isNegative != b.isNegative) return (isNegative) ? true : false;
-		else if (length < b.length) return (isNegative) ? false : true;
-		else if (length > b.length) return (isNegative) ? true : false;
-		else {
-			for (i in 0...length) {
-				if (get(length-i-1) < b.get(length-i-1)) return (isNegative) ? false : true;
-				else if (get(length-i-1) > b.get(length-i-1)) return (isNegative) ? true : false;
-			}
-			return true;
+		if (b == null) return (isNegative) ? true : false;
+		if (isNegative != b.isNegative) return (isNegative) ? true : false;
+		if (length < b.length) return (isNegative) ? false : true;
+		if (length > b.length) return (isNegative) ? true : false;
+
+		var i = length;
+		while (i-- > 0) {
+			if (get(i) < b.get(i)) return (isNegative) ? false : true;
+			if (get(i) > b.get(i)) return (isNegative) ? true : false;
 		}
+		return true;
 	}
 	
 	@:op(A == B)
 	function equal(b:BigInt):Bool {
 		if (this == null) return (b == null) ? true : false;
-		else if (b == null) return false;
-		else if (isNegative != b.isNegative) return false;
-		else if (length != b.length) return false;
-		else {
-			for (i in 0...length) {
-				if (get(length-i-1) != b.get(length-i-1)) return false;
-			}
-			return true;
+		if (b == null) return false;
+		if (isNegative != b.isNegative) return false;
+		if (length != b.length) return false;
+		
+		var i = length;
+		while (i-- > 0) {
+			if (get(i) != b.get(i)) return false;
 		}
+		return true;
 	}
 	
 	@:op(A != B)
 	function notEqual(b:BigInt):Bool {
 		if (this == null) return (b == null) ? false : true;
-		else if (b == null) return true;
-		else if (isNegative != b.isNegative) return true;
-		else if (length != b.length) return true;
-		else {
-			for (i in 0...length) {
-				if (get(length-i-1) != b.get(length-i-1)) return true;
-			}
-			return false;
+		if (b == null) return true;
+		if (isNegative != b.isNegative) return true;
+		if (length != b.length) return true;
+		
+		var i = length;
+		while (i-- > 0) {
+			if (get(i) != b.get(i)) return true;
 		}
+		return false;
 	}
 	
 	
