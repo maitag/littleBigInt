@@ -135,6 +135,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 /*	@:op(A += B) 
 	public inline function add(b:BigInt):BigInt {
+		// TODO without copying
 		return this;
 	}
 */	
@@ -183,7 +184,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A - B) function opSubtract(b:BigInt):BigInt return _subtract(this, b);
 
 /*	@:op(A -= B) public inline function subtract(b:BigInt):BigInt {
-		return this = _subtract(this, b);
+		// TODO  without copying
+		return this;
 	}
 */	
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
@@ -204,11 +206,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			v.truncateZeroChunks(false);
 			return v;
 		}
-		else {
-			v = subtractLong(b.copy(), a);
-			v.truncateZeroChunks(false);
-			if (v.length == 0) return null else return v.setNegative();
-		}
+		
+		v = subtractLong(b.copy(), a);
+		v.truncateZeroChunks(false);
+		return (v.length == 0) ? null : v.setNegative();		
 	}
 
 	static inline function subtractLong(a:BigInt, b:BigInt):BigInt {
