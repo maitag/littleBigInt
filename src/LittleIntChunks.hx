@@ -244,7 +244,8 @@ class LittleIntChunks {
 			offset = hexaChars.indexOf(s.charAt(--i));
 			if (offset == -1 || offset >= base) throw('Error, base $base string can only contain "${hexaChars.join("")}"');
 			value = value + BigInt.mulLittle(b, offset);
-			b = b * base; 
+			b = b * base;
+			//b = BigInt.mulLittle(b, base); // for only 7 bitsize base can't be more then 128 here
 		}
 		return (neg) ? value.setNegative() : value;
 	}
@@ -430,7 +431,7 @@ class LittleIntChunks {
 			offset = b.get(i++);
 			chunk += offset * bit;
 			bit = bit << 8;
-			if (bit >= UPPESTBIT) {
+			if (bit >= UPPESTBIT) { // TODO: while loop here
 				littleIntChunks.push(chunk & BITMASK);
 				
 				if (bit == UPPESTBIT) bit = 1;
@@ -453,7 +454,7 @@ class LittleIntChunks {
 		
 		return new BigInt(littleIntChunks);
 	}
-
+	
 	public function toBytes():haxe.io.Bytes {
 		
 		var numBits:Int = (length - 1) * BITSIZE + IntUtil.bitsize(get(length-1));
@@ -487,9 +488,55 @@ class LittleIntChunks {
 		}
 		
 		if (restBits > 0 && chunk > 0) b.set(j++, chunk);
-		if (isNegative) b.set(j++, 0);
+		if (isNegative) b.set(j, 0);
 		
 		return b;
 	}
+	
+	
+	// TODO:
+	// map bitsized-value from a bitposition
+	inline function mapFromBitPosition(fromBit:Int, fromBitsize:Int, toBitsize:Int):LittleInt {
+		if (this == null) return 0;
+		
+		var start = Std.int(fromBit/toBitsize);
+		var end = Std.int((fromBit + toBitsize) / toBitsize);
+		
+		var startOffset:Int = fromBit - start * toBitsize;
+		var startSize:Int = toBitsize - startOffset;
+		var endSize:Int = (fromBit+toBitsize) - end * toBitsize;
+		
+		var v:Int = 0;
+		var offset:Int;
+		var size:Int;
+		var shift:Int = 0;
+		
+		for (i in start...end+1) {
+		 	if (i == length) break;
+		 	
+			if (i == start && i == end) {
+				offset = startOffset;
+				size = endSize-offset;
+			}
+			else if (i == start) {
+				offset = startOffset;
+				size = startSize;
+			}
+		 	else if (i == end) {
+				size = endSize;
+				offset = 0;
+			}
+			else {
+				size = toBitsize;
+				offset = 0;
+			}
+			
+			v |= (  (get(i) >>> offset) & ((1 << size)-1)  ) << shift;
+		 	shift += size;
+		}
+		
+		return v;
+	}
+	
 	
 }
