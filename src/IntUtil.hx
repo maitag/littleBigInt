@@ -12,7 +12,6 @@ class IntUtil
 	#if bigint64
 		32;
 	#else
-		// 32
 		16;
 	#end
 	

@@ -1,4 +1,5 @@
 package;
+import haxe.io.Bytes;
 
 /**
  * underlaying class of BigInt-abstract
@@ -15,33 +16,26 @@ typedef LittleIntArray = Array<LittleInt>; // TODO: optimized later for JS here 
 class LittleIntChunks {
 	
 	// chunksize need to be Little enough to multiplicate 2 LittleInts without leaving range
-	
-	// TODO: use a haxe-define for easy switch with conditional compiling here
-	
-	// for testing
-	//static public inline var BITSIZE:Int = 7;
-	//static public inline var UPPESTBIT:Int = 0x80;
-	//static public inline var BITMASK:Int = 0x7F;
-		
 	// save for multiplication is 15 Bit per LittleInt on all platforms
 	
-	#if bigint64 // if LittleInt is native 64 Bit Integer:
+	#if bigint64 // if LittleInt is native 64 Bit Integer <- TODO !!!!
 		static public inline var BITSIZE:Int = 31;
 		static public inline var UPPESTBIT:Int = 0x80000000;
 		static public inline var BITMASK:Int = 0x7FFFFFFF;
 
-	#else // if LittleInt is native 32 Bit Integer (neko):
+	#else // if LittleInt is native 32 Bit Integer:
 		
-		// TODO: fixing bugs with greater BITSIZE !!!
-		//#if js
-		//static public inline var BITSIZE:Int = 26;
-		//static public inline var UPPESTBIT:Int = 0x4000000;
-		//static public inline var BITMASK:Int = 0x3FFFFFF;
-		//#else		
+		// TODO: fixing some bugs with smaller BITSIZE !!!
+		//static public inline var BITSIZE:Int = 7;
+		//static public inline var UPPESTBIT:Int = 0x80;
+		//static public inline var BITMASK:Int = 0x7F;
+		
 		static public inline var BITSIZE:Int = 15;
 		static public inline var UPPESTBIT:Int = 0x8000;
 		static public inline var BITMASK:Int = 0x7FFF;
-		//#end
+		
+		// for js there can't be used 26 bits here
+		// because interpreter will convert all float64 at each binary-op into 32bit
 	#end
 	
 	// --------------------------------------------------------------------
@@ -422,34 +416,17 @@ class LittleIntChunks {
 			littleIntChunks.isNegative = true;
 			l--;
 		}
-		var bit:Int = 1;
-		var chunk:LittleInt = 0;
-		var offset:Int;
-		
-		var i:Int = 0;
-		while (i < l) {
-			offset = b.get(i++);
-			chunk += offset * bit;
-			bit = bit << 8;
-			if (bit >= UPPESTBIT) { // TODO: while loop here
-				littleIntChunks.push(chunk & BITMASK);
-				
-				if (bit == UPPESTBIT) bit = 1;
-				else if (bit == UPPESTBIT << 1) bit = 1 << 1;
-				else if (bit == UPPESTBIT << 2) bit = 1 << 2;
-				else if (bit == UPPESTBIT << 3) bit = 1 << 3;
-				else if (bit == UPPESTBIT << 4) bit = 1 << 4;
-				else if (bit == UPPESTBIT << 5) bit = 1 << 5;
-				else if (bit == UPPESTBIT << 6) bit = 1 << 6;
-				else bit = 1 << 7;
-				
-				chunk = chunk >> BITSIZE;
+		var numBits:Int = (l - 1) * 8 + IntUtil.bitsize(b.get(l-1), 8);
+		var numChunks:Int = Std.int((numBits - 1) / BITSIZE) + 1;
+
+		for (i in 0...numChunks) {
+			var v:Int = 0;
+			var shift:Int = 0;
+			for (a in mapFromBitPosition(i*BITSIZE , 8, BITSIZE, l)) {
+				v |= (  (b.get(a.index) >>> a.offset) & ((1 << a.size)-1)  ) << shift;
+				shift += a.size;	
 			}
-		}
-		
-		if (chunk != 0) {
-			// TODO: chunk can be greater then BITSIZE
-			littleIntChunks.push(chunk);
+			littleIntChunks.push(v);
 		}
 		
 		return new BigInt(littleIntChunks);
@@ -458,58 +435,42 @@ class LittleIntChunks {
 	public function toBytes():haxe.io.Bytes {
 		
 		var numBits:Int = (length - 1) * BITSIZE + IntUtil.bitsize(get(length-1));
-		var numBytes:Int = Std.int((numBits - 1) / 8) + 1;
+		var numChunks:Int = Std.int((numBits - 1) / 8) + 1;
 		
-		if (isNegative) numBytes++;
-		var b = haxe.io.Bytes.alloc(numBytes);
-		
-		var chunk:LittleInt = 0;
-		var restBits:Int = 0;
-		var j:Int = 0;
-		for (i in 0...length) {
-			chunk = (get(i) << restBits) + chunk;
-			while (BITSIZE + restBits >= 8) {
-				b.set(j++, chunk & 0xFF);
-				chunk = chunk >> 8;
-				restBits -= 8;
-			}
-			restBits = BITSIZE + restBits;
-			
-			switch (restBits) {
-				case 0: chunk = 0;
-				case 1: chunk &= 1;
-				case 2: chunk &= 3;
-				case 3: chunk &= 7;
-				case 4: chunk &= 15;
-				case 5: chunk &= 31;
-				case 6: chunk &= 63;
-				default: chunk &= 127;
-			}
+		var b:Bytes;
+		if (isNegative) {
+			b = haxe.io.Bytes.alloc(numChunks + 1);
+			b.set(numChunks, 0);
 		}
+		else b = haxe.io.Bytes.alloc(numChunks);
 		
-		if (restBits > 0 && chunk > 0) b.set(j++, chunk);
-		if (isNegative) b.set(j, 0);
+		for (i in 0...numChunks) {
+			var v:Int = 0;
+			var shift:Int = 0;
+			for (a in mapFromBitPosition(i*8 , BITSIZE, 8, length)) {
+				v |= (  (get(a.index) >>> a.offset) & ((1 << a.size)-1)  ) << shift;
+				shift += a.size;	
+			}
+			b.set(i, v);
+		}
 		
 		return b;
 	}
 	
 	
-	// TODO:
 	// map bitsized-value from a bitposition
-	inline function mapFromBitPosition(fromBit:Int, fromBitsize:Int, toBitsize:Int):LittleInt {
-		if (this == null) return 0;
+	static inline function mapFromBitPosition(fromBit:Int, fromBitsize:Int, toBitsize:Int, length:Int):Array<{index:Int, offset:Int, size:Int}> {
+		var start = Std.int(fromBit/fromBitsize);
+		var end = Std.int((fromBit+toBitsize) / fromBitsize);
 		
-		var start = Std.int(fromBit/toBitsize);
-		var end = Std.int((fromBit + toBitsize) / toBitsize);
+		var startOffset:Int = fromBit - start * fromBitsize;
+		var startSize:Int = fromBitsize - startOffset;
+		var endSize:Int = (fromBit+toBitsize) - end * fromBitsize;
 		
-		var startOffset:Int = fromBit - start * toBitsize;
-		var startSize:Int = toBitsize - startOffset;
-		var endSize:Int = (fromBit+toBitsize) - end * toBitsize;
-		
-		var v:Int = 0;
 		var offset:Int;
 		var size:Int;
-		var shift:Int = 0;
+		
+		var ret = new Array<{index:Int, offset:Int, size:Int}>();
 		
 		for (i in start...end+1) {
 		 	if (i == length) break;
@@ -527,15 +488,13 @@ class LittleIntChunks {
 				offset = 0;
 			}
 			else {
-				size = toBitsize;
+				size = fromBitsize;
 				offset = 0;
 			}
 			
-			v |= (  (get(i) >>> offset) & ((1 << size)-1)  ) << shift;
-		 	shift += size;
+			ret.push({index:i, offset:offset, size:size});
 		}
-		
-		return v;
+		return ret;
 	}
 	
 	
