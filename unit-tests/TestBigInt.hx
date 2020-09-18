@@ -320,8 +320,28 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testDivision() {
+		// zero divided by
+		assertTrue((0 : BigInt) / 1 == 0);
+		assertTrue((-0 : BigInt) / 1 == 0);
+		assertTrue((-0 : BigInt) / "1234567890987654321" == 0);
+		assertTrue((0 : BigInt) / "-1234567890987654321" == 0);
 		assertEquals( ( (0 : BigInt) / (10 : BigInt) ).toInt(), 0 );
 		
+		// division by 1
+		assertTrue((1 : BigInt) / 1 == 1);
+		assertTrue((-1 : BigInt) / 1 == -1);
+		assertTrue((1 : BigInt) / -1 == -1);
+		assertTrue((153 : BigInt) / 1 == 153);
+		assertTrue((-153 : BigInt) / 1 == -153);
+		assertTrue(("9844190321790980841789" : BigInt) / 1 == "9844190321790980841789");
+		assertTrue(("-9844190321790980841789" : BigInt) / 1 == "-9844190321790980841789");
+		
+		// division by itself
+		assertTrue((5 : BigInt) / 5 == 1);
+		assertTrue((-5 : BigInt) / -5 == 1);
+		assertTrue(("20194965098495006574" : BigInt) / "20194965098495006574" == 1);
+		assertTrue(("-20194965098495006574" : BigInt) / "-20194965098495006574" == 1);
+
 		var result = BigInt.divMod( 9, 4 );
 		assertEquals( result.quotient.toInt(), 2 );
 		assertEquals( result.remainder.toInt(), 1 );
@@ -400,30 +420,6 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(("163353452" : BigInt).powMod(0, 14) == 1);
 	}
 	
-	public function testDivisionBy1IsTheIdentity() {
-		assertTrue((1 : BigInt) / 1 == 1);
-		assertTrue((-1 : BigInt) / 1 == -1);
-		assertTrue((1 : BigInt) / -1 == -1);
-		assertTrue((153 : BigInt) / 1 == 153);
-		assertTrue((-153 : BigInt) / 1 == -153);
-		assertTrue(("9844190321790980841789" : BigInt) / 1 == "9844190321790980841789");
-		assertTrue(("-9844190321790980841789" : BigInt) / 1 == "-9844190321790980841789");
-	}
-
-	public function testDivisionBySelfIs1() {
-		assertTrue((5 : BigInt) / 5 == 1);
-		assertTrue((-5 : BigInt) / -5 == 1);
-		assertTrue(("20194965098495006574" : BigInt) / "20194965098495006574" == 1);
-		assertTrue(("-20194965098495006574" : BigInt) / "-20194965098495006574" == 1);
-	}
-
-	public function testDivisionOf0Equals0() {
-		assertTrue((0 : BigInt) / 1 == 0);
-		assertTrue((-0 : BigInt) / 1 == 0);
-		assertTrue((-0 : BigInt) / "1234567890987654321" == 0);
-		assertTrue((0 : BigInt) / "-1234567890987654321" == 0);
-	}
-
 	public function testCanHandleLargeNumbers() {
 		var tenFactorial:BigInt = "3628800";
 		var hundredFactorial:BigInt = "93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000";

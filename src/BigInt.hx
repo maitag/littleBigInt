@@ -342,7 +342,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	static inline public function divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {			
 		if (b == null) throw ("Error '/', divisor can't be 0");
 		if (a == null) return { quotient:null, remainder:null }; // handle null
-		if (b == 1) return { quotient:a.copy(), remainder:null }; // handle /1
+		if (b == 1) return { quotient:a.copy(), remainder:null }; // handle dividing by 1
 		if (a == b) return { quotient:1, remainder:null }; // handle equal
 		
 		// handle in depend of signs
@@ -371,12 +371,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	static inline function _divMod(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {		
 		if (b.length <= 2) {
 			if (a.length <= 2) return {
-				quotient: fromInt( Std.int(a.toInt() / b.toInt() )), // optimize!
-				remainder:fromInt( Std.int(a.toInt() % b.toInt() ))
+				quotient: fromInt( Std.int(a.toInt() / b.toInt() )), // TODO: optimized toInt() without bitsize-check!
+				remainder:fromInt( Std.int(a.toInt() % b.toInt() ))  // TODO: optimized toInt() without bitsize-check!
 			}
 			if (b.length == 1) {
 				if (b.get(0) == 1) return { quotient:a, remainder:null };
-				return divModLittle(a, b.toInt());
+				return divModLittle(a, b.toInt()); // TODO: optimized toInt() without bitsize-check!
 			}
 			return divModLong(a, b);
 		}
@@ -391,33 +391,27 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var c:Int;
 		
 		do {
-			x = (r << LittleIntChunks.BITSIZE) | a.get(--i);
-			
+			x = (r << LittleIntChunks.BITSIZE) | a.get(--i);			
 			c = Std.int( x / v ); // <- can be 2 chunks
 			if (c >= LittleIntChunks.UPPESTBIT) {
 				q.unshift(c >>> LittleIntChunks.BITSIZE);
 				q.unshift(c & LittleIntChunks.BITMASK);
 			}
-			else q.unshift(c);
-			
+			else q.unshift(c);			
 			r = Std.int( x % v );
-		}
-		while (i > 0);
+		} while (i > 0);
 		
 		return { quotient:q, remainder:r };
 	}
 	
 	
+	// optimized to faster fetch only quotient and do without sign-check
 	static inline function divFast(a:BigInt, v:LittleInt):BigInt {		
 		if (a == null) return null; // handle null
 		if (a == v) return 1; // handle equal
-
-		// optimized to faster fetch only quotient and do without sign-check
-		if (a.length <= 2) return Std.int(a.toInt() / v );
-		else {
-			if (v == 1) return null;
-			return divModLittle(a, v).quotient;
-		}
+		if (v == 1) return a.copy(); // handle dividing by 1
+		if (a.length <= 2) return Std.int(a.toInt() / v ); // TODO: optimized toInt() without bitsize-check!
+		return divModLittle(a, v).quotient;
 	}
 	
 	static function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {		
@@ -433,9 +427,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				q = q - divFast(r.splitHigh(e), x);
 				q.shiftOneBitRight();
 				r.setPositive();
-			}
-		}
-		while (r >= b);
+			}			
+		} while (r >= b);
 		
 		if (r != null) {
 			r = a - (q * b );

@@ -37,11 +37,10 @@ then simple call `hpx test hl neko ...` or
 
 ## todo
 
-- fixing bugs for larger chunk-BITSIZEs
-- implementing complement operator `~` 
+- implementing complement operator `~`
 - make all bitwise-ops two's complement compatible
+- optimizing division (toInt() without bitsize-check)
 - more unit-tests and benchmarks
   
-- js optimization to work with fully 2^53 precision
 - trying all targets with haxe.Int64 chunks
 - more targetspecific optimization

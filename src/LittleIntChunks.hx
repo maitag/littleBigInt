@@ -16,7 +16,7 @@ typedef LittleIntArray = Array<LittleInt>; // TODO: optimized later for JS here 
 class LittleIntChunks {
 	
 	// chunksize need to be Little enough to multiplicate 2 LittleInts without leaving range
-	// save for multiplication is 15 Bit per LittleInt on all platforms
+	// so save for multiplication is 15 Bit per LittleInt on all platforms
 	
 	#if bigint64 // if LittleInt is native 64 Bit Integer <- TODO !!!!
 		static public inline var BITSIZE:Int = 31;
@@ -25,17 +25,17 @@ class LittleIntChunks {
 
 	#else // if LittleInt is native 32 Bit Integer:
 		
-		// TODO: fixing some bugs with smaller BITSIZE !!!
-		//static public inline var BITSIZE:Int = 7;
-		//static public inline var UPPESTBIT:Int = 0x80;
-		//static public inline var BITMASK:Int = 0x7F;
-		
 		static public inline var BITSIZE:Int = 15;
 		static public inline var UPPESTBIT:Int = 0x8000;
 		static public inline var BITMASK:Int = 0x7FFF;
-		
 		// for js there can't be used 26 bits here
 		// because interpreter will convert all float64 at each binary-op into 32bit
+
+/*		// for testing purpose
+		static public inline var BITSIZE:Int = 7;
+		static public inline var UPPESTBIT:Int = 0x80;
+		static public inline var BITMASK:Int = 0x7F;
+*/		
 	#end
 	
 	// --------------------------------------------------------------------
