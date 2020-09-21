@@ -12,19 +12,8 @@ import haxe.io.Bytes;
 
 abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
-	inline function new(littleIntChunks:LittleIntChunks) {
-		this = littleIntChunks;
-	}
+	inline function new(littleIntChunks:LittleIntChunks) this = littleIntChunks;
 	
-	public var isNegative(get, never):Bool;
-	inline function get_isNegative():Bool return this.isNegative;
-	
-	public var length(get, never):Int;
-	inline function get_length():Int return this.length;
-	
-	//public var isZero(get, never):Bool;
-	//inline function get_isZero():Bool return this.isZero;
-
 	inline function get(i:Int):LittleInt return this.get(i);
 	inline function set(i:Int, v:LittleInt) this.set(i,v);
 	inline function push(v:LittleInt) this.push(v);
@@ -43,69 +32,162 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function clone():BigInt return new BigInt(this.clone());
 	inline function negClone():BigInt return new BigInt(this.negClone());
 
+    /**
+        return true if this BigInt is negative signed
+    **/
+	public var isNegative(get, never):Bool;
+	inline function get_isNegative():Bool return this.isNegative;
 	
+    /**
+        return true if this BigInt is positive signed
+    **/
+	public var isPositive(get, never):Bool;
+	inline function get_isPositive():Bool return !this.isNegative;
+	
+    /**
+        return the number of chunks that is need to store this BigInt
+    **/
+	public var length(get, never):Int;
+	inline function get_length():Int return this.length;
+	
+    /**
+        return true if this BigInt is 0 (same as null)
+    **/
+	public var isZero(get, never):Bool;
+	inline function get_isZero():Bool return (this == null);
+
+    /**
+        Creates a new BigInt from an Integer
+
+        @param  i  the Int value to create BigInt from
+    **/
 	@:from static public function fromInt(i:LittleInt):BigInt {
 		return new BigInt(LittleIntChunks.createFromLittleInt(i));
 	}
 	
+    /**
+        Converts this BigInt into an Integer. If it's to long for native Integer-length it will throw an error.
+    **/
 	@:to public function toInt():LittleInt {
 		if (this == null) return 0;
 		return this.toLittleInt();
 	}
 	
+    /**
+        Creates a new BigInt from a String e.g. from a decimal like "1234567890".
+		It also accepts a prefix to define numbers to another base e.g.:
+		"0b 11001101" for binary, "0o 12345670" for octal or "0x ffaa 1234" for hexadecimal notation.
+		For negative valued the "-" sign has to be written first e.g. "-0x FF".
 
+        @param  s  the String that representing the number
+    **/
 	@:from static public function fromString(s:String):BigInt {
 		return LittleIntChunks.createFromBaseString(s);
 	}
 	
+    /**
+        Converts this BigInt into a String (decimal notation).
+    **/
 	@:to public function toString():String {
 		if (this == null) return "0";
 		return this.toBaseString(10);	
-	}
-	
+	}	
 
-	static public function fromBinaryString(s:String):BigInt {
-		return LittleIntChunks.createFromBaseString(s, 2);
+    /**
+        Creates a new BigInt from a String that contains a binary formated number, e.g. "01010111" or "- 1001 1011"
+
+        @param  binaryString  the String that representing the number in binary format
+    **/
+	static public function fromBinaryString(binaryString:String):BigInt {
+		return LittleIntChunks.createFromBaseString(binaryString, 2);
 	}
 	
-	static public function fromHexString(s:String):BigInt {
-		return LittleIntChunks.createFromBaseString(s, 16);
+    /**
+        Creates a new BigInt from a String that contains a hexadecimal formated number, e.g. "FE0504C" or "-ff00 10ab"
+
+        @param  hexString  the String that representing the number in hexadecimal format
+    **/
+	static public function fromHexString(hexString:String):BigInt {
+		return LittleIntChunks.createFromBaseString(hexString, 16);
 	}
 	
-	static public function fromOctalString(s:String):BigInt {
-		return LittleIntChunks.createFromBaseString(s, 8);
+    /**
+        Creates a new BigInt from a String that contains a octal formated number, e.g. "070744" or "-77"
+
+        @param  octalString  the String that representing the number in octal format
+    **/
+	static public function fromOctalString(octalString:String):BigInt {
+		return LittleIntChunks.createFromBaseString(octalString, 8);
 	}
 	
-	static public function fromBaseString(s:String, base:Int = 10):BigInt {
-		return LittleIntChunks.createFromBaseString(s, base);
+    /**
+        Creates a new BigInt from a String of numbers to a specific base
+
+        @param  numberString  the String that representing the number
+        @param  base  the base of numberformat, default is 10
+    **/
+	static public function fromBaseString(numberString:String, base:Int = 10):BigInt {
+		return LittleIntChunks.createFromBaseString(numberString, base);
 	}
 	
 	
+    /**
+        Converts this BigInt into a String (binary notation).
+		
+        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
+    **/
 	public function toBinaryString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toBinaryString(spacing, leadingZeros);	
 	}	
 	
+    /**
+        Converts this BigInt into a String (octal notation).
+		
+        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
+    **/
 	public function toOctalString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toBaseString(8, spacing, leadingZeros);	
 	}	
 	
+    /**
+        Converts this BigInt into a String (hexadecimal notation).
+		
+        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
+    **/
 	public function toHexString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toHexString(spacing, leadingZeros);	
 	}
 	
+    /**
+        Converts this BigInt into a String to a defined base.
+		
+        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
+    **/
 	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
 		return this.toBaseString(base, spacing, leadingZeros);	
 	}
 	
 	
-	static public function fromBytes(b:Bytes):BigInt {
-		return LittleIntChunks.fromBytes(b);
+    /**
+        Creates a new BigInt from Bytes.
+
+        @param  bytes  the Bytes that was stored by ".toBytes()"
+    **/
+	static public function fromBytes(bytes:Bytes):BigInt {
+		return LittleIntChunks.fromBytes(bytes);
 	}
 
+    /**
+        pack this BigInt into Bytes for efficiently storage.
+    **/
 	public function toBytes():Bytes {
 		if (this == null) {
 			var b = Bytes.alloc(1);
@@ -120,6 +202,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	// -------------------- abs -------------------------------------------
 	// --------------------------------------------------------------------	
 	
+    /**
+        returns a new BigInt of the absolute amount
+    **/
 	public function abs():BigInt {
 		if (this == null) return null;
 		if (isNegative) return negCopy();
