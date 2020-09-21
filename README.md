@@ -37,6 +37,7 @@ then simple call `hpx test hl neko ...` or
 
 ## todo
 
+- operation overloading for ops with Ints
 - implementing complement operator `~`
 - make all bitwise-ops two's complement compatible
 - optimizing division (toInt() without bitsize-check)
