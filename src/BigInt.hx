@@ -45,7 +45,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function get_isPositive():Bool return !this.isNegative;
 	
     /**
-        return the number of chunks that is need to store this BigInt
+        return the number of chunks that is needed to store this BigInt
     **/
 	public var length(get, never):Int;
 	inline function get_length():Int return this.length;
@@ -121,7 +121,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
     /**
-        Creates a new BigInt from a String of numbers to a specific base
+        Creates a new BigInt from a String of numbers of a specific base
 
         @param  numberString  the String that representing the number
         @param  base  the base of numberformat, default is 10
@@ -134,7 +134,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     /**
         Converts this BigInt into a String (binary notation).
 		
-        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
 	public function toBinaryString(spacing:Int = 0, leadingZeros:Bool = true):String {
@@ -145,7 +145,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     /**
         Converts this BigInt into a String (octal notation).
 		
-        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
 	public function toOctalString(spacing:Int = 0, leadingZeros:Bool = true):String {
@@ -156,7 +156,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     /**
         Converts this BigInt into a String (hexadecimal notation).
 		
-        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
 	public function toHexString(spacing:Int = 0, leadingZeros:Bool = true):String {
@@ -167,7 +167,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     /**
         Converts this BigInt into a String to a defined base.
 		
-        @param  spacing  the amount of summarized digits before speperating by a space-char (default value of 0 disable spacing)
+        @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
 	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
