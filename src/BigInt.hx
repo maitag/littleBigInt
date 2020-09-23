@@ -205,7 +205,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     /**
         returns a new BigInt of the absolute amount
     **/
-	public function abs():BigInt {
+	public inline function abs():BigInt {
 		if (this == null) return null;
 		if (isNegative) return negCopy();
 		return copy();
@@ -220,19 +220,29 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		Returns the sum of `a` and `b`.
 	**/
 	@:op(A + B) function opAdd(b:BigInt):BigInt return _add(this, b);
+	@:op(A + B) @:commutative function opAddInt(b:Int):BigInt return _add(this, b);
 	
-	//TODO
-	//@:op(A + B) @:commutative static inline function addInt(a:BigInt, b:Int):BigInt
-	//	return _add(a, b);
-
-	
-	
-/*	@:op(A += B) 
-	public inline function add(b:BigInt):BigInt {
-		// TODO without copying
-		return this;
+	@:op(A++) static function opIncrementAfter(a:BigInt):BigInt {
+		if (a == null) {
+			a = BigInt.fromInt(1);
+			return null;
+		}
+		var ret = a.copy();
+		if (a.isNegative) subtractLittle(a, 1, 0);
+		else addLittle(a, 1, 0);
+		return ret;
 	}
-*/	
+	
+	@:op(++A) static function opIncrementBefore(a:BigInt):BigInt {
+		if (a == null) {
+			a = BigInt.fromInt(1);
+			return BigInt.fromInt(1);
+		}
+		if (a.isNegative) subtractLittle(a, 1, 0);
+		else addLittle(a, 1, 0);
+		return a.copy();
+	}	
+	
 	static inline function _add(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.copy();
 		if (b == null) return a.copy();
@@ -279,13 +289,30 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		Returns `a` minus `b`.
 	**/	
 	@:op(A - B) function opSubtract(b:BigInt):BigInt return _subtract(this, b);
-	//TODO: cummutative
+	//@:op(A - B) static function opSubtractInt(a:BigInt, b:Int):BigInt return _subtract(a, b);
+	@:op(A - B) static function opIntSubtract(a:Int, b:BigInt):BigInt return _subtract(a, b);
 	
-/*	@:op(A -= B) public inline function subtract(b:BigInt):BigInt {
-		// TODO  without copying
-		return this;
+	@:op(A--) static function opDecrementAfter(a:BigInt):BigInt {
+		if (a == null) {
+			a = BigInt.fromInt(-1);
+			return null;
+		}
+		var ret = a.copy();
+		if (a.isNegative) addLittle(a, 1, 0);
+		else subtractLittle(a, 1, 0);
+		return ret;
 	}
-*/	
+	
+	@:op(--A) static function opDecrementBefore(a:BigInt):BigInt {
+		if (a == null) {
+			a = BigInt.fromInt(-1);
+			return BigInt.fromInt(-1);
+		}
+		if (a.isNegative) addLittle(a, 1, 0);
+		else subtractLittle(a, 1, 0);
+		return a.copy();
+	}	
+
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.negCopy();
 		if (b == null) return a.copy();
@@ -356,9 +383,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (isNegative != b.isNegative) return mul(this, b).setNegative();
 		return mul(this, b);
 	}
-	//TODO:
-	//@:op(A * B) @:commutative static inline function mulInt(a:Int64, b:Int):Int64
-		//return opMulticplicate(a, b);
+	@:op(A * B) @:commutative function opMulticplicateInt(b:Int):BigInt return opMulticplicate(b);
 	
 	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {		
 		if (v == 1) return a.copy();
@@ -392,7 +417,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var p1:BigInt = mul(aHigh, bHigh); 
 		var p2:BigInt = mul(aLow , bLow);  
 		
-		return join(e, p1, mul(aHigh + aLow, bHigh + bLow) - (p1 + p2), p2 );
+		//return join(e, p1, mul(aHigh + aLow, bHigh + bLow) - (p1 + p2), p2 );
+		return join(e, p1, mul(_add(aHigh, aLow), _add(bHigh, bLow)) - _add(p1, p2), p2 );
 	}
 	
 	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {		
@@ -407,7 +433,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 					littleIntChunks.push(0);
 				}
 			}
-			if (c.length > e) b = b + c.splitHigh(e);
+			//if (c.length > e) b = b + c.splitHigh(e);
+			//if (c.length > e) b = _add(b, c.splitHigh(e));
+			if (c.length > e) {
+				var ch = c.splitHigh(e);
+				if (ch != null) {
+					if (b == null) b = ch;
+					else if (b.length > ch.length) addLong(b, ch);
+					//else b = addLong(ch.copy(), b);
+					else b = addLong(ch, b);
+				}
+			}
 		}
 		
 		if (b == null) {
@@ -421,7 +457,16 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 					littleIntChunks.push(0);
 				}
 			}
-			if (b.length > e) a = a + b.splitHigh(e);
+			//if (b.length > e) a += b.splitHigh(e);
+			//if (b.length > e) a = _add(a, b.splitHigh(e));
+			if (b.length > e) {
+				var bh = b.splitHigh(e);
+				if (bh != null) {
+					if (a == null) a = bh;
+					else if (a.length > bh.length) addLong(a, bh);
+					else a = addLong(bh.copy(), a);
+				}
+			}
 		}
 		
 		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
@@ -438,16 +483,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		Returns the quotient of `a` divided by `b`.
 	**/
 	@:op(A / B)
-	function opDivMod(b:BigInt):BigInt {
+	function opDiv(b:BigInt):BigInt {
 		return divMod(this, b).quotient;
 	}
-	// TODO
-/*	@:op(A / B) static inline function divInt(a:BigInt, b:Int):BigInt
-		return divMod(this, b).quotient;
+	//@:op(A / B) static function opDivInt(a:BigInt, b:Int):BigInt return divMod(a, b).quotient;
+	@:op(A / B) static function opIntDiv(a:Int, b:BigInt):BigInt return divMod(a, b).quotient;
 
-	@:op(A / B) static inline function intDiv(a:Int, b:BigInt):BigInt
-		return divMod(this, b).quotient;
-*/	
 	/**
 		Returns the modulus of `a` divided by `b`.
 	**/
@@ -455,13 +496,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function opModulo(b:BigInt):BigInt {
 		return divMod(this, b).remainder;
 	}
-	// TODO
-/*	@:op(A % B) static inline function modInt(a:Int64, b:Int):Int64
-		return divMod(this, b).remainder;
-
-	@:op(A % B) static inline function intMod(a:Int, b:Int64):Int64
-		return divMod(this, b).remainder;
-*/
+	//@:op(A % B) static function opModuloInt(a:BigInt, b:Int):BigInt return divMod(a, b).remainder;
+	@:op(A % B) static function opIntModulo(a:Int, b:BigInt):BigInt return divMod(a, b).remainder;
 	
 	
 	// ------- division with remainder -----
@@ -684,7 +720,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		All works signless here.
 	**/
 	@:op(A >>> B)
-	function opShiftRightUnsigned(b:Int):BigInt {
+	inline function opShiftRightUnsigned(b:Int):BigInt {
 		return opShiftRight(b);
 	}
 	
@@ -725,7 +761,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		Returns `a` left-shifted by `b` bits.
 	**/
 	@:op(A << B)
-	inline function opShiftLeft(b:Int):BigInt {
+	function opShiftLeft(b:Int):BigInt {
 		if (this == null) return null;
 		if (b == 0) return this.copy();
 		if (b < 0) return opShiftRight(-b);
@@ -772,6 +808,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this.isNegative && b.isNegative) result.setNegative();
 		return result;
 	}
+	@:op(A & B) @:commutative inline function opANDInt(b:Int):BigInt return opAND(b);
 	
 	/**
 		Returns the bitwise OR of `a` and `b`.
@@ -793,6 +830,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this.isNegative || b.isNegative) result.setNegative();
 		return result;
 	}
+	@:op(A | B) @:commutative inline function opOrInt(b:Int):BigInt return opOR(b);
 	
 	/**
 		Returns the bitwise XOR of `a` and `b`.
@@ -814,6 +852,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this.isNegative != b.isNegative) result.setNegative();
 		return result;
 	}
+	@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
 	
 	// --------------------------------------------------------------------
 	// -------------------- comparing -------------------------------------
@@ -840,6 +879,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		return false;
 	}
+	@:op(A > B) static inline function intGreater(a:Int, b:BigInt):Bool return b.lesser(a);
 	
 	/**
 		Returns `true` if `a` is greater or equal to `b`.
@@ -862,6 +902,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		return true;		
 	}
+	@:op(A >= B) static inline function intGreaterOrEqual(a:Int, b:BigInt):Bool return b.lesserOrEqual(a);
 	
 	/**
 		Returns `true` if `a` is lesser then `b`.
@@ -884,6 +925,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		return false;
 	}
+	@:op(A < B) static inline function intLesser(a:Int, b:BigInt):Bool return b.greater(a);
 	
 	/**
 		Returns `true` if `a` is lesser or equal to `b`.
@@ -906,6 +948,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		return true;
 	}
+	@:op(A <= B) static inline function intLesserOrEqual(a:Int, b:BigInt):Bool return b.greaterOrEqual(a);
 	
 	/**
 		Returns `true` if `a` is equal to `b`.

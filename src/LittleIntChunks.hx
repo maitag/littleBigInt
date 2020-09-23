@@ -237,7 +237,7 @@ class LittleIntChunks {
 		while (i > 0) {
 			offset = hexaChars.indexOf(s.charAt(--i));
 			if (offset == -1 || offset >= base) throw('Error, base $base string can only contain "${hexaChars.join("")}"');
-			value = value + BigInt.mulLittle(b, offset);
+			value = BigInt._add(value, BigInt.mulLittle(b, offset));
 			b = b * base;
 			//b = BigInt.mulLittle(b, base); // for only 7 bitsize base can't be more then 128 here
 		}
@@ -405,7 +405,7 @@ class LittleIntChunks {
 		return ((isNegative) ? "-" : "") + s;
 	}
 		
-	static public inline function fromBytes(b:haxe.io.Bytes):BigInt {
+	static public inline function fromBytes(b:Bytes):BigInt {
 		
 		if (b.length == 1 && b.get(0) == 0) return null;
 		
@@ -432,17 +432,17 @@ class LittleIntChunks {
 		return new BigInt(littleIntChunks);
 	}
 	
-	public function toBytes():haxe.io.Bytes {
+	public function toBytes():Bytes {
 		
 		var numBits:Int = (length - 1) * BITSIZE + IntUtil.bitsize(get(length-1));
 		var numChunks:Int = Std.int((numBits - 1) / 8) + 1;
 		
 		var b:Bytes;
 		if (isNegative) {
-			b = haxe.io.Bytes.alloc(numChunks + 1);
+			b = Bytes.alloc(numChunks + 1);
 			b.set(numChunks, 0);
 		}
-		else b = haxe.io.Bytes.alloc(numChunks);
+		else b = Bytes.alloc(numChunks);
 		
 		for (i in 0...numChunks) {
 			var v:Int = 0;
