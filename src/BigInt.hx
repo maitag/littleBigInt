@@ -220,7 +220,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		Returns the sum of `a` and `b`.
 	**/
 	@:op(A + B) function opAdd(b:BigInt):BigInt return _add(this, b);
-	@:op(A + B) @:commutative function opAddInt(b:Int):BigInt return _add(this, b);
+	//@:op(A + B) @:commutative function opAddInt(b:Int):BigInt return _add(this, b);
+	@:op(A + B) static function opAddInt(a:Int, b:BigInt):BigInt return _add(a, b); // haxe 3.4.4 compatible!
 	
 	@:op(A++) static function opIncrementAfter(a:BigInt):BigInt {
 		if (a == null) {
@@ -383,7 +384,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (isNegative != b.isNegative) return mul(this, b).setNegative();
 		return mul(this, b);
 	}
-	@:op(A * B) @:commutative function opMulticplicateInt(b:Int):BigInt return opMulticplicate(b);
+	//@:op(A * B) @:commutative function opMulticplicateInt(b:Int):BigInt return opMulticplicate(b);
+	@:op(A * B) static inline function opMulticplicateInt(a:Int, b:BigInt):BigInt return b.opMulticplicate(a); // haxe 3.4.4 compatible!
 	
 	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {		
 		if (v == 1) return a.copy();
@@ -808,7 +810,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this.isNegative && b.isNegative) result.setNegative();
 		return result;
 	}
-	@:op(A & B) @:commutative inline function opANDInt(b:Int):BigInt return opAND(b);
+	//@:op(A & B) @:commutative inline function opANDInt(b:Int):BigInt return opAND(b);
+	@:op(A & B) static inline function opANDInt(a:Int, b:BigInt):BigInt return b.opAND(a); // haxe 3.4.4 compatible!
 	
 	/**
 		Returns the bitwise OR of `a` and `b`.
@@ -830,7 +833,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this.isNegative || b.isNegative) result.setNegative();
 		return result;
 	}
-	@:op(A | B) @:commutative inline function opOrInt(b:Int):BigInt return opOR(b);
+	//@:op(A | B) @:commutative inline function opOrInt(b:Int):BigInt return opOR(b);
+	@:op(A | B) static inline function opOrInt(a:Int, b:BigInt):BigInt return b.opOR(a); // haxe 3.4.4 compatible!
 	
 	/**
 		Returns the bitwise XOR of `a` and `b`.
@@ -852,7 +856,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this.isNegative != b.isNegative) result.setNegative();
 		return result;
 	}
-	@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
+	//@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
+	@:op(A ^ B) static inline function opXORInt(a:Int, b:BigInt):BigInt return b.opXOR(a); // haxe 3.4.4 compatible!
 	
 	// --------------------------------------------------------------------
 	// -------------------- comparing -------------------------------------
