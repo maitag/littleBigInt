@@ -4,24 +4,27 @@ pure haxe implementation for arbitrary size integer
 Tested on hashlink, cpp, neko and javascript targets  
 and works with haxe > 3.4.4  
 
-## what is implemented yet:
+## What is implemented yet:
 
 - string in/output for any base(<= 16)
-- addition and subtraction
-- multiplication (Karatsuba)
-- division with remainder
-- modulo
+- addition and subtraction (+, -)
+- multiplication (Karatsuba) (*)
+- division (/)
+- division with remainder (divmod)
+- modulo (%)
 - pow and powMod
 - comparing (>, <, >=, <=, ==, !=)
-- negation, abs
+- negation (-)
+- absolute value (abs)
 - binary operations (&, |, ^)
-- Bytes in/output for storing BigInts
+- bitshifting (>>>, >>, <<)
+- Bytes in/output to store BigInts
 
 
 Please tell me if you miss something ~^ 
   
   
-## testing
+## Testing
 
 To perform benchmarks or unit-tests call the `text.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
   
@@ -35,13 +38,13 @@ then simple call `hpx test hl neko ...` or
 `hpx help` into projectfolder to see more targetspecific options.
 
 
-## todo
+## Todo
 
 - implementing complement operator `~`
-- optional great letters for hexadecimal output
 - make all bitwise-ops two's complement compatible
+- optional great letters for hexadecimal output
+
+- more benchmarks
 - optimizing division (toInt() without bitsize-check)
-- more unit-tests and benchmarks
-  
-- trying all targets with haxe.Int64 chunks
-- more targetspecific optimization
+- optimizing with haxe.Int64 chunks
+- targetspecific optimizations for the chunk-arrays

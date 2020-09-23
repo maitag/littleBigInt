@@ -613,7 +613,7 @@ class TestBigInt extends haxe.unit.TestCase
 		}
 		
 		assertTrue(factorial(10) == tenFactorial);
-		//assertTrue(factorial(100) == hundredFactorial);
+		assertTrue(factorial(100) == hundredFactorial);
 		
 		var a:BigInt = 1;
 		for (i in 0...10000) a = a * 3;
@@ -628,7 +628,16 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 
 	public function testMisc() {
-		assertTrue(("10" : BigInt) + 10 == "20");
+		var i = 5;
+		assertTrue(("10" : BigInt) * i + 3 == "53");
+		assertTrue(("10" : BigInt) + i * 3 == "25");
+		assertTrue( i * 3 + ("10" : BigInt) == "25");
+		assertTrue( 3 * ("10" : BigInt) + i == "35");
+		assertTrue( 5 + 3 * ("10" : BigInt) + i == "40");
+		assertTrue( 3 * ("10" : BigInt) + i * 2 == "40");
+		assertTrue( 3 * ("10" : BigInt) + (i : BigInt) * 5 == "55");
+		assertEquals( ((2 + 2 * ("30000000000000000000000000000000000003" : BigInt) + 1)/3).toString(), "20000000000000000000000000000000000003");
+				
 		assertTrue(("-10000000000000000" : BigInt) + "0" == "-10000000000000000");
 		assertTrue(("0" : BigInt) + "10000000000000000" == "10000000000000000");
 		assertTrue((9999999 : BigInt) + 1 == 10000000);
