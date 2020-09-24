@@ -737,11 +737,19 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		
 	/**
 		Returns `a` right-shifted by `b` bits.
-		Works only signless for arbitary integers.
+		To be compatible to `>>>` with integers this works only for non negative `a`.
 	**/
 	@:op(A >>> B)
-	inline function opShiftRightUnsigned(b:Int):BigInt {
-		return opShiftRight(b); // TODO
+	function opShiftRightUnsigned(b:Int):BigInt {
+		if (this == null) return null;
+		if (b == 0) return this.copy();
+		if (isNegative) {
+			//if (b > 0) 
+				throw("ERROR '>>>', can't shift a negative value a non-negative shifting direction"); 
+			// TODO: find the equivalent to integer-implementation where b < 0
+		}
+		if (b < 0) return null;
+		return _opShiftRight(b);
 	}
 	
 	/**

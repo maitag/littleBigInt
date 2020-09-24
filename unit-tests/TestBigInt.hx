@@ -655,8 +655,11 @@ class TestBigInt extends haxe.unit.TestCase
 			for (j in -20...21) {
 				assertEquals(((i:BigInt) >> j).toString() , '${i >> j}');
 				
-				// for left shifting its is undefined behavior for negative shifting and will throw error there
+				// for left shifting its is undefined behavior for negative shifting and will throw error into that case
 				if (i == 0 || j >= 0) assertEquals(((i:BigInt) << j).toString() , '${i << j}');
+				
+				// for right signles-shifting its is undefined behavior for negative values and will throw error into that case
+				if (i >= 0) assertEquals(((i:BigInt) >>> j).toString() , '${i >>> j}');
 			}
 		}
 		assertTrue((1024 : BigInt) << 100 == "1298074214633706907132624082305024");
