@@ -744,8 +744,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null) return null;
 		if (b == 0) return this.copy();
 		if (isNegative) {
-			//if (b > 0) 
-				throw("ERROR '>>>', can't shift a negative value a non-negative shifting direction"); 
+			//if (b > 0) throw("ERROR '>>>', can't shift a negative value a non-negative shifting direction"); 
+				throw("ERROR '>>>', can't shift a negative value"); 
 			// TODO: find the equivalent to integer-implementation where b < 0
 		}
 		if (b < 0) return null;

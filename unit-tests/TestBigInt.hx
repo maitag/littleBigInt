@@ -651,25 +651,40 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testShiftingLeftAndRight() {
-		for (i in -10...11) {
-			for (j in -20...21) {
-				assertEquals(((i:BigInt) >> j).toString() , '${i >> j}');
-				
-				// for left shifting its is undefined behavior for negative shifting and will throw error into that case
-				if (i == 0 || j >= 0) assertEquals(((i:BigInt) << j).toString() , '${i << j}');
-				
-				// for right signles-shifting its is undefined behavior for negative values and will throw error into that case
-				if (i >= 0) assertEquals(((i:BigInt) >>> j).toString() , '${i >>> j}');
-			}
-		}
 		assertTrue((1024 : BigInt) << 100 == "1298074214633706907132624082305024");
 		assertTrue(("2596148429267413814265248164610049" : BigInt) >> 100 == 2048);
 		assertTrue(("8589934592" : BigInt) << 50 == "9671406556917033397649408");
 		assertTrue(("38685626227668133590597632" : BigInt) >> 50 == "34359738368");
 	}
 
+	public function testShiftingCompatibilityToInt() {
+		// i <= -4097 and >= 4096 gives error here with -20 shift (will be neg-signed for 32bitInt)! 
+		for (i in -4096...4096) {
+			for (j in -20...21) {
+				// trace('$i, $j');
+				assertEquals(((i:BigInt) >> j).toString() , '${i >> j}');
+			}
+		}
+		
+		// i = -2049 and 2048 gives error here with 20 shift (will be neg-signed for 32bitInt)! 
+		for (i in -2048...2048) {
+			// for left shifting its is undefined behavior for negative shifting and will throw error into that case
+			for (j in 0...21) {
+				assertEquals(((i:BigInt) << j).toString() , '${i << j}');
+			}
+		}
+		
+		// for right signles-shifting its is undefined behavior for negative values and will throw error into that case
+		// i = 4096 gives error here with -20 shift (not work with two-complementary !)!
+		for (i in 0...4096) {
+			for (j in -20...21) {
+				assertEquals(((i:BigInt) >>> j).toString() , '${i >>> j}');
+			}
+		}
+	}
+	
 	public function testBitwiseOperations() {
-		for (i in -16...17) assertEquals((~(i:BigInt)).toString() , '${~i}');
+		for (i in -256...257) assertEquals((~(i:BigInt)).toString() , '${~i}');
 		for (i in -0x7ffffffe...-0x7fffff00) assertEquals((~(i:BigInt)).toString() , '${~i}');
 		for (i in 0x7fffff00...0x7fffffff) assertEquals((~(i:BigInt)).toString() , '${~i}');
 		assertTrue(("435783453" : BigInt) & "902345074" == "298352912");
