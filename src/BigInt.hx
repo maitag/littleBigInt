@@ -685,7 +685,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	// --------------------------------------------------------------------
 	
 	/**
-		Binary shift one bit right.
+		Binary shift one bit right (works out of sign).
 	**/
 	public function shiftOneBitRight() {
 		if (this != null) {
@@ -704,7 +704,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	/**
-		Binary shift one bit left.
+		Binary shift one bit left (works out of sign).
 	**/
 	public function shiftOneBitLeft() {
 		if (this != null) {
@@ -717,6 +717,24 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 	}
 	
+	/**
+		Returns the bitwise NOT.
+	**/
+	@:op(~B)
+	function opNOT():BigInt {
+		if (this == null) return BigInt.fromInt( -1);
+		var ret:BigInt;
+		if (isNegative) {
+			if (length == 1 && get(0)==1) return null;
+			ret = this.negCopy();
+			subtractLittle(ret, 1, 0);
+			return ret;
+		}
+		ret = this.copy();
+		addLittle(ret, 1, 0);
+		return ret.setNegative();
+	}
+		
 	/**
 		Returns `a` right-shifted by `b` bits.
 		All works signless here.
@@ -734,12 +752,20 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function opShiftRight(b:Int):BigInt {
 		if (this == null) return null;
 		if (b == 0) return this.copy();
-		if (b < 0) return opShiftLeft(-b);
-
+		//if (b < 0) return _opShiftLeft( -b);
+		if (isNegative) {
+			if (b < 0) return BigInt.fromInt( -1);
+			if (length == 1 && get(0) == 1) return BigInt.fromInt( -1);
+			return opNOT()._opShiftRight(b).opNOT();
+		}
+		if (b < 0) return null; 
+		return _opShiftRight(b);
+	}
+	
+	inline function _opShiftRight(b:Int):BigInt {
 		var result:BigInt = new BigInt(new LittleIntChunks());
 		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
 		var r:Int = b - l * LittleIntChunks.BITSIZE;
-		
 		if (r == 0)
 			for (i in l...length) result.push(get(i));
 		else {
@@ -753,7 +779,6 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				restBits = (v << (LittleIntChunks.BITSIZE - r)) & LittleIntChunks.BITMASK;
 			}
 		}
-		
 		if (result.length == 0) return null;		
 		if (isNegative) result.setNegative();
 		return result;
@@ -765,9 +790,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A << B)
 	function opShiftLeft(b:Int):BigInt {
 		if (this == null) return null;
-		if (b == 0) return this.copy();
-		if (b < 0) return opShiftRight(-b);
-		
+		if (b == 0) return this.copy();		
+		if (b < 0) return null; //if (b < 0) return _opShiftRight(-b);
+		return _opShiftLeft(b);
+	}
+	
+	inline function _opShiftLeft(b:Int):BigInt {
 		var result:BigInt = new BigInt(new LittleIntChunks());
 		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
 		var r:Int = b - l * LittleIntChunks.BITSIZE;

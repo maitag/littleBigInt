@@ -651,13 +651,22 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testShiftingLeftAndRight() {
-		assertTrue((-5 : BigInt) >> 2 == -1);
-		assertTrue((5 : BigInt) >> -2 == 20);
-		assertTrue((5 : BigInt) << -2 == 1);
+		var a:BigInt;
+		for (i in -10...11) {
+			a = i;
+			for (j in -20...21) {
+				assertTrue(a >> j == i >> j);
+				if (i == 0 || j >= 0)
+					assertEquals((a << j).toString() , '${i << j}');
+			}
+		}
+		
+		assertTrue((5 : BigInt) << 2 == 20);
+		assertTrue((5 : BigInt) >> 2 == 1);
 		assertTrue((1024 : BigInt) << 100 == "1298074214633706907132624082305024");
 		assertTrue(("2596148429267413814265248164610049" : BigInt) >> 100 == 2048);
-		assertTrue(("8589934592" : BigInt) >> -50 == "9671406556917033397649408");
-		assertTrue(("38685626227668133590597632" : BigInt) << -50 == "34359738368");
+		assertTrue(("8589934592" : BigInt) << 50 == "9671406556917033397649408");
+		assertTrue(("38685626227668133590597632" : BigInt) >> 50 == "34359738368");
 	}
 
 	public function testBitwiseOperations() {

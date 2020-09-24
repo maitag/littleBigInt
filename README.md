@@ -40,7 +40,6 @@ then simple call `hpx test hl neko ...` or
 
 ## Todo
 
-- implementing complement operator `~`
 - make all bitwise-ops two's complement compatible
 - optional great letters for hexadecimal output
 
