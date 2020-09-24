@@ -691,7 +691,6 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(("435783453" : BigInt) | "902345074" == "1039775615");
 		assertTrue(("435783453" : BigInt) ^ "902345074" == "741422703");
 		assertTrue(("902345074" : BigInt) ^ "435783453" == "741422703");
-		assertTrue(("12" : BigInt) ^ -5 == "-9");
 	}
    
 	public function testBitwiseWithInts() {

@@ -198,6 +198,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
+	
 	// --------------------------------------------------------------------
 	// -------------------- abs -------------------------------------------
 	// --------------------------------------------------------------------	
@@ -210,6 +211,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (isNegative) return negCopy();
 		return copy();
 	}
+	
 	
 
 	// --------------------------------------------------------------------
@@ -281,6 +283,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		if (v > 0) a.push(v);
 	}
+
+	
 	
 	// --------------------------------------------------------------------
 	// -------------------- subtraction -----------------------------------
@@ -368,8 +372,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null) return null;
 		return this.negCopy();
 	}
-	
-	
+
+
+
 	// --------------------------------------------------------------------
 	// -------------------- multiplication --------------------------------
 	// --------------------------------------------------------------------	
@@ -477,6 +482,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
+	
 	// --------------------------------------------------------------------
 	// ---------------- division and modulo -------------------------------
 	// --------------------------------------------------------------------	
@@ -500,8 +506,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	//@:op(A % B) static function opModuloInt(a:BigInt, b:Int):BigInt return divMod(a, b).remainder;
 	@:op(A % B) static function opIntModulo(a:Int, b:BigInt):BigInt return divMod(a, b).remainder;
-	
-	
+
+
 	// ------- division with remainder -----
 
 	/**
@@ -574,7 +580,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
-	// optimized to faster fetch only quotient and do without sign-check
+	// optimized div to faster fetch only quotient and do without sign-check
 	static inline function divFast(a:BigInt, v:LittleInt):BigInt {		
 		if (a == null) return null; // handle null
 		if (a == v) return 1; // handle equal
@@ -608,6 +614,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		return { quotient:q, remainder:r };
 	}
+	
+	
 	
 	// --------------------------------------------------------------------
 	// ---------------------- pow and powMod ------------------------------
@@ -680,222 +688,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return result;
 	}
 	
-	// --------------------------------------------------------------------
-	// -------------------- binary operations -----------------------------
-	// --------------------------------------------------------------------
 	
-	/**
-		Binary shift one bit right (works out of sign).
-	**/
-	public function shiftOneBitRight() {
-		if (this != null) {
-			var i:Int = length - 1;
-			var v = get(i);
-			var restBit:Bool = ((v & 1) > 0);
-			v = v >>> 1;
-			if (v != 0) set(i, v) else this.pop();
-			while (i-- > 0) {
-				v = get(i);
-				if (restBit) v |= LittleIntChunks.UPPESTBIT;
-				restBit = ((v & 1) > 0);
-				set(i, v >>> 1);
-			}
-		}
-	}
-	
-	/**
-		Binary shift one bit left (works out of sign).
-	**/
-	public function shiftOneBitLeft() {
-		if (this != null) {
-			var v:LittleInt = 0;
-			for (i in 0...length) {
-				v = (get(i) << 1) | ((v & LittleIntChunks.UPPESTBIT > 0) ? 1 : 0) ;
-				set(i, v & LittleIntChunks.BITMASK);
-			}
-			if (v & LittleIntChunks.UPPESTBIT > 0) push(1);
-		}
-	}
-	
-	/**
-		Returns the bitwise NOT.
-	**/
-	@:op(~B)
-	function opNOT():BigInt {
-		if (this == null) return BigInt.fromInt( -1);
-		var ret:BigInt;
-		if (isNegative) {
-			if (length == 1 && get(0)==1) return null;
-			ret = this.negCopy();
-			subtractLittle(ret, 1, 0);
-			return ret;
-		}
-		ret = this.copy();
-		addLittle(ret, 1, 0);
-		return ret.setNegative();
-	}
-		
-	/**
-		Returns `a` right-shifted by `b` bits.
-		To be compatible to `>>>` with integers this works only for non negative `a`.
-	**/
-	@:op(A >>> B)
-	function opShiftRightUnsigned(b:Int):BigInt {
-		if (this == null) return null;
-		if (b == 0) return this.copy();
-		if (isNegative) {
-			//if (b > 0) throw("ERROR '>>>', can't shift a negative value a non-negative shifting direction"); 
-				throw("ERROR '>>>', can't shift a negative value"); 
-			// TODO: find the equivalent to integer-implementation where b < 0
-		}
-		if (b < 0) return null;
-		return _opShiftRight(b);
-	}
-	
-	/**
-		Returns `a` right-shifted by `b` bits.
-	**/
-	@:op(A >> B)
-	function opShiftRight(b:Int):BigInt {
-		if (this == null) return null;
-		if (b == 0) return this.copy();
-		//if (b < 0) return _opShiftLeft( -b);
-		if (isNegative) {
-			if (b < 0) return BigInt.fromInt( -1);
-			if (length == 1 && get(0) == 1) return BigInt.fromInt( -1);
-			return opNOT()._opShiftRight(b).opNOT();
-		}
-		if (b < 0) return null; 
-		return _opShiftRight(b);
-	}
-	
-	inline function _opShiftRight(b:Int):BigInt {
-		var result:BigInt = new BigInt(new LittleIntChunks());
-		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
-		var r:Int = b - l * LittleIntChunks.BITSIZE;
-		if (r == 0)
-			for (i in l...length) result.push(get(i));
-		else {
-			var v:Int;
-			var restBits:Int = 0;
-			var i = length;
-			while (i-- > l) {
-				v = get(i);
-				if (result.length > 0 || ((v >>> r) | restBits) > 0)
-					result.unshift((v >>> r) | restBits);
-				restBits = (v << (LittleIntChunks.BITSIZE - r)) & LittleIntChunks.BITMASK;
-			}
-		}
-		if (result.length == 0) return null;		
-		if (isNegative) result.setNegative();
-		return result;
-	}
-	
-	/**
-		Returns `a` left-shifted by `b` bits.
-		Works only for non negative shift-direction.
-	**/
-	@:op(A << B)
-	function opShiftLeft(b:Int):BigInt {
-		if (this == null) return null;
-		if (b == 0) return this.copy();		
-		//if (b < 0) return null; //if (b < 0) return _opShiftRight(-b);
-		//if (b < 0 && isNegative) throw("ERROR '<<', can't negative-shift-left a negative value"); 
-		if (b < 0) throw("ERROR '<<', can't negative-shift-left a negative value"); 
-		return _opShiftLeft(b);
-	}
-	
-	inline function _opShiftLeft(b:Int):BigInt {
-		var result:BigInt = new BigInt(new LittleIntChunks());
-		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
-		var r:Int = b - l * LittleIntChunks.BITSIZE;
-		for (i in 0...l) result.push(0);
-		if (r == 0)
-			for (i in 0...length) result.push(get(i));
-		else {
-			var v:Int;
-			var restBits:Int = 0;
-			for (i in 0...length) {
-				v = get(i);
-				result.push( ((v << r) & LittleIntChunks.BITMASK) | restBits);
-				restBits = v >>> (LittleIntChunks.BITSIZE - r);
-			}
-			if (restBits > 0) result.push(restBits);
-		}
-		if (isNegative) result.setNegative();
-		return result;
-	}
-	
-	/**
-		Returns the bitwise AND of `a` and `b`.
-	**/
-	@:op(A & B)
-	function opAND(b:BigInt):BigInt {
-		if (this == null || b == null) return null;
-
-		var result:BigInt = null;
-		var r:LittleInt;
-		var i = (length < b.length) ? length : b.length;
-		while (i-- > 0) {
-			r = this.get(i) & b.get(i);
-			if (result != null)
-				result.unshift(r);
-			else if (r != 0) {
-				result = new BigInt(new LittleIntChunks());
-				result.unshift(r);
-			} 
-		}
-		if (this.isNegative && b.isNegative) result.setNegative();
-		return result;
-	}
-	//@:op(A & B) @:commutative inline function opANDInt(b:Int):BigInt return opAND(b);
-	@:op(A & B) static inline function opANDInt(a:Int, b:BigInt):BigInt return b.opAND(a); // haxe 3.4.4 compatible!
-	
-	/**
-		Returns the bitwise OR of `a` and `b`.
-	**/
-	@:op(A | B)
-	function opOR(b:BigInt):BigInt {
-		if (this == null || b == null) return null;
-		
-		var result:BigInt = new BigInt(new LittleIntChunks());
-		var l = (length < b.length) ? length : b.length;
-		for (i in 0...l) {
-			result.push(this.get(i) | b.get(i));
-		}
-		if (length < b.length)
-			for (i in l...b.length) result.push(b.get(i));
-		else if (length > b.length)
-			for (i in l...length) result.push(this.get(i));
-		
-		if (this.isNegative || b.isNegative) result.setNegative();
-		return result;
-	}
-	//@:op(A | B) @:commutative inline function opOrInt(b:Int):BigInt return opOR(b);
-	@:op(A | B) static inline function opOrInt(a:Int, b:BigInt):BigInt return b.opOR(a); // haxe 3.4.4 compatible!
-	
-	/**
-		Returns the bitwise XOR of `a` and `b`.
-	**/
-	@:op(A ^ B)
-	function opXOR(b:BigInt):BigInt {
-		if (this == null || b == null) return null;
-		
-		var result:BigInt = new BigInt(new LittleIntChunks());
-		var l = (length < b.length) ? length : b.length;
-		for (i in 0...l) {
-			result.push(this.get(i) ^ b.get(i));
-		}
-		if (length < b.length)
-			for (i in l...b.length) result.push(b.get(i));
-		else if (length > b.length)
-			for (i in l...length) result.push(this.get(i));
-		
-		if (this.isNegative != b.isNegative) result.setNegative();
-		return result;
-	}
-	//@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
-	@:op(A ^ B) static inline function opXORInt(a:Int, b:BigInt):BigInt return b.opXOR(a); // haxe 3.4.4 compatible!
 	
 	// --------------------------------------------------------------------
 	// -------------------- comparing -------------------------------------
@@ -1026,6 +819,244 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		return false;
 	}
+	
+	
+	
+	
+	// --------------------------------------------------------------------
+	// -------------------- binary operations -----------------------------
+	// --------------------------------------------------------------------
+	
+	/**
+		Binary shift one bit right (works out of sign).
+	**/
+	public function shiftOneBitRight() {
+		if (this != null) {
+			var i:Int = length - 1;
+			var v = get(i);
+			var restBit:Bool = ((v & 1) > 0);
+			v = v >>> 1;
+			if (v != 0) set(i, v) else this.pop();
+			while (i-- > 0) {
+				v = get(i);
+				if (restBit) v |= LittleIntChunks.UPPESTBIT;
+				restBit = ((v & 1) > 0);
+				set(i, v >>> 1);
+			}
+		}
+	}
+	
+	/**
+		Binary shift one bit left (works out of sign).
+	**/
+	public function shiftOneBitLeft() {
+		if (this != null) {
+			var v:LittleInt = 0;
+			for (i in 0...length) {
+				v = (get(i) << 1) | ((v & LittleIntChunks.UPPESTBIT > 0) ? 1 : 0) ;
+				set(i, v & LittleIntChunks.BITMASK);
+			}
+			if (v & LittleIntChunks.UPPESTBIT > 0) push(1);
+		}
+	}
+	
+	/**
+		Returns the bitwise NOT (two's complement).
+	**/
+	@:op(~B)
+	function opNOT():BigInt {
+		if (this == null) return BigInt.fromInt( -1);
+		var ret:BigInt;
+		if (isNegative) {
+			if (length == 1 && get(0)==1) return null;
+			ret = this.negCopy();
+			subtractLittle(ret, 1, 0);
+			return ret;
+		}
+		ret = this.copy();
+		addLittle(ret, 1, 0);
+		return ret.setNegative();
+	}
+		
+	/**
+		Returns `a` right-shifted by `b` bits.
+		To be compatible to `>>>` with integers this works only for non negative `a`.
+	**/
+	@:op(A >>> B)
+	function opShiftRightUnsigned(b:Int):BigInt {
+		if (this == null) return null;
+		if (b == 0) return this.copy();
+		if (isNegative) {
+			//if (b > 0) throw("ERROR '>>>', can't shift a negative value a non-negative shifting direction"); 
+			throw("ERROR '>>>', can't shift a negative value"); 
+			// TODO: if (b < 0): find the equivalent to two's complement implementation
+		}
+		if (b < 0) return null;
+		return _opShiftRight(b);
+	}
+	
+	/**
+		Returns `a` right-shifted by `b` bits.
+	**/
+	@:op(A >> B)
+	function opShiftRight(b:Int):BigInt {
+		if (this == null) return null;
+		if (b == 0) return this.copy();
+		//if (b < 0) return _opShiftLeft( -b);
+		if (isNegative) {
+			if (b < 0) return BigInt.fromInt( -1);
+			if (length == 1 && get(0) == 1) return BigInt.fromInt( -1);
+			return opNOT()._opShiftRight(b).opNOT();
+		}
+		if (b < 0) return null; 
+		return _opShiftRight(b);
+	}	
+	inline function _opShiftRight(b:Int):BigInt {
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
+		var r:Int = b - l * LittleIntChunks.BITSIZE;
+		if (r == 0)
+			for (i in l...length) result.push(get(i));
+		else {
+			var v:Int;
+			var restBits:Int = 0;
+			var i = length;
+			while (i-- > l) {
+				v = get(i);
+				if (result.length > 0 || ((v >>> r) | restBits) > 0)
+					result.unshift((v >>> r) | restBits);
+				restBits = (v << (LittleIntChunks.BITSIZE - r)) & LittleIntChunks.BITMASK;
+			}
+		}
+		if (result.length == 0) return null;		
+		if (isNegative) result.setNegative();
+		return result;
+	}
+	
+	/**
+		Returns `a` left-shifted by `b` bits.
+		Works only for non negative shift-direction.
+	**/
+	@:op(A << B)
+	function opShiftLeft(b:Int):BigInt {
+		if (this == null) return null;
+		if (b == 0) return this.copy();		
+		if (b < 0) throw("ERROR '<<', can't negative-shift-left a negative value"); 
+		return _opShiftLeft(b);
+	}	
+	inline function _opShiftLeft(b:Int):BigInt {
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l:Int = Std.int(b / LittleIntChunks.BITSIZE);
+		var r:Int = b - l * LittleIntChunks.BITSIZE;
+		for (i in 0...l) result.push(0);
+		if (r == 0)
+			for (i in 0...length) result.push(get(i));
+		else {
+			var v:Int;
+			var restBits:Int = 0;
+			for (i in 0...length) {
+				v = get(i);
+				result.push( ((v << r) & LittleIntChunks.BITMASK) | restBits);
+				restBits = v >>> (LittleIntChunks.BITSIZE - r);
+			}
+			if (restBits > 0) result.push(restBits);
+		}
+		if (isNegative) result.setNegative();
+		return result;
+	}
+	
+	/**
+		Returns the bitwise AND of `a` and `b`.
+		No support for handling negative params yet (like for two's complement behavior).
+	**/
+	@:op(A & B)
+	function opAND(b:BigInt):BigInt {
+		if (this == null || b == null) return null;
+		if (isNegative || b.isNegative) {
+			// TODO (have no idea now ;)
+			throw("ERROR '&', emulation of two's complement behavior for '&' with negative numbers is not implemented yet"); 
+		}
+		return _opAND(b);
+	}	
+	inline function _opAND(b:BigInt):BigInt {
+		var result:BigInt = null;
+		var r:LittleInt;
+		var i = (length < b.length) ? length : b.length;
+		while (i-- > 0) {
+			r = this.get(i) & b.get(i);
+			if (result != null)
+				result.unshift(r);
+			else if (r != 0) {
+				result = new BigInt(new LittleIntChunks());
+				//if (this.isNegative && b.isNegative) result.setNegative();
+				result.unshift(r);
+			} 
+		}
+		return result;
+	}
+	//@:op(A & B) @:commutative inline function opANDInt(b:Int):BigInt return opAND(b);
+	@:op(A & B) static inline function opANDInt(a:Int, b:BigInt):BigInt return b.opAND(a); // haxe 3.4.4 compatible!
+	
+	/**
+		Returns the bitwise OR of `a` and `b`.
+		No support for handling negative params yet (like for two's complement behavior).
+	**/
+	@:op(A | B)
+	function opOR(b:BigInt):BigInt {
+		if (this == null || b == null) return null;
+		if (isNegative || b.isNegative) {
+			// TODO:
+			throw("ERROR '&', emulation of two's complement behavior for '|' with negative numbers is not implemented yet"); 
+		}
+		return _opOR(b);
+	}	
+	inline function _opOR(b:BigInt):BigInt {
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l = (length < b.length) ? length : b.length;
+		for (i in 0...l) {
+			result.push(this.get(i) | b.get(i));
+		}
+		if (length < b.length)
+			for (i in l...b.length) result.push(b.get(i));
+		else if (length > b.length)
+			for (i in l...length) result.push(this.get(i));
+		
+		//if (this.isNegative || b.isNegative) result.setNegative();
+		return result;
+	}
+	//@:op(A | B) @:commutative inline function opOrInt(b:Int):BigInt return opOR(b);
+	@:op(A | B) static inline function opOrInt(a:Int, b:BigInt):BigInt return b.opOR(a); // haxe 3.4.4 compatible!
+	
+	/**
+		Returns the bitwise XOR of `a` and `b`.
+		No support for handling negative params yet (like for two's complement behavior).
+	**/
+	@:op(A ^ B)
+	function opXOR(b:BigInt):BigInt {
+		if (this == null || b == null) return null;
+		if (isNegative || b.isNegative) {
+			// TODO:
+			throw("ERROR '&', emulation of two's complement behavior for '^' with negative numbers is not implemented yet"); 
+		}
+		return _opXOR(b);
+	}
+	
+	inline function _opXOR(b:BigInt):BigInt {
+		var result:BigInt = new BigInt(new LittleIntChunks());
+		var l = (length < b.length) ? length : b.length;
+		for (i in 0...l) {
+			result.push(this.get(i) ^ b.get(i));
+		}
+		if (length < b.length)
+			for (i in l...b.length) result.push(b.get(i));
+		else if (length > b.length)
+			for (i in l...length) result.push(this.get(i));
+		
+		//if (this.isNegative != b.isNegative) result.setNegative();
+		return result;
+	}
+	//@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
+	@:op(A ^ B) static inline function opXORInt(a:Int, b:BigInt):BigInt return b.opXOR(a); // haxe 3.4.4 compatible!
 	
 	
 }
