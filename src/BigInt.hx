@@ -737,16 +737,15 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		
 	/**
 		Returns `a` right-shifted by `b` bits.
-		All works signless here.
+		Works only signless for arbitary integers.
 	**/
 	@:op(A >>> B)
 	inline function opShiftRightUnsigned(b:Int):BigInt {
-		return opShiftRight(b);
+		return opShiftRight(b); // TODO
 	}
 	
 	/**
 		Returns `a` right-shifted by `b` bits.
-		All works signless here.
 	**/
 	@:op(A >> B)
 	function opShiftRight(b:Int):BigInt {
@@ -786,12 +785,15 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	/**
 		Returns `a` left-shifted by `b` bits.
+		Works only for non negative shift-direction.
 	**/
 	@:op(A << B)
 	function opShiftLeft(b:Int):BigInt {
 		if (this == null) return null;
 		if (b == 0) return this.copy();		
-		if (b < 0) return null; //if (b < 0) return _opShiftRight(-b);
+		//if (b < 0) return null; //if (b < 0) return _opShiftRight(-b);
+		//if (b < 0 && isNegative) throw("ERROR '<<', can't negative-shift-left a negative value"); 
+		if (b < 0) throw("ERROR '<<', can't negative-shift-left a negative value"); 
 		return _opShiftLeft(b);
 	}
 	
