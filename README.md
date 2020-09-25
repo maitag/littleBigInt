@@ -62,7 +62,7 @@ trace(  x.toOctalString(3)  );   // -> 125 273
 trace( (a+b+c).toHexString(4) ); // -> abfc 4480
 
 // or from and to a specific base
-a = BigInt.fromBaseString(4, "01234");
+a = BigInt.fromBaseString("01234", 5);
 trace( a.toBaseString(7) ); // mhm ;)
 
 ```
