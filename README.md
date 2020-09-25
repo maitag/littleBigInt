@@ -1,32 +1,13 @@
 # littleBigInt
 pure haxe implementation for arbitrary size integer
-
-Tested on hashlink, cpp, neko and javascript targets  
-and works with haxe > 3.4.4  
-
-## What is implemented yet:
-
-- string in/output for any base(<= 16)
-- addition and subtraction (+, -)
-- multiplication (Karatsuba) (*)
-- division (/)
-- division with remainder (divmod)
-- modulo (%)
-- pow and powMod
-- comparing (>, <, >=, <=, ==, !=)
-- negation (-)
-- absolute value (abs)
-- binary operations (&, |, ^)
-- bitshifting (>>>, >>, <<)
-- Bytes in/output to store BigInts
-
-
-Please tell me if you miss something ~^ 
   
   
 ## Testing
 
-To perform benchmarks or unit-tests call the `text.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
+Needs a haxe-version greater then 3.4.4 and  
+can be test for hashlink, cpp, neko and javascript targets.  
+  
+To perform benchmarks or unit-tests call the `test.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
   
 install [hxp](https://lib.haxe.org/p/hxp) via:
 ```
@@ -36,8 +17,8 @@ haxelib run hxp --install-hxp-alias
 
 then simple call `hpx test hl neko ...` or  
 `hpx help` into projectfolder to see more targetspecific options.
-
-
+  
+  
 ## Synopsis
 
 
@@ -75,13 +56,36 @@ c = BigInt.fromBinaryString("0010 1101");
 
 
 // to output into different formats
-trace(  i.toBinaryString(8) );   // -> 01111111
 trace(  i.toBinaryString()  );   // -> 1111111
+trace(  i.toBinaryString(8) );   // -> 01111111
 trace(  x.toOctalString(3)  );   // -> 125 273
 trace( (a+b+c).toHexString(4) ); // -> abfc 4480
 
+// or from and to a specific base
+a = BigInt.fromBaseString(4, "01234");
+trace( a.toBaseString(7) ); // mhm ;)
+
 ```
 
+
+### Math expressions
+```
+- addition and subtraction (+, -)
+- multiplication (Karatsuba) (*)
+- division (/)
+- division with remainder (divmod)
+- modulo (%)
+- pow and powMod
+- comparing (>, <, >=, <=, ==, !=)
+- negation (-)
+- absolute value (abs)
+- binary operations (&, |, ^)
+- bitshifting (>>>, >>, <<)
+- Bytes in/output to store BigInts
+
+Please tell me if you miss something ~^ 
+
+```
 
 
 
