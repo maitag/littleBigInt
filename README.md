@@ -111,10 +111,8 @@ trace( a ); // 5
 // negation
 trace( -a ); // -5
 
-
 // multiplication
 trace( a * b ); // 35
-
 
 // division with remainder
 a = 64;
@@ -128,13 +126,11 @@ trace( a / b); // 3 (same as result.quotient)
 // modulo
 trace( a % b); // 4 (same as result.remainder)
 
-
 // power
 trace( a.pow(b) ); // 1532495540865888858358347027150309183618739122183602176
 
 // power modulo
 trace( a.powMod(b, 10000) ); // 2176
-
 
 // absolute value
 a = -5;
@@ -144,16 +140,41 @@ trace( b.abs() ); // 3
 ```
 
 
+
 ### Comparing
-```hx
-- comparing (>, <, >=, <=, ==, !=)
-```
+
+All comparing operations `>`, `<`, `>=`, `<=`, `==`, `!=`  
+works like default and returns a boolean value.
+
 
 
 ### Bitwise Operations
+
+For positive values all works the same as with integers but because there is  
+no bitsize-limit not all operations with negative values makes sense.
+
 ```hx
-- binary operations (~, &, |, ^)
-- bitshifting (>>>, >>, <<)
+var a:BigInt = "0b 01010111";
+var b:BigInt = "0b 11001100";
+
+// bitwise AND
+trace( (a & b).toBinaryString(8) ); // 01000100
+
+// bitwise OR
+trace( (a | b).toBinaryString(8) ); // 11011111
+
+// bitwise XOR
+trace( (a ^ b).toBinaryString(8) ); // 10011011
+
+//complement (NOT)
+trace( (~a).toBinaryString(8) );    //-01011000
+
+// bitshifting left
+trace( (a << 2).toBinaryString(8, false) );  // 1 01011100
+
+// bitshifting right
+trace( (a >>  3).toBinaryString() ); // 1010
+trace( (a >>> 3).toBinaryString() ); // 1010
 ```
 
 Please tell me if you miss something ~^ 
@@ -163,11 +184,12 @@ Please tell me if you miss something ~^
 
 - more into synopsis here
 - fixing output with leading zeros
+- optional exponential notation for decimals
 - optional great letters for hexadecimal output
-
+  
 - more benchmarks
 - optimizing division (toInt() without bitsize-check)
 - optimizing with haxe.Int64 chunks
 - targetspecific optimizations for the chunk-arrays
-
+  
 - make `&`, `|`, `^` bitwise operations working with negative numbers (two's complement compatible)
