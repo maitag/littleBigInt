@@ -143,15 +143,15 @@ trace( b.abs() ); // 3
 
 ### Comparing
 
-All comparing operations `>`, `<`, `>=`, `<=`, `==`, `!=`  
-works like default and returns a boolean value.
+All comparing operators `>`, `<`, `>=`, `<=`, `==`, `!=`  
+works like default and returns the expected boolean value.
 
 
 
 ### Bitwise Operations
 
-For positive values all works the same as with integers but because there is  
-no bitsize-limit not all operations with negative values makes sense.
+For positive values all works same as with integers but because there is no sign-bit  
+not all operations with negative values makes sense in emulating for two's complements.
 
 ```hx
 var a:BigInt = "0b 01010111";
