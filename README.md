@@ -24,12 +24,14 @@ then simple call `hpx test hl neko ...` or
 
 ### Creating BigInts
 ```
-// from an Integer
+// from Integer
+
 var a:BigInt = 5;
 var b = BigInt.fromInt(5);
 
 
-// from a String
+// from String
+
 var a:BigInt = "127";
 var b = BigInt.fromString("127"); // decimal
 
@@ -38,15 +40,15 @@ var a:BigInt = "0x ffff 0000";   // hexadecimal
 var b:BigInt = "0o 01234567 10"; // octal
 var c:BigInt = "0b 00111010";    // binary  
 
-// helper functions to create from numberformats
+// helpers to create from different formats
 BigInt.fromHexString("aaFF 01e3");
 BigInt.fromOctalString("7724 1160");
 BigInt.fromBinaryString("0010 1101");
-
-BigInt.fromBaseString("2010221101102", 3); // base 3
+BigInt.fromBaseString("2010221101102", 3); // to numberbase 3
 
 
 // you can also define values on demand inside brackets like:
+
 var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000" : BigInt);
 trace(x); // 2147483647000000000000000000
 ```
@@ -78,7 +80,7 @@ trace(  a.toBinaryString()  ); // binary: 11000010
 trace(  a.toOctalString()  ); // octal:        302
 trace(  a.toHexString()  );  // hexadecimal:    c2
 
-// or for specific numberbase
+// or for a specific numberbase
 trace(  a.toBaseString(7)  ); // -> 365 ;)
 
 
