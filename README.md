@@ -1,12 +1,23 @@
 # littleBigInt
-pure haxe implementation for arbitrary size integer
+pure haxe implementation for arbitrary size integer  
   
+This lib was designed and optimized for fast [Karatsuba](https://en.wikipedia.org/wiki/Karatsuba_algorithm) multiplicaton.  
+Works with all haxe-version greater then 3.4.4 and tested on hashlink, cpp, neko and javascript targets.  
+
   
+## Installation
+```
+haxelib install littleBigInt
+```
+
+or use the latest developement version from github:
+```
+haxelib git littleBigInt https://github.com/maitag/littleBigInt.git
+```
+
+
 ## Testing
 
-Needs a haxe-version greater then 3.4.4 and  
-can be test for hashlink, cpp, neko and javascript targets.  
-  
 To perform benchmarks or unit-tests call the `test.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
   
 install [hxp](https://lib.haxe.org/p/hxp) via:
@@ -144,14 +155,14 @@ trace( b.abs() ); // 3
 ### Comparing
 
 All comparing operators `>`, `<`, `>=`, `<=`, `==`, `!=`  
-works like default and returns the expected boolean value.
+works like default and return the expected boolean value.
 
 
 
 ### Bitwise Operations
 
-For positive values all works same as with integers but because there is no sign-bit  
-not all operations with negative values makes sense in emulating for two's complements.
+For positive values all the operations work the same as they do with integers  
+but because there is no sign-bit, with negative numbers it don't make sense outside of [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement).
 
 ```hx
 var a:BigInt = "0b 01010111";
@@ -177,9 +188,10 @@ trace( (a >>  3).toBinaryString() ); // 1010
 trace( (a >>> 3).toBinaryString() ); // 1010
 ```
 
-Please tell me if you miss something ~^ 
-
-
+Let me know if something's mising ~^  
+  
+  
+  
 ## Todo
 
 - more into synopsis here
