@@ -95,25 +95,68 @@ trace(bytes.length); // 1
 ```
 
 
-### Math functions and expressions
+### Arithmetic operations
 ```
-- addition and subtraction (+, -)
-- multiplication (Karatsuba) (*)
-- division (/)
-- division with remainder (divmod)
-- modulo (%)
-- pow and powMod
+var a:BigInt = 3;
+var b:BigInt = 7;
+
+// addition and subtraction
+trace(a + b); // 10
+
+// increment and decrement
+trace(++a); // 3
+trace(a++); // 4
+trace( a ); // 5
+
+// negation
+trace( -a ); // -5
+
+
+// multiplication
+trace( a * b ); // 35
+
+
+// division with remainder
+a = 64;
+b = 30;
+var result = BigInt.divMod(a, b);
+trace( result.quotient, result.remainder ); // 2, 4
+
+// integer division
+trace( a / b); // 3 (same as result.quotient)
+
+// modulo
+trace( a % b); // 4 (same as result.remainder)
+
+
+// power
+trace( a.pow(b) ); // 1532495540865888858358347027150309183618739122183602176
+
+// power modulo
+trace( a.powMod(b, 10000) ); // 2176
+
+
+// absolute value
+a = -5;
+b = 3;
+trace( a.abs() ); // 5
+trace( b.abs() ); // 3
+```
+
+
+### Comparing
+```
 - comparing (>, <, >=, <=, ==, !=)
-- negation (-)
-- absolute value (abs)
+```
+
+
+### Bitwise Operations
+```
 - binary operations (~, &, |, ^)
 - bitshifting (>>>, >>, <<)
-- Bytes in/output to store BigInts
-
-Please tell me if you miss something ~^ 
-
 ```
 
+Please tell me if you miss something ~^ 
 
 
 ## Todo
