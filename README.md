@@ -23,7 +23,7 @@ then simple call `hpx test hl neko ...` or
 
 
 ### Creating BigInts
-```
+```hx
 // from Integers:
 var a:BigInt = 5;
 var b = BigInt.fromInt(5);
