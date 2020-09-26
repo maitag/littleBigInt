@@ -33,7 +33,7 @@ var b = BigInt.fromInt(5);
 var a:BigInt = "127"; // default is in decimal notation
 var b = BigInt.fromString("127");
 
-// or use a prefix to define number format
+// or use a prefix to define the number format
 var a:BigInt = "0x ffff 0000";   // hexadecimal
 var b:BigInt = "0o 01234567 10"; // octal
 var c:BigInt = "0b 00111010";    // binary  
