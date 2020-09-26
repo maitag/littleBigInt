@@ -74,7 +74,7 @@ trace( zero.toInt() ); // 0
 var a = BigInt.fromBaseString("01234", 5);
 
 // convert into native integer
-trace(  a.toInt()  ); // -> 194  (throws out an error if 'a' not fit into Int size)
+trace(  a.toInt()  ); // -> 194  (throws out an error if 'a' not fit into)
 
 
 // convert into String for different number bases
@@ -96,7 +96,7 @@ trace(bytes.length); // 1
 
 
 ### Arithmetic operations
-```
+```hx
 var a:BigInt = 3;
 var b:BigInt = 7;
 
@@ -145,13 +145,13 @@ trace( b.abs() ); // 3
 
 
 ### Comparing
-```
+```hx
 - comparing (>, <, >=, <=, ==, !=)
 ```
 
 
 ### Bitwise Operations
-```
+```hx
 - binary operations (~, &, |, ^)
 - bitshifting (>>>, >>, <<)
 ```
