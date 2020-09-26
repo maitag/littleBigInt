@@ -2,7 +2,7 @@
 pure haxe implementation for arbitrary size integer  
   
 This lib was designed and optimized for fast [Karatsuba](https://en.wikipedia.org/wiki/Karatsuba_algorithm) multiplicaton.  
-Works with all haxe-version greater then 3.4.4 and tested on hashlink, cpp, neko and javascript targets.  
+Works with haxe-version 3.4.4 and up. Tested on hashlink, cpp, neko and javascript targets.  
 
   
 ## Installation
