@@ -26,49 +26,69 @@ then simple call `hpx test hl neko ...` or
 ```
 // from an Integer
 var a:BigInt = 5;
+var b = BigInt.fromInt(5);
+
 
 // from a String
-var b:BigInt = "127";
+var a:BigInt = "127";
+var b = BigInt.fromString("127"); // decimal
 
-// or defining values on demand inside brackets-definition like:
-var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000" : BigInt);
-
-trace(x); // -> 2147483647000000000000000000
-```
-
-
-### Number formats
-```
-// use a prefix to define numberformat
+// or use a prefix to define numberformat
 var a:BigInt = "0x ffff 0000";   // hexadecimal
 var b:BigInt = "0o 01234567 10"; // octal
 var c:BigInt = "0b 00111010";    // binary  
 
-// if there is a sign, it has to be at placed at first
-var d:BigInt = "-0xFF";
+// helper functions to create from numberformats
+BigInt.fromHexString("aaFF 01e3");
+BigInt.fromOctalString("7724 1160");
+BigInt.fromBinaryString("0010 1101");
 
-// helper functions to create into various notations
-var i = BigInt.fromInt(127);
-x = BigInt.fromString("0x aabb");
-a = BigInt.fromHexString("aaFF 01e3");
-b = BigInt.fromOctalString("7724 1160");
-c = BigInt.fromBinaryString("0010 1101");
+BigInt.fromBaseString("2010221101102", 3); // base 3
 
 
-// to output into different formats
-trace(  i.toBinaryString()  );   // -> 1111111
-trace(  i.toBinaryString(8) );   // -> 01111111
-trace(  x.toOctalString(3)  );   // -> 125 273
-trace( (a+b+c).toHexString(4) ); // -> abfc 4480
+// you can also define values on demand inside brackets like:
+var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000" : BigInt);
+trace(x); // 2147483647000000000000000000
+```
+  
+  
+### Signing and the zero value
+```
+// signs has to be placed at first of notation
+var a:BigInt = "-0xFF";
 
-// or from and to a specific base
-a = BigInt.fromBaseString("01234", 5);
-trace( a.toBaseString(7) ); // mhm ;)
+// the 'null' value is equivalent to 0
+var zero:BigInt = 0;
+trace(zero); // null
+trace(zero.toInt()); // 0
+```
+  
+  
+### Different output formats
+```
+var a = BigInt.fromBaseString("01234", 5);
 
+// convert into Integer (will throw an error if it's to big)
+trace(  a.toInt()  ); // -> 194
+
+
+// convert into Strings
+trace(  a.toString()  );        // decimal:    194
+trace(  a.toBinaryString()  ); // binary: 11000010
+trace(  a.toOctalString()  ); // octal:        302
+trace(  a.toHexString()  );  // hexadecimal:    c2
+
+// or for specific numberbase
+trace(  a.toBaseString(7)  ); // -> 365 ;)
+
+
+// create spacings
+trace(  a.toBinaryString(4) );   //   1100 0010
+trace(  a.toBinaryString(3) );   // 011 000 010
 ```
 
 
-### Math expressions
+### Math functions and expressions
 ```
 - addition and subtraction (+, -)
 - multiplication (Karatsuba) (*)
@@ -79,7 +99,7 @@ trace( a.toBaseString(7) ); // mhm ;)
 - comparing (>, <, >=, <=, ==, !=)
 - negation (-)
 - absolute value (abs)
-- binary operations (&, |, ^)
+- binary operations (~, &, |, ^)
 - bitshifting (>>>, >>, <<)
 - Bytes in/output to store BigInts
 
@@ -92,6 +112,7 @@ Please tell me if you miss something ~^
 ## Todo
 
 - more into synopsis here
+- fixing output with leading zeros
 - optional great letters for hexadecimal output
 
 - more benchmarks
