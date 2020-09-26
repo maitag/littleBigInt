@@ -24,14 +24,12 @@ then simple call `hpx test hl neko ...` or
 
 ### Creating BigInts
 ```
-// from Integers
-
+// from Integers:
 var a:BigInt = 5;
 var b = BigInt.fromInt(5);
 
 
-// from Strings
-
+// from Strings:
 // default is decimal notation
 var a:BigInt = "127";
 var b = BigInt.fromString("127");
@@ -49,12 +47,11 @@ BigInt.fromBaseString("2010221101102", 3); // to numberbase 3
 
 
 // you can also define values on demand inside brackets like:
-
 var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000" : BigInt);
 trace(x); // 2147483647000000000000000000
 ```
-  
-  
+
+
 ### Signing and the zero value
 ```
 // signs has to be placed at first of notation
@@ -62,34 +59,30 @@ var a:BigInt = "-0xFF";
 
 // the 'null' value is equivalent to 0
 var zero:BigInt = 0;
-trace(zero); // null
-trace(zero.toInt()); // 0
+trace( zero );         // null
+trace( zero.toInt() ); // 0
 ```
-  
-  
+
+
 ### Different output formats
 ```
 var a = BigInt.fromBaseString("01234", 5);
 
-// convert into Integer 
-
+// convert into Integer: 
 trace(  a.toInt()  ); // -> 194  (throws out an error if it's to big)
 
 
-// convert into Strings
-
-trace(  a.toString()  );        // decimal:    194
-trace(  a.toBinaryString()  ); // binary: 11000010
-trace(  a.toOctalString()  ); // octal:        302
-trace(  a.toHexString()  );  // hexadecimal:    c2
-
-// or for a specific numberbase
-trace(  a.toBaseString(7)  ); // -> 365 ;)
+// convert into Strings:
+trace( a.toString() );          // decimal:    194
+trace( a.toBinaryString() );   // binary: 11000010
+trace( a.toOctalString() );   // octal:        302
+trace( a.toHexString() );    // hexadecimal:    c2
+trace( a.toBaseString(7) ); // base 7:         365
 
 
 // create spacings
-trace(  a.toBinaryString(4) );   //   1100 0010
-trace(  a.toBinaryString(3) );   // 011 000 010
+trace( a.toBinaryString(4) );   //   1100 0010
+trace( a.toBinaryString(3) );   // 011 000 010
 ```
 
 
