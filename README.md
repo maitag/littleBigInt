@@ -24,14 +24,13 @@ then simple call `hpx test hl neko ...` or
 
 ### Creating BigInts
 ```hx
-// from Integers:
+// from Integers
 var a:BigInt = 5;
 var b = BigInt.fromInt(5);
 
 
-// from Strings:
-// default is decimal notation
-var a:BigInt = "127";
+// from Strings
+var a:BigInt = "127"; // default is in decimal notation
 var b = BigInt.fromString("127");
 
 // or use a prefix to define numberformat
@@ -53,7 +52,7 @@ trace(x); // 2147483647000000000000000000
 
 
 ### Signing and the zero value
-```
+```hx
 // signs has to be placed at first of notation
 var a:BigInt = "-0xFF";
 
@@ -65,20 +64,19 @@ trace( zero.toInt() ); // 0
 
 
 ### Different output formats
-```
+```hx
 var a = BigInt.fromBaseString("01234", 5);
 
-// convert into Integer: 
+// convert into Integer
 trace(  a.toInt()  ); // -> 194  (throws out an error if it's to big)
 
 
-// convert into Strings:
+// convert into Strings
 trace( a.toString() );          // decimal:    194
 trace( a.toBinaryString() );   // binary: 11000010
 trace( a.toOctalString() );   // octal:        302
 trace( a.toHexString() );    // hexadecimal:    c2
 trace( a.toBaseString(7) ); // base 7:         365
-
 
 // create spacings
 trace( a.toBinaryString(4) );   //   1100 0010
