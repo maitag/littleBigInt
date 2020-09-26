@@ -33,7 +33,7 @@ var b = BigInt.fromInt(5);
 var a:BigInt = "127"; // default is in decimal notation
 var b = BigInt.fromString("127");
 
-// or use a prefix to define numberformat
+// or use a prefix to define number format
 var a:BigInt = "0x ffff 0000";   // hexadecimal
 var b:BigInt = "0o 01234567 10"; // octal
 var c:BigInt = "0b 00111010";    // binary  
@@ -42,12 +42,18 @@ var c:BigInt = "0b 00111010";    // binary
 BigInt.fromHexString("aaFF 01e3");
 BigInt.fromOctalString("7724 1160");
 BigInt.fromBinaryString("0010 1101");
-BigInt.fromBaseString("2010221101102", 3); // to numberbase 3
+BigInt.fromBaseString("2010221101102", 3); // to number base 3
 
 
 // you can also define values on demand inside brackets like:
 var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000":BigInt);
 trace(x); // 2147483647000000000000000000
+
+
+// from Bytes
+var bytes = Bytes.ofString("A");
+var a = BigInt.fromBytes(bytes);
+trace(a); // 65
 ```
 
 
@@ -67,20 +73,25 @@ trace( zero.toInt() ); // 0
 ```hx
 var a = BigInt.fromBaseString("01234", 5);
 
-// convert into Integer
-trace(  a.toInt()  ); // -> 194  (throws out an error if it's to big)
+// convert into native integer
+trace(  a.toInt()  ); // -> 194  (throws out an error if 'a' not fit into Int size)
 
 
-// convert into Strings
-trace( a.toString() );          // decimal:    194
-trace( a.toBinaryString() );   // binary: 11000010
-trace( a.toOctalString() );   // octal:        302
-trace( a.toHexString() );    // hexadecimal:    c2
-trace( a.toBaseString(7) ); // base 7:         365
+// convert into String for different number bases
+trace( a.toString() );          // decimal:    "194"
+trace( a.toBinaryString() );   // binary: "11000010"
+trace( a.toOctalString() );   // octal:        "302"
+trace( a.toHexString() );    // hexadecimal:    "c2"
+trace( a.toBaseString(7) ); // base 7:         "365"
 
 // create spacings
 trace( a.toBinaryString(4) );   //   1100 0010
 trace( a.toBinaryString(3) );   // 011 000 010
+
+
+// store into Bytes
+var bytes:Bytes = a.toBytes();
+trace(bytes.length); // 1
 ```
 
 
