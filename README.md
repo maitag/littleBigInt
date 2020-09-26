@@ -1,5 +1,5 @@
 # littleBigInt
-pure haxe implementation for arbitrary size integer  
+pure haxe implementation for [arbitrary-precision integer](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic)  
   
 This lib was designed and optimized for fast [Karatsuba](https://en.wikipedia.org/wiki/Karatsuba_algorithm) multiplicaton.  
 Works with haxe-version 3.4.4 and up. Tested on hashlink, cpp, neko and javascript targets.  
@@ -194,7 +194,7 @@ Let me know if something's mising ~^
   
 ## Todo
 
-- more into synopsis here
+- `haxelib run` command for invoking hxp testscripts
 - fixing output with leading zeros
 - optional exponential notation for decimals
 - optional great letters for hexadecimal output
@@ -204,4 +204,4 @@ Let me know if something's mising ~^
 - optimizing with haxe.Int64 chunks
 - targetspecific optimizations for the chunk-arrays
   
-- make `&`, `|`, `^` bitwise operations working with negative numbers (two's complement compatible)
+- make `&`, `|`, `^` bitwise operations with negative values more "two's complement"-compatible

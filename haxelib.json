@@ -1,0 +1,12 @@
+{
+	"name": "littleBigInt",
+	"url": "https://github.com/maitag/littleBigInt",
+	"license": "MIT",
+	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
+	"description": "pure haxe implementation for arbitrary-precision integer",
+	"version": "0.1.0",
+	"classPath": "src/",
+	"releasenote": "coded once, runs everywhere ;)",
+	"contributors": ["maitag"],
+	"dependencies": {}
+}
