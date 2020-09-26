@@ -46,7 +46,7 @@ BigInt.fromBaseString("2010221101102", 3); // to numberbase 3
 
 
 // you can also define values on demand inside brackets like:
-var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000" : BigInt);
+var x = (2147483647:BigInt) * ("1 000 000 000   000 000 000":BigInt);
 trace(x); // 2147483647000000000000000000
 ```
 
