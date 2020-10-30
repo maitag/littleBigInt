@@ -10,9 +10,9 @@ class IntUtil
 	
 	public inline static var MAX_BITSIZE:Int = 
 	#if bigint64
-		32;
+		64;
 	#else
-		16;
+		32;
 	#end
 	
 	#if macro_optimize_bitsize   // --------------- macro optimization -------------------

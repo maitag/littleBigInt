@@ -227,21 +227,27 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	@:op(A++) static function opIncrementAfter(a:BigInt):BigInt {
 		if (a == null) {
-			a = BigInt.fromInt(1);
+			a = BigInt.fromInt(1); // TODO: Can't do "++" for 0 (null can not be changed)
 			return null;
 		}
 		var ret = a.copy();
-		if (a.isNegative) subtractLittle(a, 1, 0);
+		if (a.isNegative) {
+			if (a == -1) a = null; // TODO: Can't do "++" for 0 (null can not be changed)
+			else subtractLittle(a, 1, 0);
+		}
 		else addLittle(a, 1, 0);
 		return ret;
 	}
 	
 	@:op(++A) static function opIncrementBefore(a:BigInt):BigInt {
 		if (a == null) {
-			a = BigInt.fromInt(1);
+			a = BigInt.fromInt(1); // TODO: Can't do "++" for 0 (null can not be changed)
 			return BigInt.fromInt(1);
 		}
-		if (a.isNegative) subtractLittle(a, 1, 0);
+		if (a.isNegative) {
+			if (a == -1) a = null; // TODO: Can't do "++" for 0 (null can not be changed)
+			subtractLittle(a, 1, 0);
+		}
 		else addLittle(a, 1, 0);
 		return a.copy();
 	}	
@@ -299,22 +305,31 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	@:op(A--) static function opDecrementAfter(a:BigInt):BigInt {
 		if (a == null) {
-			a = BigInt.fromInt(-1);
+			a = BigInt.fromInt(-1); // TODO: Can't do "--" for 0 (null can not be changed)
 			return null;
 		}
 		var ret = a.copy();
 		if (a.isNegative) addLittle(a, 1, 0);
-		else subtractLittle(a, 1, 0);
+		else {
+			if (a == 1) a = null; // TODO: Can't do "--" for 0 (null can not be changed)
+			else subtractLittle(a, 1, 0);
+		}
 		return ret;
 	}
 	
 	@:op(--A) static function opDecrementBefore(a:BigInt):BigInt {
 		if (a == null) {
-			a = BigInt.fromInt(-1);
+			a = BigInt.fromInt(-1); // TODO: Can't do "--" for 0 (null can not be changed)
 			return BigInt.fromInt(-1);
 		}
 		if (a.isNegative) addLittle(a, 1, 0);
-		else subtractLittle(a, 1, 0);
+		else {
+			if (a == 1) {
+				a = null; // TODO: Can't do "--" for 0 (null can not be changed)
+				return null;
+			}
+			else subtractLittle(a, 1, 0);
+		}
 		return a.copy();
 	}	
 
@@ -441,8 +456,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				}
 			}
 			//if (c.length > e) b = b + c.splitHigh(e);
-			//if (c.length > e) b = _add(b, c.splitHigh(e));
-			if (c.length > e) {
+			if (c.length > e) b = _add(b, c.splitHigh(e));
+/*			if (c.length > e) {
 				var ch = c.splitHigh(e);
 				if (ch != null) {
 					if (b == null) b = ch;
@@ -451,6 +466,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 					else b = addLong(ch, b);
 				}
 			}
+*/		
 		}
 		
 		if (b == null) {
@@ -465,8 +481,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				}
 			}
 			//if (b.length > e) a += b.splitHigh(e);
-			//if (b.length > e) a = _add(a, b.splitHigh(e));
-			if (b.length > e) {
+			if (b.length > e) a = _add(a, b.splitHigh(e));
+/*			if (b.length > e) {
 				var bh = b.splitHigh(e);
 				if (bh != null) {
 					if (a == null) a = bh;
@@ -474,6 +490,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 					else a = addLong(bh.copy(), a);
 				}
 			}
+*/		
 		}
 		
 		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
@@ -593,7 +610,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var e = b.length - 1;
 		var r:BigInt;
 		var x:LittleInt = b.get(e);
-		var q:BigInt = divFast(a.splitHigh(e) , x);
+		var q:BigInt = divFast(a.splitHigh(e), x);
 		
 		do {
 			r = a - (q * b);
@@ -602,8 +619,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				q = q - divFast(r.splitHigh(e), x);
 				q.shiftOneBitRight();
 				r.setPositive();
-			}			
+			}
 		} while (r >= b);
+		
 		
 		if (r != null) {
 			r = a - (q * b );
