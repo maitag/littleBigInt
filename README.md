@@ -115,7 +115,6 @@ var b:BigInt = 7;
 trace(a + b); // 10
 
 // increment and decrement
-// This works not with haxes operationoverloads yet if argument or result is 0 (because of 'null') !
 trace(++a); // 3
 trace(a++); // 4
 trace( a ); // 5
@@ -195,8 +194,6 @@ Let me know if something's mising ~^
   
 ## Todo
 
-- fixing increment and decrement (++,--) problem with zero value/result
-  or replace this by .inc() and .dec() functions
 - `haxelib run` command for invoking hxp testscripts
 - fixing output with leading zeros
 - optional exponential notation for decimals

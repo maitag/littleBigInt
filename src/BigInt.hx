@@ -225,31 +225,39 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	//@:op(A + B) @:commutative function opAddInt(b:Int):BigInt return _add(this, b);
 	@:op(A + B) static function opAddInt(a:Int, b:BigInt):BigInt return _add(a, b); // haxe 3.4.4 compatible!
 	
-	@:op(A++) static function opIncrementAfter(a:BigInt):BigInt {
-		if (a == null) {
-			a = BigInt.fromInt(1); // TODO: Can't do "++" for 0 (null can not be changed)
+	@:op(A++) inline function opIncrementAfter():BigInt {
+		if (this == null) {
+			this = LittleIntChunks.createFromLittleInt(1);
 			return null;
 		}
-		var ret = a.copy();
-		if (a.isNegative) {
-			if (a == -1) a = null; // TODO: Can't do "++" for 0 (null can not be changed)
-			else subtractLittle(a, 1, 0);
+		var ret = copy();
+		if (isNegative) {
+			if (length == 1 && get(0) == 1) this = null;
+			else subtractLittle(this, 1, 0);
 		}
-		else addLittle(a, 1, 0);
+		else addLittle(this, 1, 0);
 		return ret;
 	}
 	
-	@:op(++A) static function opIncrementBefore(a:BigInt):BigInt {
-		if (a == null) {
-			a = BigInt.fromInt(1); // TODO: Can't do "++" for 0 (null can not be changed)
-			return BigInt.fromInt(1);
+	@:op(++A) inline function opIncrementBefore():BigInt {
+		if (this == null) {
+			this = LittleIntChunks.createFromLittleInt(1);
+			return LittleIntChunks.createFromLittleInt(1);
 		}
-		if (a.isNegative) {
-			if (a == -1) a = null; // TODO: Can't do "++" for 0 (null can not be changed)
-			subtractLittle(a, 1, 0);
+		if (isNegative) {
+			if (length == 1 && get(0) == 1) {
+				this = null;
+				return null;
+			}
+			else {
+				subtractLittle(this, 1, 0);
+				return copy();
+			}
 		}
-		else addLittle(a, 1, 0);
-		return a.copy();
+		else {
+			addLittle(this, 1, 0);
+			return copy();
+		}
 	}	
 	
 	static inline function _add(a:BigInt, b:BigInt):BigInt {
@@ -303,34 +311,39 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	//@:op(A - B) static function opSubtractInt(a:BigInt, b:Int):BigInt return _subtract(a, b);
 	@:op(A - B) static function opIntSubtract(a:Int, b:BigInt):BigInt return _subtract(a, b);
 	
-	@:op(A--) static function opDecrementAfter(a:BigInt):BigInt {
-		if (a == null) {
-			a = BigInt.fromInt(-1); // TODO: Can't do "--" for 0 (null can not be changed)
+	@:op(A--) inline function opDecrementAfter():BigInt {
+		if (this == null) {
+			this = LittleIntChunks.createFromLittleInt(-1);
 			return null;
 		}
-		var ret = a.copy();
-		if (a.isNegative) addLittle(a, 1, 0);
+		var ret = copy();
+		if (isNegative) addLittle(this, 1, 0);
 		else {
-			if (a == 1) a = null; // TODO: Can't do "--" for 0 (null can not be changed)
-			else subtractLittle(a, 1, 0);
+			if (length == 1 && get(0) == 1) this = null;
+			else subtractLittle(this, 1, 0);
 		}
 		return ret;
 	}
 	
-	@:op(--A) static function opDecrementBefore(a:BigInt):BigInt {
-		if (a == null) {
-			a = BigInt.fromInt(-1); // TODO: Can't do "--" for 0 (null can not be changed)
-			return BigInt.fromInt(-1);
+	@:op(--A) inline function opDecrementBefore():BigInt {
+		if (this == null) {
+			this = LittleIntChunks.createFromLittleInt(-1);
+			return LittleIntChunks.createFromLittleInt(-1);
 		}
-		if (a.isNegative) addLittle(a, 1, 0);
+		if (isNegative) {
+			addLittle(this, 1, 0);
+			return copy();
+		}
 		else {
-			if (a == 1) {
-				a = null; // TODO: Can't do "--" for 0 (null can not be changed)
+			if (length == 1 && get(0) == 1) {
+				this = null;
 				return null;
 			}
-			else subtractLittle(a, 1, 0);
-		}
-		return a.copy();
+			else {
+				subtractLittle(this, 1, 0);
+				return copy();
+			}
+		}		
 	}	
 
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {

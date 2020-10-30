@@ -4,9 +4,9 @@
 	"license": "MIT",
 	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
 	"description": "pure haxe implementation for arbitrary-precision integer",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"classPath": "src/",
-	"releasenote": "fixing multiplication, adding pi-benchmark",
+	"releasenote": "fixing multiplication and inc-/decrement, adding pi-benchmark",
 	"contributors": ["maitag"],
 	"dependencies": {}
 }

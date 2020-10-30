@@ -258,12 +258,23 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testIncrement() {
-		var a:BigInt = "0x 1 1234 5678 abcd efff";
-		var b:BigInt = a++;
+		var a:BigInt;
+		var b:BigInt;
+		var c:BigInt;
+		a = "0x 1 1234 5678 abcd efff";
+		b = a++;
 		assertTrue( b == ("0x 1 1234 5678 abcd efff" : BigInt) );
 		assertTrue( a == ("0x 1 1234 5678 abcd f000" : BigInt) );
-		var c:BigInt = ++a;
+		c = ++a;
 		assertTrue( (a == c) && (c == ("0x 1 1234 5678 abcd f001" : BigInt)) );
+		a = 0; assertTrue(a++ == 0); assertTrue(a == 1);
+		a =-1; assertTrue(a++ ==-1); assertTrue(a == 0);
+		a = 0; assertTrue(++a == 1); assertTrue(a == 1);
+		a =-1; assertTrue(++a == 0); assertTrue(a == 0);
+		a = 0; assertTrue(a-- == 0); assertTrue(a ==-1);
+		a = 1; assertTrue(a-- == 1); assertTrue(a == 0);
+		a = 0; assertTrue(--a ==-1); assertTrue(a ==-1);
+		a = 1; assertTrue(--a == 0); assertTrue(a == 0);
 	}
 	
 	public function testSubtraction() {
@@ -381,6 +392,12 @@ class TestBigInt extends haxe.unit.TestCase
 		a = "111111111111111111111111111111111111111";
 		b = "-333333333333333333333";
 		c = "-37037037037037037036999999999999999999962962962962962962963";
+		assertTrue(a * b == c);
+		
+		// check optimization bug
+		a = "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000195193276309135075023284912102116616768613765187463511927839869094134045055764247";
+		b = "10000000000";
+		c = "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001951932763091350750232849121021166167686137651874635119278398690941340450557642470000000000";
 		assertTrue(a * b == c);
 	}
 	
