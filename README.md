@@ -2,7 +2,7 @@
 pure haxe implementation for [arbitrary-precision integer](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic)  
   
 This lib was designed and optimized for fast [Karatsuba](https://en.wikipedia.org/wiki/Karatsuba_algorithm) multiplicaton.  
-Works with haxe-version 3.4.4 and up. Tested on hashlink, cpp, neko and javascript targets.  
+Works with haxe-version 3.4.4 and up to 4.2. Tested on hashlink, cpp, neko and javascript targets.  
 
   
 ## Installation
@@ -26,8 +26,10 @@ haxelib install hxp
 haxelib run hxp --install-hxp-alias
 ```
 
-then simple call `hxp test hl neko ...` or  
+then simple call `hxp test hl neko ...`, `hxp bench ...` or  
 `hxp help` into projectfolder to see more targetspecific options.
+  
+To add a new benchmark you only need to put a new .hx file into [benchmarks-folder](https://github.com/maitag/littleBigInt/tree/master/benchmarks).  
   
   
 ## Synopsis
@@ -194,7 +196,7 @@ Let me know if something's mising ~^
   
 ## Todo
 
-- `haxelib run` command for invoking hxp testscripts
+- `haxelib run` command to invoke the hxp testscripts from libfolder
 - fixing output with leading zeros
 - optional exponential notation for decimals
 - optional great letters for hexadecimal output

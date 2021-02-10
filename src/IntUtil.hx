@@ -25,7 +25,7 @@ class IntUtil
 				else {
 					var bitsize = IntUtil._bitsize(($i:UInt) - 1, $v{maxBitsize >> 1}, $v{maxBitsize >> 1});
 					if (bitsize >= $v{maxBitsize})
-						throw('Error calculating nextPowerOfTwo: reaching maxBitSize of $maxBitsize');
+						throw("Error calculating nextPowerOfTwo: reaching maxBitSize of " + $v{maxBitsize});
 					1 << bitsize;
 				}
 			):UInt);
@@ -41,7 +41,7 @@ class IntUtil
 	// how to make "private"? (no access from bitsize and _bitsize itself!)
 	public static macro function _bitsize(i:haxe.macro.Expr, n:Int, delta:Int) {
 		if (delta == 0)
-			return macro throw('Error calculating intBitLength: ' + $i + ' has more bits than maxBitSize');
+			return macro throw('Error calculating intBitLength: ' + $i + ' has more bits than maxBitSize of ' + $v{MAX_BITSIZE});
 		else {
 			delta = delta >> 1;
 			return macro {
