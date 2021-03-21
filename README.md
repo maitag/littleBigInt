@@ -2,8 +2,8 @@
 pure haxe implementation for [arbitrary-precision integer](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic)  
   
 This lib was designed and optimized for fast [Karatsuba](https://en.wikipedia.org/wiki/Karatsuba_algorithm) multiplicaton.  
-Works with haxe-version 3.4.4 and up to 4.2. Tested on hashlink, cpp, neko and javascript targets.  
-
+Works and tested with any haxe-version >= 3.4.4 on hashlink, cpp, neko and javascript targets.  
+  
   
 ## Installation
 ```
@@ -14,11 +14,11 @@ or use the latest developement version from github:
 ```
 haxelib git littleBigInt https://github.com/maitag/littleBigInt.git
 ```
-
-
+  
+  
 ## Testing
 
-To perform benchmarks or unit-tests call the `test.hx` [hxp](https://lib.haxe.org/p/hxp) script. 
+To perform benchmarks or unit-tests call the `test.hx` [hxp](https://lib.haxe.org/p/hxp) script.
   
 install [hxp](https://lib.haxe.org/p/hxp) via:
 ```
@@ -29,7 +29,7 @@ haxelib run hxp --install-hxp-alias
 then simple call `hxp test hl neko ...`, `hxp bench ...` or  
 `hxp help` into projectfolder to see more targetspecific options.
   
-To add a new benchmark you only need to put a new .hx file into [benchmarks-folder](https://github.com/maitag/littleBigInt/tree/master/benchmarks).  
+To add a new benchmark you only need to put a new .hx file into [benchmarks-folder](https://github.com/maitag/littleBigInt/tree/master/benchmarks).
   
   
 ## Synopsis
@@ -55,7 +55,11 @@ var c:BigInt = "0b 00111010";    // binary
 BigInt.fromHexString("aaFF 01e3");
 BigInt.fromOctalString("7724 1160");
 BigInt.fromBinaryString("0010 1101");
-BigInt.fromBaseString("2010221101102", 3); // to number base 3
+BigInt.fromBaseString("2010221101102", 3); // to default digits and numberbase of 3
+
+// use a custom string of digit chars for number representation (also need for a base > 16)
+BigInt.fromBaseString("hello", 5, "0helo1234567"); // using the first 5 digits of digitChars
+BigInt.fromBaseString("haxe", "abcdefgh123xyz"); // base is set to length of digitChars
 
 
 // you can also define values on demand inside brackets like:
@@ -91,15 +95,21 @@ trace(  a.toInt()  ); // -> 194  (throws out an error if 'a' not fit into)
 
 
 // convert into String for different number bases
-trace( a.toString() );          // decimal:    "194"
-trace( a.toBinaryString() );   // binary: "11000010"
-trace( a.toOctalString() );   // octal:        "302"
-trace( a.toHexString() );    // hexadecimal:    "c2"
-trace( a.toBaseString(7) ); // base 7:         "365"
+trace( a.toString() );           // decimal:    "194"
+trace( a.toBinaryString() );    // binary: "11000010"
+trace( a.toOctalString() );    // octal:        "302"
+trace( a.toHexString() );     // hexadecimal:    "C2"
+trace( a.toHexString(false));// hexa-lowercase:  "c2"
+trace( a.toBaseString(7) ); // base 7:          "365"
 
 // create spacings
-trace( a.toBinaryString(4) );   //   1100 0010
-trace( a.toBinaryString(3) );   // 011 000 010
+trace( a.toBinaryString(4) );        //   "1100 0010"
+trace( a.toBinaryString(3) );        // "011 000 010"
+trace( a.toBinaryString(3, false) ); //  "11 000 010" (no leading zeros!)
+
+// use a custom digit string for number-representation
+trace( (969:BigInt).toBaseString(5, "0helo1234567") ); // "hello"
+trace( (19366:BigInt).toBaseString("abcdefgh123xyz") ); // "haxe"
 
 
 // store into Bytes
@@ -117,7 +127,7 @@ var b:BigInt = 7;
 trace(a + b); // 10
 
 // increment and decrement
-trace(++a); // 3
+trace(++a); // 4
 trace(a++); // 4
 trace( a ); // 5
 
@@ -134,7 +144,7 @@ var result = BigInt.divMod(a, b);
 trace( result.quotient, result.remainder ); // 2, 4
 
 // integer division
-trace( a / b); // 3 (same as result.quotient)
+trace( a / b); // 2 (same as result.quotient)
 
 // modulo
 trace( a % b); // 4 (same as result.remainder)
@@ -153,12 +163,10 @@ trace( b.abs() ); // 3
 ```
 
 
-
 ### Comparing
 
 All comparing operators `>`, `<`, `>=`, `<=`, `==`, `!=`  
 work like default and return the expected boolean value.
-
 
 
 ### Bitwise Operations
@@ -193,17 +201,13 @@ trace( (a >>> 3).toBinaryString() ); // 1010
 Let me know if something's mising ~^  
   
   
-  
 ## Todo
 
 - `haxelib run` command to invoke the hxp testscripts from libfolder
-- fixing output with leading zeros
 - optional exponential notation for decimals
-- optional great letters for hexadecimal output
-  
 - more benchmarks
 - optimizing division (toInt() without bitsize-check)
-- optimizing with haxe.Int64 chunks
 - targetspecific optimizations for the chunk-arrays
-  
 - make `&`, `|`, `^` bitwise operations with negative values more "two's complement"-compatible
+  
+  

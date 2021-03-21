@@ -124,10 +124,15 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
         Creates a new BigInt from a String of numbers of a specific base
 
         @param  numberString  the String that representing the number
-        @param  base  the base of numberformat, default is 10
+        @param  base  the base of numberformat (on null it is set to digitChars.length or to 10 instead)
+        @param  digitChars  a String of ordered digit chars for number representation (default is "0123456789abcdef")
     **/
-	static public function fromBaseString(numberString:String, base:Int = 10):BigInt {
-		return LittleIntChunks.createFromBaseString(numberString, base);
+	static public function fromBaseString(numberString:String, base:Null<Int> = null, digitChars:Null<String> = null):BigInt {
+		if (base == null) {
+			if (digitChars == null) base = 10;
+			else base = digitChars.length;
+		}
+		return LittleIntChunks.createFromBaseString(numberString, base, digitChars);
 	}
 	
 	
@@ -139,7 +144,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     **/
 	public function toBinaryString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
-		return this.toBinaryString(spacing, leadingZeros);	
+		return this.toBinaryString(spacing, leadingZeros);
 	}	
 	
     /**
@@ -150,29 +155,44 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     **/
 	public function toOctalString(spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
-		return this.toBaseString(8, spacing, leadingZeros);	
+		return this.toBaseString(8, spacing, leadingZeros);
 	}	
 	
     /**
         Converts this BigInt into a String (hexadecimal notation).
 		
+        @param  upperCase  output hex number into lowercase letters
         @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
-	public function toHexString(spacing:Int = 0, leadingZeros:Bool = true):String {
+	public function toHexString(upperCase:Bool = true, spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
-		return this.toHexString(spacing, leadingZeros);	
+		return this.toHexString(upperCase, spacing, leadingZeros);	
 	}
 	
     /**
         Converts this BigInt into a String to a defined base.
 		
+        @param  base  the base of numberformat (on null it is set to digitChars.length or to 10 instead)
+        @param  digitChars  a String of ordered digit chars for number representation (default is "0123456789abcdef")
         @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
-	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
-		if (this == null) return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing) : "0";
-		return this.toBaseString(base, spacing, leadingZeros);	
+	public function toBaseString(base:Null<Int> = null, digitChars:Null<String> = null, spacing:Int = 0, leadingZeros:Bool = true):String {
+		if (base == null) {
+			if (digitChars == null) base = 10;
+			else base = digitChars.length;
+		}
+		if (this == null) {
+			var zeroDigitChar = "0";
+			if (digitChars != null) {
+				if (base < 2)  throw('Error, base $base need to be greater or equal 2');
+				if (base > digitChars.length) throw('Error, base $base for string output is to great. Max value can be ${digitChars.length}');
+				zeroDigitChar = digitChars.charAt(0);
+			}
+			return (leadingZeros && spacing > 0) ? LittleIntChunks.getStringOfZeros(spacing, zeroDigitChar) : zeroDigitChar;
+		}
+		return this.toBaseString(base, digitChars, spacing, leadingZeros);	
 	}
 	
 	

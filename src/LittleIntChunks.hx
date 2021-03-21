@@ -180,19 +180,18 @@ class LittleIntChunks {
 
 	static var regexSpaces = ~/\s+/g;
 	static var regexLeadingZeros = ~/^0*/g;
+	static var regexLeadingZeroBlocks = ~/^(0+\s)+/g;
 	static var regexBinary = ~/^0b/;
 	static var regexOctal = ~/^0o/;
 	static var regexHex = ~/^0x/;
 	static var regexSign = ~/^-/;
-	static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
+	//static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
+	static var regexForbiddenDigitChars = ~/\s|-/g;
+			
+	public static function createFromBaseString(s:String, base:Null<Int> = null, digitChars:Null<String> = null):BigInt {
 		
-	public static function createFromBaseString(s:String, base:Null<Int> = null):BigInt {
-
-		// make lowercase and parse out all spaces
-		s = regexSpaces.replace(s.toLowerCase(), "");
-		
-		// checking zero
-		if (regexZero.match(s)) return null;
+		s = regexSpaces.replace(s, "");	// parse out all spaces	
+		if (digitChars == null) s = s.toLowerCase();
 		
 		// check sign
 		var neg = false;
@@ -201,33 +200,38 @@ class LittleIntChunks {
 			neg = true;
 		}
 		
-		if (base != null) {
-			return fromBaseString(regexLeadingZeros.replace(s, ""), base, neg);
-		}
+		if (base != null) return fromBaseString(s, base, digitChars, neg);
 		else {
-
-			if (regexBinary.match(s)) 
-				return fromBinaryString(regexLeadingZeros.replace(regexBinary.replace(s, ""), ""), neg);
-			else if (regexHex.match(s))
-				return fromHexString(regexLeadingZeros.replace(regexHex.replace(s, ""), ""), neg);
-			else if (regexOctal.match(s)) 
-				return fromBaseString(regexLeadingZeros.replace(regexOctal.replace(s, ""), ""), 8, neg);
-			else
-				return fromBaseString(regexLeadingZeros.replace(s, ""), 10, neg);
+			if (regexBinary.match(s)) return fromBinaryString(regexBinary.replace(s, ""), neg);
+			else if (regexHex.match(s)) return fromHexString(regexHex.replace(s, ""), neg);
+			else if (regexOctal.match(s)) return fromBaseString(regexOctal.replace(s, ""), 8, digitChars, neg);
+			else return fromBaseString(s, 10, digitChars, neg);
 		}
 	}
 	
-	public static inline function getStringOfZeros(amount:Int):String {
-		return [for (i in 0...amount) "0"].join("");
+	public static inline function getStringOfZeros(amount:Int, zeroDigitChar:String = "0"):String {
+		return [for (i in 0...amount) zeroDigitChar].join("");
 	}
 	
 	// ------ Parsing String from Number to a defined Base ------------
-	
-	static inline function fromBaseString(s:String, base:Int = 10, neg:Bool):BigInt {
+	static inline function fromBaseString(s:String, base:Int = 10, digitChars:Null<String>, neg:Bool):BigInt {
 		
-		// TODO: optional param for custom chars (only hexaChars yet)
 		if (base < 2)  throw('Error, base $base need to be greater or equal 2');
-		if (base > 16) throw('Error, base $base for string output is to great. Max value can be ${hexaChars.length}');
+
+		if (digitChars == null) {
+			digitChars = hexaChars;
+			s = regexLeadingZeros.replace(s, "");
+		}
+		else
+		{
+			if (digitChars.length < 2) throw('Error, the string for the digits needs to contain at least 2 chars');
+			if (regexForbiddenDigitChars.match(digitChars)) throw("Error, the string for the digits should not contain spacing or '-' chars");
+			s = new EReg("^" + digitChars.charAt(0) + "*", "g").replace(s, "");
+		}
+		
+		if (s.length == 0) return null; // all was filled by zero
+
+		if (base > digitChars.length) throw('Error, base $base for numberstring is to great. Max value can be ${digitChars.length}');
 
 		var i = s.length;
 		var b:BigInt = 1;
@@ -235,8 +239,8 @@ class LittleIntChunks {
 		var offset:Int;
 		
 		while (i > 0) {
-			offset = hexaChars.indexOf(s.charAt(--i));
-			if (offset == -1 || offset >= base) throw('Error, base $base string can only contain "${hexaChars.join("")}"');
+			offset = digitChars.indexOf(s.charAt(--i));
+			if (offset == -1 || offset >= base) throw('Error, base $base string can only contain "${digitChars}"');
 			value = BigInt._add(value, BigInt.mulLittle(b, offset));
 			b = b * base;
 			//b = BigInt.mulLittle(b, base); // for only 7 bitsize base can't be more then 128 here
@@ -244,11 +248,22 @@ class LittleIntChunks {
 		return (neg) ? value.setNegative() : value;
 	}
 	
-	public function toBaseString(base:Int = 10, spacing:Int = 0, leadingZeros:Bool = false):String {
+	public function toBaseString(base:Int = 10, digitChars:Null<String> = null, spacing:Int = 0, leadingZeros:Bool = true):String {
 		
-		// TODO: optional param for custom chars (only hexaChars yet)
 		if (base < 2)  throw('Error, base $base need to be greater or equal 2');
-		if (base > 16) throw('Error, base $base for string output is to great. Max value can be ${hexaChars.length}');
+		
+		var zeroDigitChar = "0";
+		
+		if (digitChars == null) {
+			digitChars = hexaChars;
+		} 
+		else {
+			if (digitChars.length < 2) throw('Error, the string for the digits needs to contain at least 2 chars');
+			if (regexForbiddenDigitChars.match(digitChars)) throw("Error, the string for the digits should not contain spacing or '-' chars");
+			zeroDigitChar = digitChars.charAt(0);
+		}
+		
+		if (base > digitChars.length) throw('Error, base $base for numberstring is to great. Max value can be ${digitChars.length}');
 		
 		var s = "";
 		var a = new BigInt(this).clone().setPositive();
@@ -262,12 +277,16 @@ class LittleIntChunks {
 				s = ((j != 0 && j % spacing == 0) ? " " : "") + s;
 				j++;
 			}
-			s = hexaChars[ret.remainder.toInt()] + s;			
+			s = digitChars.charAt(ret.remainder.toInt()) + s;			
 		}
 		
 		if (leadingZeros && spacing > 0) {
-			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
-			s = ~/^(0+\s)+/.replace(s, "");
+			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing, zeroDigitChar) + s;
+			s = new EReg("^("+zeroDigitChar+"+\\s)+","g").replace(s, "");
+		}
+		else {
+			s = new EReg("^("+zeroDigitChar+"+\\s)+","g").replace(s, "");
+			s = new EReg("^"+zeroDigitChar+"*","g").replace(s, "");
 		}
 
 		return ((isNegative) ? "-" : "") + s;
@@ -276,6 +295,9 @@ class LittleIntChunks {
 	// ---------- fast parsing Binary String -------------------
 	
 	static public inline function fromBinaryString(s:String, neg:Bool):BigInt {
+		
+		s = regexLeadingZeros.replace(s, "");
+		if (s.length == 0) return null; // all was filled by zero		
 		
 		var littleIntChunks = new LittleIntChunks();
 		littleIntChunks.isNegative = neg;
@@ -321,9 +343,12 @@ class LittleIntChunks {
 		
 		if (leadingZeros && spacing > 0) {
 			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
-			s = ~/^(0+\s)+/.replace(s, "");
+			s = regexLeadingZeroBlocks.replace(s, "");
 		}
-		else s = regexLeadingZeros.replace(s, "");
+		else {
+			s = regexLeadingZeroBlocks.replace(s, "");
+			s = regexLeadingZeros.replace(s, "");
+		}
 		
 		return ((isNegative) ? "-" : "") + s;
 	}
@@ -331,9 +356,12 @@ class LittleIntChunks {
 	
 	// ---------- fast parsing Hexadecimal String -------------------
 	
-	static var hexaChars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
+	static var hexaChars:String = "0123456789abcdef";
 	
 	static public inline function fromHexString(s:String, neg:Bool):BigInt {
+		
+		s = regexLeadingZeros.replace(s, "");
+		if (s.length == 0) return null; // all was filled by zero
 		
 		var littleIntChunks = new LittleIntChunks();
 		littleIntChunks.isNegative = neg;
@@ -344,7 +372,7 @@ class LittleIntChunks {
 		
 		while (i > 0) {
 			offset = hexaChars.indexOf(s.charAt(--i));
-			if (offset == -1) throw('Error, hexadecimal string can only contain "${hexaChars.join("")}"');
+			if (offset == -1) throw('Error, hexadecimal string can only contain "${hexaChars}"');
 			chunk += offset * bit;
 			bit = bit << 4;
 			if (bit >= UPPESTBIT) {
@@ -363,7 +391,7 @@ class LittleIntChunks {
 		return new BigInt(littleIntChunks);
 	}
 	
-	public function toHexString(spacing:Int = 0, leadingZeros:Bool = true):String {
+	public function toHexString(upperCase:Bool = true, spacing:Int = 0, leadingZeros:Bool = true):String {
 		
 		var s = "";
 		var chunk:LittleInt = 0;
@@ -377,7 +405,7 @@ class LittleIntChunks {
 					s = ((j != 0 && j % spacing == 0) ? " " : "") + s;
 					j++;
 				}
-				s = hexaChars[chunk & 0x0F] + s;
+				s = hexaChars.charAt(chunk & 0x0F) + s;
 				chunk = chunk >> 4;
 				restBits -= 4;
 			}
@@ -390,18 +418,21 @@ class LittleIntChunks {
 			}
 		}
 		
-		//if (restBits > 0) {
 		if (restBits > 0 && chunk > 0) {
 			if (spacing > 0) s = ((j++ % spacing == 0) ? " " : "") + s;
-			s = hexaChars[chunk & 0x0F] + s;
+			s = hexaChars.charAt(chunk & 0x0F) + s;
 		}
-
+		
 		if (leadingZeros && spacing > 0) {
 			if (j % spacing != 0) s = getStringOfZeros(spacing - j % spacing) + s;
-			s = ~/^(0+\s)+/.replace(s, "");
+			s = regexLeadingZeroBlocks.replace(s, "");
 		}
-		else s = regexLeadingZeros.replace(s, "");
+		else {
+			s = regexLeadingZeroBlocks.replace(s, "");
+			s = regexLeadingZeros.replace(s, "");
+		}
 		
+		if (upperCase) s = s.toUpperCase();
 		return ((isNegative) ? "-" : "") + s;
 	}
 		

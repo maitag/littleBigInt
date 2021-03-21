@@ -13,6 +13,7 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testFromString() {
+		assertTrue( ("" : BigInt) == 0 );
 		assertTrue( (" 0 " : BigInt) == 0 );
 		assertTrue( (" -0 " : BigInt) == 0 );
 		assertTrue( (" -0 000 " : BigInt) == 0 );
@@ -27,14 +28,36 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testFromBaseString() {
+		assertTrue( BigInt.fromBaseString("") == 0 );
+		assertTrue( BigInt.fromBaseString("", 3) == 0 );
+		assertTrue( BigInt.fromBaseString("", 3, "012") == 0 );
+		assertTrue( BigInt.fromBaseString("", "012") == 0 );
+		assertTrue( BigInt.fromBaseString("10") == 10 );
 		assertTrue( BigInt.fromBaseString("0", 10) == 0 );
 		assertTrue( BigInt.fromBaseString(" - 0", 10) == 0 );
 		assertTrue( BigInt.fromBaseString("-54321", 10) == -54321 );
+		assertTrue( BigInt.fromBaseString(" 54 321 ", 10) == 54321 );
 		assertTrue( BigInt.fromBaseString("12345", 10) == 12345 );
 		assertTrue( BigInt.fromBaseString("25", 8) == 21 );
 		assertTrue( BigInt.fromBaseString("-100", 8) == -64 );
 		assertTrue( BigInt.fromBaseString("7FFFFFFF", 16) == 0x7FFFFFFF );
 		assertTrue( BigInt.fromBaseString("12", 3) == 5 );
+		assertTrue( BigInt.fromBaseString("OOOx OOOO OOOO", "Ox") == 256 );
+		assertTrue( BigInt.fromBaseString("hello", 25, "0123456789abcdefghijklmno") == 6873049 );
+		assertTrue( BigInt.fromBaseString("h e l l o", 5, "0helo1234567") == 969 );
+		assertTrue( BigInt.fromBaseString("haxe", "abcdefgh123xyz") == 19366 );
+		// errors
+		assertTrue( try { BigInt.fromBaseString("0x ff", 16); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("1", ""); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("1", "1"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("1", "1"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("a", "123"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("10", 5, "0123"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("10", "0 123"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("10", "0 12 3"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("10", "0  12-3"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("10", "0 1--2-3"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBaseString("10", "-0123"); false; } catch (e:Dynamic) true );
 	}
 	
 	public function testToBaseString() {
@@ -44,10 +67,31 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( (255 : BigInt).toBaseString(16, 2), "ff" );
 		assertEquals( (255 : BigInt).toBaseString(16), "ff" );
 		assertEquals( (256 : BigInt).toBaseString(16, 4, true), "0100" );
+		assertEquals( (256 : BigInt).toBaseString(16, 4, false), "100" );
 		assertEquals( (256 : BigInt).toBaseString(16), "100" );
+		assertEquals( (256 : BigInt).toBaseString(16, true), "100" );
 		assertEquals( (16777215 : BigInt).toBaseString(16), "ffffff" );
-		assertEquals( (16777215 : BigInt).toBaseString(16, 4), "ff ffff" );
+		assertEquals( (16777215 : BigInt).toBaseString(16, 4), "00ff ffff" );
+		assertEquals( (16777215 : BigInt).toBaseString(16, 4, false), "ff ffff" );
 		assertEquals( (-16777215 : BigInt).toBaseString(16, 8, true), "-00ffffff" );
+		assertEquals( (6873049 : BigInt).toBaseString(25, "0123456789abcdefghijklmno"), "hello" );
+		assertEquals( (6873049 : BigInt).toBaseString(25, "0123456789abcdefghijklmno", 2, false), "h el lo" );
+		assertEquals( (6873049 : BigInt).toBaseString(25, "O123456789abcdefghijklmno", 2), "Oh el lo" );
+		assertEquals( (256 : BigInt).toBaseString(2, "Ox", 4), "OOOx OOOO OOOO" );
+		assertEquals( (256 : BigInt).toBaseString(2, "Ox", 4, false), "x OOOO OOOO" );
+		assertEquals( (969 : BigInt).toBaseString(5, "0helo1234567"), "hello" );
+		assertEquals( (19366 : BigInt).toBaseString(14, "abcdefgh123xyz"), "haxe" );
+		assertEquals( (19366 : BigInt).toBaseString("abcdefgh123xyz", 2), "ha xe" );
+		// errors
+		assertTrue( try { (10 : BigInt).toBaseString(""); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString("a"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString(0, "a"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString(1, "a"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString(4, "abc"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString("-abc"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString("-ab--c"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString("a bc"); false; } catch (e:Dynamic) true );
+		assertTrue( try { (10 : BigInt).toBaseString("a bc  "); false; } catch (e:Dynamic) true );
 	}
 
 	public function testFromOctalString() {
@@ -55,6 +99,14 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( (" -0o0" : BigInt) == 0 );
 		assertTrue( ("0o10" : BigInt) == 8 );
 		assertTrue( ("0o 24" : BigInt) == 20 );
+		assertTrue( BigInt.fromOctalString(" 0 ") == 0 );
+		assertTrue( BigInt.fromOctalString("10 ") == 8 );
+		assertTrue( BigInt.fromOctalString("-11 ") == -9 );
+		assertTrue( BigInt.fromOctalString(" 2 4 ") == 20 );
+		// errors
+		assertTrue( try { BigInt.fromOctalString(" 0o 24 "); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromOctalString("-0o 24 "); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromOctalString("--24"); false; } catch (e:Dynamic) true );
 	}
 	
 	public function testFromHexString() {
@@ -70,20 +122,45 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( ("-0x7f" : BigInt) == -127 );
 		assertTrue( ("- 0x 80" : BigInt) == -128 );
 		assertTrue( ("0x ABCDEF123456789" : BigInt) == "773738363261118345" );
+		assertTrue( BigInt.fromHexString(" 0 ") == 0 );
+		assertTrue( BigInt.fromHexString(" 00 ") == 0 );
+		assertTrue( BigInt.fromHexString(" -0 ") == 0 );
+		assertTrue( BigInt.fromHexString(" - 5 ") == -5 );
+		assertTrue( BigInt.fromHexString("-5 ") == -5 );
+		assertTrue( BigInt.fromHexString("- 5 ") == -5 );
+		assertTrue( BigInt.fromHexString("ff") == 255 );
+		assertTrue( BigInt.fromHexString("-f f") == -255 );
+		// errors
+		assertTrue( try { BigInt.fromHexString(" 0x0 "); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromHexString(" - 0x0 "); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromHexString(" 0x ff "); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromHexString("0xff "); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromHexString("-0xff "); false; } catch (e:Dynamic) true );
 	}
 	
 	public function testToHexString() {
 		assertEquals( (0 : BigInt).toHexString(), "0" );
 		assertEquals( (-1 : BigInt).toHexString(), "-1" );
 		assertEquals( (16 : BigInt).toHexString(), "10" );
-		assertEquals( (255 : BigInt).toHexString(2), "ff" );
-		assertEquals( (255 : BigInt).toHexString(), "ff" );
+		assertEquals( (255 : BigInt).toHexString(2), "FF" );
+		assertEquals( (255 : BigInt).toHexString(), "FF" );
+		assertEquals( (255 : BigInt).toHexString(3), "0FF" );
+		assertEquals( (255 : BigInt).toHexString(3, false), "FF" );
 		assertEquals( (256 : BigInt).toHexString(4), "0100" );
+		assertEquals( (256 : BigInt).toHexString(4, false), "100" );
+		assertEquals( (256 : BigInt).toHexString(false, 4, false), "100" );
 		assertEquals( (256 : BigInt).toHexString(), "100" );
-		assertEquals( (16777215 : BigInt).toHexString(), "ffffff" );
-		assertEquals( (16777215 : BigInt).toHexString(4), "00ff ffff" );
-		assertEquals( ( -16777215 : BigInt).toHexString(8), "-00ffffff" );
-		assertEquals( ("773738363261118345" : BigInt).toHexString(), "abcdef123456789" );
+		assertEquals( (16777215 : BigInt).toHexString(), "FFFFFF" );
+		assertEquals( (16777215 : BigInt).toHexString(6), "FFFFFF" );
+		assertEquals( (16777215 : BigInt).toHexString(5), "0000F FFFFF" );
+		assertEquals( (16777215 : BigInt).toHexString(5, false), "F FFFFF" );
+		assertEquals( (16777215 : BigInt).toHexString(false, 5, false), "f fffff" );
+		assertEquals( (16777215 : BigInt).toHexString(4), "00FF FFFF" );
+		assertEquals( (16777215 : BigInt).toHexString(false, 4, true), "00ff ffff" );
+		assertEquals( (16777215 : BigInt).toHexString(4, false), "FF FFFF" );
+		assertEquals( ( -16777215 : BigInt).toHexString(8), "-00FFFFFF" );
+		assertEquals( ( -16777215 : BigInt).toHexString(8, false), "-FFFFFF" );
+		assertEquals( ("773738363261118345" : BigInt).toHexString(), "ABCDEF123456789" );
 	}
 
 	public function testFromBinaryString() {
@@ -98,6 +175,19 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( ("-0b 01111111 11111111 11111111 11111111" : BigInt) == -2147483647 );
 		assertTrue( ("-0b 111 1111" : BigInt) == -127 );
 		assertTrue( ("- 0b 1000 0000" : BigInt) == -128 );
+		assertTrue( BigInt.fromBinaryString(" 0 ") == 0 );
+		assertTrue( BigInt.fromBinaryString("00") == 0 );
+		assertTrue( BigInt.fromBinaryString("-00") == 0 );
+		assertTrue( BigInt.fromBinaryString("11111111 ") == 255 );
+		assertTrue( BigInt.fromBinaryString(" 1111 111  1") == 255 );
+		assertTrue( BigInt.fromBinaryString("-1111 1111") == -255 );
+		assertTrue( BigInt.fromBinaryString("- 0 00 1000 0000") == -128 );
+		// errors
+		assertTrue( try { BigInt.fromBinaryString("0b"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBinaryString("0b101"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBinaryString("-0b101"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBinaryString("-10-1"); false; } catch (e:Dynamic) true );
+		assertTrue( try { BigInt.fromBinaryString("2"); false; } catch (e:Dynamic) true );
 	}
 
 	public function testToBinaryString() {
