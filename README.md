@@ -76,7 +76,7 @@ trace(a); // 65
 
 ### Signing and the zero value
 ```hx
-// signs has to be placed at first of notation
+// only the negative sign is available and has to be placed at first
 var a:BigInt = "-0xFF";
 
 // the 'null' value is equivalent to 0
