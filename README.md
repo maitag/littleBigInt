@@ -55,7 +55,7 @@ var c:BigInt = "0b 00111010";    // binary
 BigInt.fromHexString("aaFF 01e3");
 BigInt.fromOctalString("7724 1160");
 BigInt.fromBinaryString("0010 1101");
-BigInt.fromBaseString("2010221101102", 3); // to default digits and numberbase of 3
+BigInt.fromBaseString("2010221101102", 3); // to default digits and number base of 3
 
 // use a custom string of digit chars for number representation (also need for a base > 16)
 BigInt.fromBaseString("hello", 5, "0helo1234567"); // using the first 5 digits of digitChars
@@ -107,7 +107,7 @@ trace( a.toBinaryString(4) );        //   "1100 0010"
 trace( a.toBinaryString(3) );        // "011 000 010"
 trace( a.toBinaryString(3, false) ); //  "11 000 010" (no leading zeros!)
 
-// use a custom digit string for number-representation
+// use a custom digit string for number representation
 trace( (969:BigInt).toBaseString(5, "0helo1234567") ); // "hello"
 trace( (19366:BigInt).toBaseString("abcdefgh123xyz") ); // "haxe"
 

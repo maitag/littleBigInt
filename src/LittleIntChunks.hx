@@ -22,7 +22,7 @@ class LittleIntChunks {
 		static public inline var BITSIZE:Int = 31;
 		static public inline var UPPESTBIT:Int = 0x80000000;
 		static public inline var BITMASK:Int = 0x7FFFFFFF;
-
+	
 	#else // if LittleInt is native 32 Bit Integer:
 		
 		static public inline var BITSIZE:Int = 15;
@@ -30,7 +30,7 @@ class LittleIntChunks {
 		static public inline var BITMASK:Int = 0x7FFF;
 		// for js there can't be used 26 bits here
 		// because interpreter will convert all float64 at each binary-op into 32bit
-
+		
 /*		// for testing purpose
 		static public inline var BITSIZE:Int = 7;
 		static public inline var UPPESTBIT:Int = 0x80;
@@ -125,12 +125,12 @@ class LittleIntChunks {
 		return chunks.pop();
 	}
 	
-	public inline function unshift(v:LittleInt) {		
+	public inline function unshift(v:LittleInt) {
 		end++;			
 		chunks.unshift(v);
 	}
 	
-	public inline function truncateZeroChunks(remove:Bool) {		
+	public inline function truncateZeroChunks(remove:Bool) {
 		var i = length;
 		while ( --i >= 0) {
 			if (get(i) == 0) {
@@ -141,7 +141,7 @@ class LittleIntChunks {
 	}
 	
 	// ---------- From/ToInteger -------------------
-
+	
 	public static inline function createFromLittleInt(i:LittleInt):LittleIntChunks {
 		
 		if (i == 0) return null;
@@ -157,7 +157,7 @@ class LittleIntChunks {
 		}
 		return littleIntChunks;
 	}
-
+	
 	public inline function toLittleInt():LittleInt {
 		
 		if (length == 0) return 0;
@@ -177,7 +177,7 @@ class LittleIntChunks {
 	}
 	
 	// ---------- From/To String -------------------
-
+	
 	static var regexSpaces = ~/\s+/g;
 	static var regexLeadingZeros = ~/^0*/g;
 	static var regexLeadingZeroBlocks = ~/^(0+\s)+/g;
@@ -185,9 +185,8 @@ class LittleIntChunks {
 	static var regexOctal = ~/^0o/;
 	static var regexHex = ~/^0x/;
 	static var regexSign = ~/^-/;
-	//static var regexZero = ~/^-?(0b|0o|0x)?[0\s]*$/;
 	static var regexForbiddenDigitChars = ~/\s|-/g;
-			
+	
 	public static function createFromBaseString(s:String, base:Null<Int> = null, digitChars:Null<String> = null):BigInt {
 		
 		s = regexSpaces.replace(s, "");	// parse out all spaces	
@@ -217,7 +216,7 @@ class LittleIntChunks {
 	static inline function fromBaseString(s:String, base:Int = 10, digitChars:Null<String>, neg:Bool):BigInt {
 		
 		if (base < 2)  throw('Error, base $base need to be greater or equal 2');
-
+		
 		if (digitChars == null) {
 			digitChars = hexaChars;
 			s = regexLeadingZeros.replace(s, "");
@@ -230,9 +229,9 @@ class LittleIntChunks {
 		}
 		
 		if (s.length == 0) return null; // all was filled by zero
-
+		
 		if (base > digitChars.length) throw('Error, base $base for numberstring is to great. Max value can be ${digitChars.length}');
-
+		
 		var i = s.length;
 		var b:BigInt = 1;
 		var value:BigInt = 0;
@@ -256,7 +255,7 @@ class LittleIntChunks {
 		
 		if (digitChars == null) {
 			digitChars = hexaChars;
-		} 
+		}
 		else {
 			if (digitChars.length < 2) throw('Error, the string for the digits needs to contain at least 2 chars');
 			if (regexForbiddenDigitChars.match(digitChars)) throw("Error, the string for the digits should not contain spacing or '-' chars");
@@ -277,7 +276,7 @@ class LittleIntChunks {
 				s = ((j != 0 && j % spacing == 0) ? " " : "") + s;
 				j++;
 			}
-			s = digitChars.charAt(ret.remainder.toInt()) + s;			
+			s = digitChars.charAt(ret.remainder.toInt()) + s;
 		}
 		
 		if (leadingZeros && spacing > 0) {
@@ -288,7 +287,7 @@ class LittleIntChunks {
 			s = new EReg("^("+zeroDigitChar+"+\\s)+","g").replace(s, "");
 			s = new EReg("^"+zeroDigitChar+"*","g").replace(s, "");
 		}
-
+		
 		return ((isNegative) ? "-" : "") + s;
 	}
 	
@@ -435,7 +434,7 @@ class LittleIntChunks {
 		if (upperCase) s = s.toUpperCase();
 		return ((isNegative) ? "-" : "") + s;
 	}
-		
+	
 	static public inline function fromBytes(b:Bytes):BigInt {
 		
 		if (b.length == 1 && b.get(0) == 0) return null;
@@ -449,13 +448,13 @@ class LittleIntChunks {
 		}
 		var numBits:Int = (l - 1) * 8 + IntUtil.bitsize(b.get(l-1), 8);
 		var numChunks:Int = Std.int((numBits - 1) / BITSIZE) + 1;
-
+		
 		for (i in 0...numChunks) {
 			var v:Int = 0;
 			var shift:Int = 0;
 			for (a in mapFromBitPosition(i*BITSIZE , 8, BITSIZE, l)) {
 				v |= (  (b.get(a.index) >>> a.offset) & ((1 << a.size)-1)  ) << shift;
-				shift += a.size;	
+				shift += a.size;
 			}
 			littleIntChunks.push(v);
 		}

@@ -93,7 +93,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( try { (10 : BigInt).toBaseString("a bc"); false; } catch (e:Dynamic) true );
 		assertTrue( try { (10 : BigInt).toBaseString("a bc  "); false; } catch (e:Dynamic) true );
 	}
-
+	
 	public function testFromOctalString() {
 		assertTrue( (" 0o 0" : BigInt) == 0 );
 		assertTrue( (" -0o0" : BigInt) == 0 );
@@ -162,7 +162,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( ( -16777215 : BigInt).toHexString(8, false), "-FFFFFF" );
 		assertEquals( ("773738363261118345" : BigInt).toHexString(), "ABCDEF123456789" );
 	}
-
+	
 	public function testFromBinaryString() {
 		assertTrue( ("0b 0 " : BigInt) == 0 );
 		assertTrue( ("-0b0" : BigInt) == 0 );
@@ -189,7 +189,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( try { BigInt.fromBinaryString("-10-1"); false; } catch (e:Dynamic) true );
 		assertTrue( try { BigInt.fromBinaryString("2"); false; } catch (e:Dynamic) true );
 	}
-
+	
 	public function testToBinaryString() {
 		assertEquals( (0 : BigInt).toBinaryString(), "0" );
 		assertEquals( (-1 : BigInt).toBinaryString(), "-1" );
@@ -214,7 +214,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(BigInt.fromBytes( ("23834435537834523436234" : BigInt).toBytes() ) == "23834435537834523436234");
 		assertTrue(BigInt.fromBytes( ("-23834435537834523436234" : BigInt).toBytes() ) == "-23834435537834523436234");
 	}  
-
+	
 	public function testComparing() {
 		assertTrue( ("-0x 0" : BigInt) == ("0x 0" : BigInt) );
 		assertTrue( ("0x 10" : BigInt) == ("0x 10" : BigInt) );
@@ -234,7 +234,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( ("0x ff ffff" : BigInt) > ("-0x ff fffe" : BigInt) );
 		assertTrue( ("-0x 100 0000" : BigInt) != ("0x 100 0000" : BigInt) );
 		assertTrue( ("0x 100 0001" : BigInt) != ("0x 100 0000" : BigInt) );
-
+		
 		var a:BigInt = 1;
 		var	b:BigInt = 2;
 		assertTrue(a < b);
@@ -300,7 +300,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(-b == a);
 		assertTrue( b == -a);
 	}
-
+	
    public function testAbs() {
 		assertTrue((0 : BigInt).abs() == 0);
 		assertTrue(("-0" : BigInt).abs() == 0);
@@ -309,7 +309,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(("13412564654613034984065434" : BigInt).abs() == "13412564654613034984065434");
 		assertTrue(("-13412564654613034984065434" : BigInt).abs() == "13412564654613034984065434");
    }
-
+	
 	public function testAddition() {
 		assertTrue( (0 : BigInt) + (0 : BigInt) == (0 : BigInt) );
 		assertTrue( (1 : BigInt) + (0 : BigInt) == (1 : BigInt) );
@@ -344,7 +344,7 @@ class TestBigInt extends haxe.unit.TestCase
 		c = b + a;
 		assertTrue( a == ("0x 1 0000 0000 0000 0000" : BigInt) );
 		assertTrue( b == ("0x 2 0000 0000 0000 0000" : BigInt) );
-		assertTrue( c == ("0x 3 0000 0000 0000 0000" : BigInt) );		
+		assertTrue( c == ("0x 3 0000 0000 0000 0000" : BigInt) );
 	}
 	
 	public function testIncrement() {
@@ -405,7 +405,7 @@ class TestBigInt extends haxe.unit.TestCase
 		c = b - a;
 		assertTrue( a == ("0x 3 0000 0000 0000 0000" : BigInt) );
 		assertTrue( b == ("0x 2 0000 0000 0000 0000" : BigInt) );
-		assertTrue( c == ("-0x 1 0000 0000 0000 0000" : BigInt) );		
+		assertTrue( c == ("-0x 1 0000 0000 0000 0000" : BigInt) );
 	}
 	
 	public function testDecrement() {
@@ -416,7 +416,7 @@ class TestBigInt extends haxe.unit.TestCase
 		var c:BigInt = --a;
 		assertTrue( (a == c) && (c == ("0x 1 1234 5678 abcd effd" : BigInt)) );
 	}
-
+	
 	public function testMultiplication() {
 		assertEquals( ( (0 : BigInt) * (0 : BigInt) ).toInt(), 0 );
 		assertEquals( ( (1 : BigInt) * (0 : BigInt) ).toInt(), 0 );
@@ -436,17 +436,17 @@ class TestBigInt extends haxe.unit.TestCase
 		b = "0x1FFFFFF";
 		c = "0x3FFFFFC000001";		
 		assertEquals( ( a * b ).toString(), c.toString() );
-
+		
 		a = "0x1FFFFFF";
 		b = "0x1FFFFFF";
 		c = "0x3FFFFFC000001";		
 		assertEquals( ( a * b ).toString(), c.toString() );
-
+		
 		a = "2 000 000 000 000 000 000 000 000 000 000 000 000";
 		b = "4 000 000 000 000 000 000 000 000 000 000 000 000";
 		c = "8 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000";
 		assertTrue( a * b == c );
-
+		
 		a = "0x123456789abcdef112233445566778899aabbccddeeff987654321fedcba987654321";
 		b = "0x73b5c003fe76cc41a904bcd6f325e56cd974bb1a8e653e0ff76cf3b1936cde63110af";
 		c = "0x83a6f80da5817994858b95127c284366b38bc087d0f522993e797cb39a6b7a70ec441e6fc8853782d1c4fe22ecf3f93fd26f0eaa57f9c785f5a44581cecd96d7861bbf38f";
@@ -464,21 +464,21 @@ class TestBigInt extends haxe.unit.TestCase
 		a = 12347; b = 0;
 		assertTrue(a*b == b);
 		assertTrue(b*a == b);
-
+		
 		a = -99999; b = 1;
 		assertTrue(a*b == a);
 		assertTrue(b*a == a);
-
+		
 		a = 1235; b = 44; c = 54340;
 		assertTrue(a*b == c);
 		assertTrue(b*a == c);
-
+		
 		a = -11; b = -9; c = 99;
 		assertTrue(a*b == c);
-
+		
 		a = 55; b = 200395; c = 11021725;
 		assertTrue(a*b == c);
-
+		
 		a = "111111111111111111111111111111111111111";
 		b = "-333333333333333333333";
 		c = "-37037037037037037036999999999999999999962962962962962962963";
@@ -494,14 +494,14 @@ class TestBigInt extends haxe.unit.TestCase
 	public function testMultiplicationWithInt() {
 		var i:Int = 0x7FFFFFFF;
 		var b:BigInt = "1 000 000 000 000 000";
-		var c:BigInt = "2147483647 000 000 000 000 000";		
-
+		var c:BigInt = "2147483647 000 000 000 000 000";
+		
 		assertTrue( i * b == c );
 		assertTrue( b * i == c );
 		assertTrue( -10 * b == ("-1 000 000 000 000 000 0":BigInt) );
 		assertTrue( b * -10 == ("-1 000 000 000 000 000 0":BigInt) );
 	}
-
+	
 	public function testMultiplicationNotChangeParams() {
 		var a:BigInt = "111111111111111111111111111111111111111";
 		var b:BigInt = "333333333333333333333";
@@ -512,7 +512,7 @@ class TestBigInt extends haxe.unit.TestCase
 		c = b * a;
 		assertTrue( a == ("111111111111111111111111111111111111111" : BigInt) );
 		assertTrue( b == ("333333333333333333333" : BigInt) );
-		assertTrue( c == ("37037037037037037036999999999999999999962962962962962962963" : BigInt) );		
+		assertTrue( c == ("37037037037037037036999999999999999999962962962962962962963" : BigInt) );
 	}
 	
 	public function testModulo() {
@@ -543,7 +543,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( b % i == 123 );
 		assertTrue( i % b == (1000000:BigInt) );
 	}
-
+	
 	public function testDivision() {
 		// zero divided by
 		assertTrue((0 : BigInt) / 1 == 0);
@@ -566,7 +566,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue((-5 : BigInt) / -5 == 1);
 		assertTrue(("20194965098495006574" : BigInt) / "20194965098495006574" == 1);
 		assertTrue(("-20194965098495006574" : BigInt) / "-20194965098495006574" == 1);
-
+		
 		var result = BigInt.divMod( 9, 4 );
 		assertEquals( result.quotient.toInt(), 2 );
 		assertEquals( result.remainder.toInt(), 1 );
@@ -621,7 +621,7 @@ class TestBigInt extends haxe.unit.TestCase
 	}
 	
 	public function testDivisionWithInt() {
-		var b:BigInt = "2147483647 000 000 000 000 000";		
+		var b:BigInt = "2147483647 000 000 000 000 000";
 		var i:Int = 0x7FFFFFFF;
 		var c:BigInt = "1 000 000 000 000 000";
 		assertTrue( b / i == c );
@@ -630,7 +630,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( -b / i == -c );
 		assertTrue( -b / -i == c );
 	}
-
+	
 	public function testDivisionNotChangeParams() {
 		var a:BigInt = "100000000000000000000000000000000000000000000";
 		var b:BigInt = "300000000000000000000000000000000000000000";
@@ -648,14 +648,14 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( a == ("100000000000000000000000000000000000000000000" : BigInt) );
 		assertTrue( b == ("-300000000000000000000000000000000000000000" : BigInt) );
 		assertTrue( c == ("-333" : BigInt) );
-
+		
 		a = "-100000000000000000000000000000000000000000000";
 		c = a / b;
 		assertTrue( a == ("-100000000000000000000000000000000000000000000" : BigInt) );
 		assertTrue( b == ("-300000000000000000000000000000000000000000" : BigInt) );
 		assertTrue( c == ("333" : BigInt) );
 	}
-
+	
 	public function testPow() {
 		assertEquals( ( (0 : BigInt).pow("9844190321790980841789") ).toInt(), 0 );
 		assertEquals( ( (1 : BigInt).pow("9844190321790980841789") ).toInt(), 1 );
@@ -726,14 +726,14 @@ class TestBigInt extends haxe.unit.TestCase
 		for (i in 0...10000) a = a * 3;
 		assertTrue(a == threeToTenThousand);
 	}
-
+	
 	public function testCarriesOverCorrectly() {
 		assertTrue(("9007199254740991" : BigInt) + 1 == "9007199254740992");
 		assertTrue(("-9007199254740983" : BigInt) + "-9999999999999998" == "-19007199254740981");
 		assertTrue(("100000000000000000000000000000000000" : BigInt) - "999999999999999999" == "99999999999999999000000000000000001");
 		assertTrue(("50000005000000" : BigInt) * "10000001" == "500000100000005000000");
 	}
-
+	
 	public function testMisc() {
 		var i = 5;
 		assertTrue(("10" : BigInt) * i + 3 == "53");
@@ -744,7 +744,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue( 3 * ("10" : BigInt) + i * 2 == "40");
 		assertTrue( 3 * ("10" : BigInt) + (i : BigInt) * 5 == "55");
 		assertEquals( ((2 + 2 * ("30000000000000000000000000000000000003" : BigInt) + 1)/3).toString(), "20000000000000000000000000000000000003");
-				
+		
 		assertTrue(("-10000000000000000" : BigInt) + "0" == "-10000000000000000");
 		assertTrue(("0" : BigInt) + "10000000000000000" == "10000000000000000");
 		assertTrue((9999999 : BigInt) + 1 == 10000000);
@@ -763,7 +763,7 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue(("8589934592" : BigInt) << 50 == "9671406556917033397649408");
 		assertTrue(("38685626227668133590597632" : BigInt) >> 50 == "34359738368");
 	}
-
+	
 	public function testShiftingCompatibilityToInt() {
 		// i <= -4097 and >= 4096 gives error here with -20 shift (will be neg-signed for 32bitInt)! 
 		for (i in -4096...4096) {

@@ -14,10 +14,9 @@ import hxp.*;
 
 class Test extends hxp.Script {
 	
-	public function new()
-	{
+	public function new() {
 		super();
-
+		
 		var targets:Array<String>;
 		
 		if (commandArgs.length == 0) targets = ['all'];
@@ -31,7 +30,7 @@ class Test extends hxp.Script {
 		
 		// remove double targets
 		targets = removeDoubles(targets);
-				
+		
 		switch (command) {
 			
 			case "h"|"help": 
@@ -40,7 +39,7 @@ class Test extends hxp.Script {
 				
 				Log.info("performance benchmark:");
 				Log.info(" 'hxp bench <targets>' or 'hxp benchmark <targets>'\n");
-			
+				
 				Log.info("<targets> can be one or combination of: 'neko hl js cpp'");
 				Log.info(" or simple leave it empty for 'all' targets\n");
 				
@@ -66,10 +65,8 @@ class Test extends hxp.Script {
 		}
 		
 	}
-
-
+	
 	private function test (targets:Array<String>) {
-		
 		Log.info("unit tests for targets: " + targets.join(", ") + "\n");
 		
 		var base = new HXML ({
@@ -91,16 +88,14 @@ class Test extends hxp.Script {
 			Log.info("build " + target + " target...");
 			build(target, base);
 		}
-			
+		
 		for (target in targets) {
 			Log.info("\n------------ "+target.toUpperCase()+" ------------");
 			run(target, base);
 		}
 	}
-
 	
 	private function benchmark (targets:Array<String>, benchmarks:Array<String>) {
-		
 		Log.info("perform benchmark tests for targets: " + targets.join(", ") + "\n");
 		
 		var base = new HXML ({
@@ -130,10 +125,8 @@ class Test extends hxp.Script {
 			Log.info("\n");
 		}
 	}
-
 	
 	private function build (target:String, base:HXML) {
-
 		switch (target) {
 			
 			case "neko":
@@ -161,9 +154,8 @@ class Test extends hxp.Script {
 		}
 		
 	}
-
+	
 	private function run (target:String, base:HXML) {
-
 		switch (target) {
 			
 			case "neko":
@@ -217,10 +209,8 @@ class Test extends hxp.Script {
 		}
 		
 	}
-
 	
-	private function removeDoubles(a:Array<String>)
-	{
+	private function removeDoubles(a:Array<String>) {
 		var i = a.length;
 		var j:Int;
 		while (i-- > 0) {

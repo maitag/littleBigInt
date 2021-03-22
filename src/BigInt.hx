@@ -4,7 +4,7 @@ import LittleIntChunks;
 import haxe.io.Bytes;
 
 /**
- * pure Haxe BigInt implementation
+ * pure haxe implementation for arbitrary-precision integer
  * 
  * by Sylvio Sell, Rostock 2020
  * 
@@ -18,10 +18,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function set(i:Int, v:LittleInt) this.set(i,v);
 	inline function push(v:LittleInt) this.push(v);
 	inline function unshift(v:LittleInt) this.unshift(v);
-
+	
 	inline function splitHigh(e:Int):BigInt return this.splitHigh(e);
 	inline function splitLow(e:Int):BigInt return this.splitLow(e);
-
+	
 	inline function truncateZeroChunks(remove:Bool) this.truncateZeroChunks(remove);
 	
 	inline function setNegative():BigInt { this.isNegative = true; return this;}
@@ -31,7 +31,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	inline function negCopy():BigInt return new BigInt(this.negCopy());
 	inline function clone():BigInt return new BigInt(this.clone());
 	inline function negClone():BigInt return new BigInt(this.negClone());
-
+	
     /**
         return true if this BigInt is negative signed
     **/
@@ -55,7 +55,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     **/
 	public var isZero(get, never):Bool;
 	inline function get_isZero():Bool return (this == null);
-
+	
     /**
         Creates a new BigInt from an Integer
 
@@ -92,7 +92,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null) return "0";
 		return this.toBaseString(10);	
 	}	
-
+	
     /**
         Creates a new BigInt from a String that contains a binary formated number, e.g. "01010111" or "- 1001 1011"
 
@@ -204,7 +204,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	static public function fromBytes(bytes:Bytes):BigInt {
 		return LittleIntChunks.fromBytes(bytes);
 	}
-
+	
     /**
         pack this BigInt into Bytes for efficiently storage.
     **/
@@ -221,7 +221,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	// --------------------------------------------------------------------
 	// -------------------- abs -------------------------------------------
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 	
     /**
         returns a new BigInt of the absolute amount
@@ -233,10 +233,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	
-
+	
 	// --------------------------------------------------------------------
 	// -------------------- addition --------------------------------------
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 	
 	/**
 		Returns the sum of `a` and `b`.
@@ -317,12 +317,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		if (v > 0) a.push(v);
 	}
-
+	
 	
 	
 	// --------------------------------------------------------------------
 	// -------------------- subtraction -----------------------------------
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 	
 	/**
 		Returns `a` minus `b`.
@@ -365,7 +365,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			}
 		}		
 	}	
-
+	
 	static inline function _subtract(a:BigInt, b:BigInt):BigInt {
 		if (a == null) return (b == null) ? null : b.negCopy();
 		if (b == null) return a.copy();
@@ -376,7 +376,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (b.isNegative) return __add(a, b.negClone()); // 3 - -2
 		return __subtract(a, b);  // 3 - 2
 	}
-
+	
 	static inline function __subtract(a:BigInt, b:BigInt):BigInt {
 		var v:BigInt;
 		if (a > b) {
@@ -387,17 +387,17 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		
 		v = subtractLong(b.copy(), a);
 		v.truncateZeroChunks(false);
-		return (v.length == 0) ? null : v.setNegative();		
+		return (v.length == 0) ? null : v.setNegative();
 	}
-
+	
 	static inline function subtractLong(a:BigInt, b:BigInt):BigInt {
 		for (position in 0...b.length) {
 			subtractLittle(a, b.get(position), position);
 		}
 		return a;
 	}
-
-	static inline function subtractLittle(a:BigInt, v:LittleInt, position:Int):Void {		
+	
+	static inline function subtractLittle(a:BigInt, v:LittleInt, position:Int):Void {
 		for (i in position...a.length) {
 			var x:Int = a.get(i);
 			if (x >= v) {
@@ -411,7 +411,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	}
 	
 	// ------- negation -----------
-
+	
 	/**
 		Returns the negative.
 	**/
@@ -420,12 +420,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null) return null;
 		return this.negCopy();
 	}
-
-
-
+	
+	
+	
 	// --------------------------------------------------------------------
 	// -------------------- multiplication --------------------------------
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 	// (katatsuba: https://en.wikipedia.org/wiki/Karatsuba_algorithm) -----
 	
 	/**
@@ -440,7 +440,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	//@:op(A * B) @:commutative function opMulticplicateInt(b:Int):BigInt return opMulticplicate(b);
 	@:op(A * B) static inline function opMulticplicateInt(a:Int, b:BigInt):BigInt return b.opMulticplicate(a); // haxe 3.4.4 compatible!
 	
-	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {		
+	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {
 		if (v == 1) return a.copy();
 		if (v < 0) v = -v;
 		var x:Int = 0;
@@ -454,7 +454,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return(b);
 	}
 	
-	static function mul(a:BigInt, b:BigInt):BigInt {		
+	static function mul(a:BigInt, b:BigInt):BigInt {
 		if (a == null || b == null) return null;
 		if (a.length == 1) {
 			if (b.length == 1) return fromInt(a.get(0) * b.get(0));
@@ -469,14 +469,14 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var bHigh:BigInt = b.splitHigh(e);
 		var bLow:BigInt = b.splitLow(e);
 		
-		var p1:BigInt = mul(aHigh, bHigh); 
-		var p2:BigInt = mul(aLow , bLow);  
+		var p1:BigInt = mul(aHigh, bHigh);
+		var p2:BigInt = mul(aLow , bLow);
 		
 		//return join(e, p1, mul(aHigh + aLow, bHigh + bLow) - (p1 + p2), p2 );
 		return join(e, p1, mul(_add(aHigh, aLow), _add(bHigh, bLow)) - _add(p1, p2), p2 );
 	}
 	
-	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {		
+	static inline function join(e:Int, a:BigInt, b:BigInt, c:BigInt):BigInt {
 		var littleIntChunks = new LittleIntChunks();
 		
 		if (c == null) for (i in 0...e) littleIntChunks.push(0);
@@ -527,7 +527,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		
 		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
-
+	
 		return littleIntChunks;
 	}
 	
@@ -535,7 +535,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	
 	// --------------------------------------------------------------------
 	// ---------------- division and modulo -------------------------------
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 	
 	/**
 		Returns the quotient of `a` divided by `b`.
@@ -992,7 +992,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function opShiftLeft(b:Int):BigInt {
 		if (this == null) return null;
 		if (b == 0) return this.copy();		
-		if (b < 0) throw("ERROR '<<', can't negative-shift-left a negative value"); 
+		if (b < 0) throw("ERROR '<<', can't negative-shift-left a negative value");
 		return _opShiftLeft(b);
 	}	
 	inline function _opShiftLeft(b:Int):BigInt {
@@ -1025,7 +1025,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null || b == null) return null;
 		if (isNegative || b.isNegative) {
 			// TODO (have no idea now ;)
-			throw("ERROR '&', emulation of two's complement behavior for '&' with negative numbers is not implemented yet"); 
+			throw("ERROR '&', emulation of two's complement behavior for '&' with negative numbers is not implemented yet");
 		}
 		return _opAND(b);
 	}	
@@ -1057,7 +1057,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null || b == null) return null;
 		if (isNegative || b.isNegative) {
 			// TODO:
-			throw("ERROR '&', emulation of two's complement behavior for '|' with negative numbers is not implemented yet"); 
+			throw("ERROR '&', emulation of two's complement behavior for '|' with negative numbers is not implemented yet");
 		}
 		return _opOR(b);
 	}	
@@ -1087,7 +1087,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this == null || b == null) return null;
 		if (isNegative || b.isNegative) {
 			// TODO:
-			throw("ERROR '&', emulation of two's complement behavior for '^' with negative numbers is not implemented yet"); 
+			throw("ERROR '&', emulation of two's complement behavior for '^' with negative numbers is not implemented yet");
 		}
 		return _opXOR(b);
 	}

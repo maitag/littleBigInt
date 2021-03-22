@@ -16,7 +16,7 @@ class IntUtil
 	#end
 	
 	#if macro_optimize_bitsize   // --------------- macro optimization -------------------
-
+	
 	
 	public static macro function nextPowerOfTwo(i:haxe.macro.Expr, maxBitsize:Int = MAX_BITSIZE) {
 		return macro {
@@ -90,7 +90,4 @@ class IntUtil
 	
 	
 	#end  // --------------------------------------------------------
-	
-	
-	
 }
