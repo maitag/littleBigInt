@@ -69,7 +69,6 @@ class TestBigInt extends haxe.unit.TestCase
 		assertEquals( (256 : BigInt).toBaseString(16, 4, true), "0100" );
 		assertEquals( (256 : BigInt).toBaseString(16, 4, false), "100" );
 		assertEquals( (256 : BigInt).toBaseString(16), "100" );
-		assertEquals( (256 : BigInt).toBaseString(16, true), "100" );
 		assertEquals( (16777215 : BigInt).toBaseString(16), "ffffff" );
 		assertEquals( (16777215 : BigInt).toBaseString(16, 4), "00ff ffff" );
 		assertEquals( (16777215 : BigInt).toBaseString(16, 4, false), "ff ffff" );

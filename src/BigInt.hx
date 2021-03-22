@@ -178,7 +178,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
         @param  spacing  the amount of summarized digits before the separation by a space-char (default value of 0 disable spacing)
         @param  leadingZeros  fills up the first digits with zeros up to the spacing-amount (default is true)
     **/
-	public function toBaseString(base:Null<Int> = null, digitChars:Null<String> = null, ?spacing:Int = 0, leadingZeros:Bool = true):String {
+	public function toBaseString(base:Null<Int> = null, digitChars:Null<String> = null, spacing:Int = 0, leadingZeros:Bool = true):String {
 		if (base == null) {
 			if (digitChars == null) base = 10;
 			else base = digitChars.length;
