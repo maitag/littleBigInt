@@ -38,7 +38,7 @@ class Test extends hxp.Script {
 				Log.info(" 'hxp test <targets>'\n");
 				
 				Log.info("performance benchmark:");
-				Log.info(" 'hxp bench <targets>' or 'hxp benchmark <targets>'\n");
+				Log.info(" 'hxp bench <names> <targets>' or 'hxp benchmark <targets>'\n");
 				
 				Log.info("<targets> can be one or combination of: 'neko hl js cpp'");
 				Log.info(" or simple leave it empty for 'all' targets\n");
@@ -49,19 +49,28 @@ class Test extends hxp.Script {
 			case "bench" | "benchmark":
 				// fetch all benchmarks classnames from folder
 				var benchmarks = new Array<String>();
+				var benchmark_select = new Array<String>();
 				var benchFiles = System.readDirectory("benchmarks");
 				if (benchFiles != null) {
 					for (b in benchFiles) {
 						var r = ~/([^\/\\]+).hx$/;
-						if (r.match(b)) benchmarks.push(r.matched(1));
+						if (r.match(b)) {
+							var benchfile:String = r.matched(1);
+							benchmarks.push(benchfile);
+							if (targets.indexOf(benchfile) >= 0) {
+								targets.remove(benchfile);
+								benchmark_select.push(benchfile);
+							}
+						}
 					}
+					if (benchmark_select.length != 0) benchmarks = benchmark_select;
 					if (benchmarks.length != 0)	benchmark(targets, benchmarks);
 					else Log.error("No .hx files into 'benchmarks' folder");
 				}
 				else Log.error("No 'benchmarks' directory found");
 				
 			default:
-				Log.error("Expected \"hxp <test|(bench|benchmark)> <all|neko|hl|js|cpp>\"");
+				Log.error("Expected \"hxp <test|(bench|benchmark <CalcPi|Collatz|Fibonacci|Multiplicacci>)> <all|neko|hl|js|cpp>\"");
 		}
 		
 	}
@@ -96,7 +105,7 @@ class Test extends hxp.Script {
 	}
 	
 	private function benchmark (targets:Array<String>, benchmarks:Array<String>) {
-		Log.info("perform benchmark tests for targets: " + targets.join(", ") + "\n");
+		Log.info("perform benchmarks " + benchmarks.join(", ") + " for targets: " + targets.join(", ") + "\n");
 		
 		var base = new HXML ({
 			cp: [ "src", "benchmarks" ],
@@ -204,7 +213,7 @@ class Test extends hxp.Script {
 				}
 				else System.runCommand ("bin/cpp",  './${base.main}-debug', []);
 			
-			default: Log.error ("Unknown target \"" + target + "\"");
+			default: Log.error ("Unknown benchmark or target \"" + target + "\"");
 			
 		}
 		

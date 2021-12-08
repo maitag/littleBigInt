@@ -4,9 +4,9 @@
 	"license": "MIT",
 	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
 	"description": "pure haxe implementation for arbitrary-precision integer",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"classPath": "src/",
-	"releasenote": "fix output for leading-zeros, custom digits for any number base",
+	"releasenote": "new benchmark (Collatz), improving hxp",
 	"contributors": ["maitag"],
 	"dependencies": {}
 }
