@@ -20,8 +20,8 @@ class Test extends hxp.Script {
 		var targets:Array<String>;
 		
 		if (commandArgs.length == 0) targets = ['all'];
-		else targets = commandArgs;
-		
+		else targets = commandArgs.map(function(s) return s.toLowerCase());
+		Log.info(targets[0]);
 		// replace 'all' with all available targets
 		if (targets.indexOf('all') != -1) {
 			targets[targets.indexOf('all')] = 'neko';
@@ -57,12 +57,13 @@ class Test extends hxp.Script {
 						if (r.match(b)) {
 							var benchfile:String = r.matched(1);
 							benchmarks.push(benchfile);
-							if (targets.indexOf(benchfile) >= 0) {
-								targets.remove(benchfile);
+							if (targets.indexOf(benchfile.toLowerCase()) >= 0) {
+								targets.remove(benchfile.toLowerCase());
 								benchmark_select.push(benchfile);
 							}
 						}
 					}
+					if (targets.length == 0) targets = ['neko', 'hl', 'js', 'cpp'];
 					if (benchmark_select.length != 0) benchmarks = benchmark_select;
 					if (benchmarks.length != 0)	benchmark(targets, benchmarks);
 					else Log.error("No .hx files into 'benchmarks' folder");
