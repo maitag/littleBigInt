@@ -4,9 +4,9 @@
 	"license": "MIT",
 	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
 	"description": "pure haxe implementation for arbitrary-precision integer",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"classPath": "src/",
-	"releasenote": "new benchmark (Collatz), improving hxp",
+	"releasenote": "fixing binary OR and XOR operations",
 	"contributors": ["maitag"],
 	"dependencies": {}
 }

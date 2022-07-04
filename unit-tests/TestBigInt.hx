@@ -793,10 +793,27 @@ class TestBigInt extends haxe.unit.TestCase
 		for (i in -256...257) assertEquals((~(i:BigInt)).toString() , '${~i}');
 		for (i in -0x7ffffffe...-0x7fffff00) assertEquals((~(i:BigInt)).toString() , '${~i}');
 		for (i in 0x7fffff00...0x7fffffff) assertEquals((~(i:BigInt)).toString() , '${~i}');
-		assertTrue(("435783453" : BigInt) & "902345074" == "298352912");
-		assertTrue(("435783453" : BigInt) | "902345074" == "1039775615");
-		assertTrue(("435783453" : BigInt) ^ "902345074" == "741422703");
-		assertTrue(("902345074" : BigInt) ^ "435783453" == "741422703");
+		
+		assertTrue(("0b 00000000" : BigInt) & ("0b 00000000" : BigInt) == 0);
+		assertTrue(("0b 00000000" : BigInt) & ("0b 01010111" : BigInt) == 0);
+		assertTrue(("0b 11010110" : BigInt) & ("0b 00000000" : BigInt) == 0);
+		assertTrue(("0b 11100101101111100010010100011001110010110100111001001111011100011100011101001" : BigInt) & ("0b 1101" : BigInt) == ("0b 1001" : BigInt));
+		assertTrue(("0b 1101" : BigInt) & ("0b 11100101101111100010010100011001110010110100111001001111011100011100011101001" : BigInt) == ("0b 1001" : BigInt));
+		
+		
+		assertTrue(("0b 00000000" : BigInt) | ("0b 00000000" : BigInt) == ("0b 00000000" : BigInt));
+		assertTrue(("0b 00000000" : BigInt) | ("0b 01010111" : BigInt) == ("0b 01010111" : BigInt));
+		assertTrue(("0b 11010110" : BigInt) | ("0b 00000000" : BigInt) == ("0b 11010110" : BigInt));
+		assertTrue(("0b 11100101101111100010010100011001110010110100111001001111011100011100011101001" : BigInt) | ("0b 1101" : BigInt) == ("0b 11100101101111100010010100011001110010110100111001001111011100011100011101101" : BigInt));
+		assertTrue(("0b 1101" : BigInt) | ("0b 11100101101111100010010100011001110010110100111001001111011100011100011101001" : BigInt) == ("0b 11100101101111100010010100011001110010110100111001001111011100011100011101101" : BigInt));
+		
+		
+		assertTrue(("0b 00000000" : BigInt) ^ ("0b 00000000" : BigInt) == ("0b 00000000" : BigInt));
+		assertTrue(("0b 00000000" : BigInt) ^ ("0b 11010110" : BigInt) == ("0b 11010110" : BigInt));
+		assertTrue(("0b 01010110" : BigInt) ^ ("0b 00000000" : BigInt) == ("0b 01010110" : BigInt));
+		assertTrue(("0b 11010110" : BigInt) ^ ("0b 01010101" : BigInt) == ("0b 10000011" : BigInt));
+		assertTrue(("0b 111111110011100101110011101011100111010111" : BigInt) ^ ("0b 101" : BigInt) == ("0b 111111110011100101110011101011100111010010" : BigInt));
+		assertTrue(("0b 1001" : BigInt) ^ ("0b 11001011100011110110101110101000100111001110011111101111101111" : BigInt) == ("0b 11001011100011110110101110101000100111001110011111101111100110" : BigInt));
 	}
    
 	public function testBitwiseWithInts() {

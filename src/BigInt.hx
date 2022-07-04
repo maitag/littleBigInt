@@ -1054,10 +1054,11 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	**/
 	@:op(A | B)
 	function opOR(b:BigInt):BigInt {
-		if (this == null || b == null) return null;
+		if (this == null) return b;
+		if (b == null) return this;
 		if (isNegative || b.isNegative) {
 			// TODO:
-			throw("ERROR '&', emulation of two's complement behavior for '|' with negative numbers is not implemented yet");
+			throw("ERROR '|', emulation of two's complement behavior for '|' with negative numbers is not implemented yet");
 		}
 		return _opOR(b);
 	}	
@@ -1083,11 +1084,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		No support for handling negative params yet (like for two's complement behavior).
 	**/
 	@:op(A ^ B)
-	function opXOR(b:BigInt):BigInt {
-		if (this == null || b == null) return null;
+	inline function opXOR(b:BigInt):BigInt {
+		if (this == null) return b;
+		if (b == null) return this;
 		if (isNegative || b.isNegative) {
 			// TODO:
-			throw("ERROR '&', emulation of two's complement behavior for '^' with negative numbers is not implemented yet");
+			throw("ERROR '^', emulation of two's complement behavior for '^' with negative numbers is not implemented yet");
 		}
 		return _opXOR(b);
 	}
@@ -1101,9 +1103,9 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (length < b.length)
 			for (i in l...b.length) result.push(b.get(i));
 		else if (length > b.length)
-			for (i in l...length) result.push(this.get(i));
-		
-		//if (this.isNegative != b.isNegative) result.setNegative();
+			for (i in l...length) result.push(this.get(i));		
+
+		result.truncateZeroChunks(true);
 		return result;
 	}
 	//@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
