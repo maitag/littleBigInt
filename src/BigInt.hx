@@ -47,7 +47,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
     /**
         return the number of chunks that is needed to store this BigInt
     **/
-	public var length(get, never):Int;
+	public var chunksLength(get, never):Int;
+	inline function get_chunksLength():Int return (this == null) ? 0 : this.length;
+	
+	var length(get, never):Int;
 	inline function get_length():Int return this.length;
 	
     /**
@@ -1084,7 +1087,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		No support for handling negative params yet (like for two's complement behavior).
 	**/
 	@:op(A ^ B)
-	inline function opXOR(b:BigInt):BigInt {
+	function opXOR(b:BigInt):BigInt {
 		if (this == null) return b;
 		if (b == null) return this;
 		if (isNegative || b.isNegative) {
@@ -1106,7 +1109,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			for (i in l...length) result.push(this.get(i));		
 
 		result.truncateZeroChunks(true);
-		return result;
+		return (result.length == 0) ? null : result;
 	}
 	//@:op(A ^ B) @:commutative inline function opXORInt(b:Int):BigInt return opXOR(b);
 	@:op(A ^ B) static inline function opXORInt(a:Int, b:BigInt):BigInt return b.opXOR(a); // haxe 3.4.4 compatible!
