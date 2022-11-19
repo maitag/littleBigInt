@@ -185,9 +185,9 @@ class Test extends hxp.Script {
 						hlPath = Path.combine (hlPath, "templates/bin/hl");
 						
 						switch (System.hostPlatform) {
-							case LINUX: hlPath = Path.combine (hlPath, "linux");
-							case WINDOWS: hlPath = Path.combine (hlPath, "windows");
-							case MAC: hlPath = Path.combine (hlPath, "mac");
+							case LINUX: hlPath = Path.combine (hlPath, "Linux");
+							case WINDOWS: hlPath = Path.combine (hlPath, "Windows");
+							case MAC: hlPath = Path.combine (hlPath, "Mac");
 						}
 						if (System.hostArchitecture != X86) hlPath += "64";
 						
