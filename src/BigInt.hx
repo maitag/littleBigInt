@@ -530,7 +530,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		}
 		
 		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
-	
+
+		// to fix this: https://github.com/maitag/littleBigInt/issues/1
+		littleIntChunks.truncateZeroChunks(false);
+
 		return littleIntChunks;
 	}
 	
@@ -611,7 +614,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return divModLong(a, b);
 	}
 	
-	static inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {		
+	static inline function divModLittle(a:BigInt, v:LittleInt):{quotient:BigInt, remainder:BigInt} {	
 		var i = a.length - 1;
 		var x:LittleInt = (a.get(i) << LittleIntChunks.BITSIZE) | a.get(--i);
 		var q:BigInt = Std.int( x / v );
@@ -657,8 +660,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 				r.setPositive();
 			}
 		} while (r >= b);
-		
-		
+				
 		if (r != null) {
 			r = a - (q * b );
 			if (r.isNegative) {
@@ -669,6 +671,39 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		return { quotient:q, remainder:r };
 	}
 	
+	/*
+	// more near to this one: https://justinparrtech.com/JustinParr-Tech/an-algorithm-for-arbitrary-precision-integer-division/
+	static function divModLong(a:BigInt, b:BigInt):{quotient:BigInt, remainder:BigInt} {		
+		var e = b.length - 1;
+		var r:BigInt;
+		var x:LittleInt = b.get(e);
+		var q:BigInt = divFast(a.splitHigh(e), x);
+		var qn:BigInt;
+		
+		do {
+			//trace(q);
+			r = a - (q * b);//trace("check",q*b);
+			if (r != null) {
+				if (r.isPositive) {
+					qn = q + divFast(r.splitHigh(e), x);
+				}
+				else {
+					qn = q - divFast(r.splitHigh(e), x);
+				}
+				q = (qn + q) / 2;		
+			}
+		} while (r.abs() >= b && q >=0);
+			
+		if (r != null) {
+			r = a - (q * b );
+			if (r.isNegative) {
+				subtractLittle(q, 1, 0); //q = q - 1;
+				r = r + b;
+			}
+		}
+		return { quotient:q, remainder:r };
+	}
+	*/
 	
 	
 	// --------------------------------------------------------------------
