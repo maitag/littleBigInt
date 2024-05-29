@@ -256,7 +256,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var ret = copy();
 		if (isNegative) {
 			if (length == 1 && get(0) == 1) this = null;
-			else subtractLittle(this, 1, 0);
+			else {
+				subtractLittle(this, 1, 0);
+				truncateZeroChunks(true);
+			}
 		}
 		else addLittle(this, 1, 0);
 		return ret;
@@ -274,6 +277,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			}
 			else {
 				subtractLittle(this, 1, 0);
+				truncateZeroChunks(true);
 				return copy();
 			}
 		}
@@ -343,7 +347,10 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (isNegative) addLittle(this, 1, 0);
 		else {
 			if (length == 1 && get(0) == 1) this = null;
-			else subtractLittle(this, 1, 0);
+			else {
+				subtractLittle(this, 1, 0);
+				truncateZeroChunks(true);
+			}
 		}
 		return ret;
 	}
@@ -364,6 +371,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			}
 			else {
 				subtractLittle(this, 1, 0);
+				truncateZeroChunks(true);
 				return copy();
 			}
 		}		
@@ -384,12 +392,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var v:BigInt;
 		if (a > b) {
 			v = subtractLong(a.copy(), b);
-			v.truncateZeroChunks(false);
+			v.truncateZeroChunks(true);
 			return v;
 		}
 		
 		v = subtractLong(b.copy(), a);
-		v.truncateZeroChunks(false);
+		v.truncateZeroChunks(true);
 		return (v.length == 0) ? null : v.setNegative();
 	}
 	
@@ -532,7 +540,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (a != null) for (i in 0...a.length) littleIntChunks.push(a.get(i));
 
 		// to fix this: https://github.com/maitag/littleBigInt/issues/1
-		littleIntChunks.truncateZeroChunks(false);
+		littleIntChunks.truncateZeroChunks(true);
 
 		return littleIntChunks;
 	}
@@ -664,10 +672,12 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (r != null) {
 			r = a - (q * b );
 			if (r.isNegative) {
-				subtractLittle(q, 1, 0); //q = q - 1;
+				subtractLittle(q, 1, 0);
+				q.truncateZeroChunks(true);
 				r = r + b;
 			}
 		}
+
 		return { quotient:q, remainder:r };
 	}
 	
@@ -698,6 +708,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 			r = a - (q * b );
 			if (r.isNegative) {
 				subtractLittle(q, 1, 0); //q = q - 1;
+				q.truncateZeroChunks(true);
 				r = r + b;
 			}
 		}
@@ -942,7 +953,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (this != null) {
 			var v:LittleInt = 0;
 			for (i in 0...length) {
-				v = (get(i) << 1) | ((v & LittleIntChunks.UPPESTBIT > 0) ? 1 : 0) ;
+				v = (get(i) << 1) | ((v & LittleIntChunks.UPPESTBIT > 0) ? 1 : 0);
 				set(i, v & LittleIntChunks.BITMASK);
 			}
 			if (v & LittleIntChunks.UPPESTBIT > 0) push(1);
@@ -954,12 +965,13 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	**/
 	@:op(~B)
 	function opNOT():BigInt {
-		if (this == null) return BigInt.fromInt( -1);
+		if (this == null) return BigInt.fromInt(-1);
 		var ret:BigInt;
 		if (isNegative) {
 			if (length == 1 && get(0)==1) return null;
 			ret = this.negCopy();
 			subtractLittle(ret, 1, 0);
+			ret.truncateZeroChunks(true);
 			return ret;
 		}
 		ret = this.copy();
