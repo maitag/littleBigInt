@@ -15,6 +15,7 @@ import hxp.*;
 class Test extends hxp.Script {
 	
 	public function new() {
+		
 		super();
 		
 		var targets:Array<String>;
@@ -22,6 +23,7 @@ class Test extends hxp.Script {
 		if (commandArgs.length == 0) targets = ['all'];
 		else targets = commandArgs.map(function(s) return s.toLowerCase());
 		Log.info(targets[0]);
+		
 		// replace 'all' with all available targets
 		if (targets.indexOf('all') != -1) {
 			targets[targets.indexOf('all')] = 'neko';
@@ -77,6 +79,7 @@ class Test extends hxp.Script {
 	}
 	
 	private function test (targets:Array<String>) {
+		
 		Log.info("unit tests for targets: " + targets.join(", ") + "\n");
 		
 		var base = new HXML ({
@@ -106,6 +109,7 @@ class Test extends hxp.Script {
 	}
 	
 	private function benchmark (targets:Array<String>, benchmarks:Array<String>) {
+		
 		Log.info("perform benchmarks " + benchmarks.join(", ") + " for targets: " + targets.join(", ") + "\n");
 		
 		var base = new HXML ({
@@ -137,6 +141,7 @@ class Test extends hxp.Script {
 	}
 	
 	private function build (target:String, base:HXML) {
+		
 		switch (target) {
 			
 			case "neko":
@@ -166,6 +171,7 @@ class Test extends hxp.Script {
 	}
 	
 	private function run (target:String, base:HXML) {
+		
 		switch (target) {
 			
 			case "neko":
@@ -215,13 +221,14 @@ class Test extends hxp.Script {
 				}
 				else System.runCommand ("bin/cpp",  './${base.main}-debug', []);
 			
-			default: Log.error ("Unknown benchmark or target \"" + target + "\"");
+			default: Log.error ("Unknown target \"" + target + "\"");
 			
 		}
 		
 	}
 	
 	private function removeDoubles(a:Array<String>) {
+	
 		var i = a.length;
 		var j:Int;
 		while (i-- > 0) {

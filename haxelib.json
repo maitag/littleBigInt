@@ -4,9 +4,9 @@
 	"license": "MIT",
 	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
 	"description": "pure haxe implementation for arbitrary-precision integer",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"classPath": "src/",
-	"releasenote": "new unit test, fixing hxp script for lime 8",
+	"releasenote": "fix multiplication bug and issue with trunkate zero chunks",
 	"contributors": ["maitag"],
 	"dependencies": {}
 }
