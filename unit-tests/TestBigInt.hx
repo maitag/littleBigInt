@@ -468,6 +468,12 @@ class TestBigInt extends haxe.unit.TestCase
 		a = -99999; b = 1;
 		assertTrue(a*b == a);
 		assertTrue(b*a == a);
+        
+        // Multiplication by -1 bug
+		b = -1;
+		assertTrue(b * a == -a);
+		assertTrue(a * b == -a);
+		assertTrue(a / b == -a);
 		
 		a = 1235; b = 44; c = 54340;
 		assertTrue(a*b == c);

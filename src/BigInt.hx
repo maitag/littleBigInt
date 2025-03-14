@@ -446,7 +446,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	function opMulticplicate(b:BigInt):BigInt {
 		if (this == null || b == null) return null;
 		if (isNegative != b.isNegative) return mul(this, b).setNegative();
-		return mul(this, b);
+		return mul(this, b).setPositive();
 	}
 	//@:op(A * B) @:commutative function opMulticplicateInt(b:Int):BigInt return opMulticplicate(b);
 	@:op(A * B) static inline function opMulticplicateInt(a:Int, b:BigInt):BigInt return b.opMulticplicate(a); // haxe 3.4.4 compatible!
