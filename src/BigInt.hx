@@ -452,8 +452,8 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 	@:op(A * B) static inline function opMulticplicateInt(a:Int, b:BigInt):BigInt return b.opMulticplicate(a); // haxe 3.4.4 compatible!
 	
 	static inline function mulLittle(a:BigInt, v:LittleInt):BigInt {
-		if (v == 1) return a.copy();
-		if (v < 0) v = -v;
+		if (v == 1) return a.copy().setPositive();
+		if (v < 0) v = -v; // CHECK: can this ever be negative ?
 		var x:Int = 0;
 		var b = new BigInt(new LittleIntChunks());
 		for (i in 0...a.length) {
@@ -469,7 +469,7 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (a == null || b == null) return null;
 		if (a.length == 1) {
 			if (b.length == 1) return fromInt(a.get(0) * b.get(0));
-			return mulLittle(b, a.get(0));
+			else return mulLittle(b, a.get(0));
 		}
 		if (b.length == 1) return mulLittle(a, b.get(0));
 		
@@ -582,8 +582,14 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		if (divisor == null) throw ("Error '/', divisor can't be 0");
 		if (dividend == null) return { quotient:null, remainder:null }; // handle null
 		if (divisor == 1) return { quotient:dividend.copy(), remainder:null }; // handle dividing by 1
-		if (dividend == divisor) return { quotient:1, remainder:null }; // handle equal
-		
+		if (divisor == -1) return { quotient:dividend.negCopy(), remainder:null }; // handle dividing by 1
+		// if (dividend == divisor) return { quotient:1, remainder:null }; // handle equal
+		// if (dividend == -divisor) return { quotient:-1, remainder:null }; // handle equal
+		if (equalOrNegative(dividend, divisor)) {
+			if (dividend.isNegative != divisor.isNegative) return { quotient:-1, remainder:null };
+			else return { quotient:1, remainder:null };
+		}
+
 		// handle in depend of signs
 		var ret:{quotient:BigInt, remainder:BigInt};
 		if (dividend.isNegative) {
@@ -899,6 +905,18 @@ abstract BigInt(LittleIntChunks) from LittleIntChunks {
 		var i = length;
 		while (i-- > 0) {
 			if (get(i) != b.get(i)) return false;
+		}
+		return true;
+	}
+	
+	static function equalOrNegative(a:BigInt,b:BigInt):Bool {
+		if (a == null) return (b == null) ? true : false;
+		if (b == null) return false;
+		if (a.length != b.length) return false;
+		
+		var i = a.length;
+		while (i-- > 0) {
+			if (a.get(i) != b.get(i)) return false;
 		}
 		return true;
 	}

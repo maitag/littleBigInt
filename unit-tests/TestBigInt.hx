@@ -468,7 +468,18 @@ class TestBigInt extends haxe.unit.TestCase
 		a = -99999; b = 1;
 		assertTrue(a*b == a);
 		assertTrue(b*a == a);
-		
+
+        // multiplication by 1 and -1
+		for (s in ["12347", "-99999", "0xab123456789abcda83996c7f3342deeff987654321fedcba987654321", "-0x34673c34f6bba678c7f3342deeff987654321fedcba987654321"]) {
+			a = BigInt.fromString(s);
+			b = -1;
+			assertTrue(b * a == -a);
+			assertTrue(a * b == -a);
+			b = 1;
+			assertTrue(b * a == a);
+			assertTrue(a * b == a);
+		}
+
 		a = 1235; b = 44; c = 54340;
 		assertTrue(a*b == c);
 		assertTrue(b*a == c);
@@ -564,12 +575,25 @@ class TestBigInt extends haxe.unit.TestCase
 		assertTrue((-153 : BigInt) / 1 == -153);
 		assertTrue(("9844190321790980841789" : BigInt) / 1 == "9844190321790980841789");
 		assertTrue(("-9844190321790980841789" : BigInt) / 1 == "-9844190321790980841789");
+		assertTrue(("9844190321790980841789" : BigInt) / -1 == "-9844190321790980841789");
+		assertTrue(("-9844190321790980841789" : BigInt) / -1 == "9844190321790980841789");
+
+		for (s in ["12347", "-99999", "-0xab123456789abcda83996c7f3342deeff987654321fedcba987654321", "0x34673c34f6bba678c7f3342deeff987654321fedcba987654321"]) {
+			var a:BigInt = BigInt.fromString(s);
+			assertTrue(a / -1 == -a);
+			assertTrue(a / 1 == a);
+		}
+		
 		
 		// division by itself
 		assertTrue((5 : BigInt) / 5 == 1);
 		assertTrue((-5 : BigInt) / -5 == 1);
+		assertTrue((5 : BigInt) / -5 == -1);
+		assertTrue((-5 : BigInt) / 5 == -1);
 		assertTrue(("20194965098495006574" : BigInt) / "20194965098495006574" == 1);
 		assertTrue(("-20194965098495006574" : BigInt) / "-20194965098495006574" == 1);
+		assertTrue(("-20194965098495006574" : BigInt) / "20194965098495006574" == -1);
+		assertTrue(("20194965098495006574" : BigInt) / "-20194965098495006574" == -1);
 		
 		var result = BigInt.divMod( 9, 4 );
 		assertEquals( result.quotient.toInt(), 2 );
