@@ -4,9 +4,9 @@
 	"license": "MIT",
 	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
 	"description": "pure haxe implementation for arbitrary-precision integer",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"classPath": "src/",
-	"releasenote": "fix multiplication bug and issue with trunkate zero chunks",
+	"releasenote": "fix multiplication/division with -1 bug ",
 	"contributors": ["maitag"],
 	"dependencies": {}
 }
