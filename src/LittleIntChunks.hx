@@ -108,20 +108,20 @@ class LittleIntChunks {
 	}
 	
 	public inline function get(i:Int):LittleInt {
-        #if cpp
+		#if cpp
 		return cpp.NativeArray.unsafeGet(chunks, start + i);
 		#else 
 		return chunks[start + i];
 		#end
-    }
+	}
 	
-    public inline function set(i:Int, v:LittleInt) {
+	public inline function set(i:Int, v:LittleInt) {
 		#if cpp
 		cpp.NativeArray.unsafeSet(chunks, start + i, v);
 		#else
 		chunks[start + i] = v;
 		#end
-    }
+	}
 	
 	public inline function push(v:LittleInt) {
 		end++;
@@ -134,7 +134,7 @@ class LittleIntChunks {
 	}
 	
 	public inline function unshift(v:LittleInt) {
-		end++;			
+		end++;
 		chunks.unshift(v);
 	}
 	
@@ -534,6 +534,5 @@ class LittleIntChunks {
 		}
 		return ret;
 	}
-	
 	
 }
