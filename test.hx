@@ -88,8 +88,8 @@ class Test extends hxp.Script {
 			libs: [ "hx3compat" ],  // need for old unit-tests
 			#end
 			main: "Test",
-			dce: FULL,
-			debug: false
+			dce: FULL
+			//,debug: true
 		});
 		
 		#if (haxe_ver >= "4.0.0")
@@ -114,8 +114,8 @@ class Test extends hxp.Script {
 		
 		var base = new HXML ({
 			cp: [ "src", "benchmarks" ],
-			dce: FULL,
-			debug: false
+			dce: FULL
+			//,debug: true
 		});
 		base.define("macro_optimize_bitsize");
 		
