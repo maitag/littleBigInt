@@ -9,8 +9,7 @@ import haxe.io.Bytes;
  * 
  */
 
-typedef LittleInt = Int; // TODO: replace by Int64 (needs some fixes at place where only used Int yet!)
-typedef LittleIntArray = Array<LittleInt>; // TODO: optimized later for JS here (e.g. UInt32Array or )
+typedef LittleInt = Int; // TODO: could be also Int64 (needs some fixes at place where only used Int yet!)
 
 @:access(BigInt)
 class LittleIntChunks {
@@ -40,7 +39,7 @@ class LittleIntChunks {
 	
 	// --------------------------------------------------------------------
 	
-	var chunks:LittleIntArray;
+	var chunks:Chunks<LittleInt>;
 	public var isNegative:Bool = false;
 	
 	// for splitting only start/end is changing for each part
@@ -51,21 +50,23 @@ class LittleIntChunks {
 	inline function get_length():Int return end - start;
 	
 	
-	public inline function new(chunks:LittleIntArray = null) {
+	public inline function new(chunks:Chunks<LittleInt> = null) {
 		if (chunks != null)	this.chunks = chunks;
-		else this.chunks = new LittleIntArray();
+		else this.chunks = new Chunks<LittleInt>();
 	}
 		
 	public inline function copy():LittleIntChunks {
-		var littleIntChunks = new LittleIntChunks();
-		for (i in 0...length) littleIntChunks.push(get(i));
+		var littleIntChunks = new LittleIntChunks(chunks.slice(start, end));
+		littleIntChunks.end = end - start;
+
 		littleIntChunks.isNegative = isNegative;
 		return littleIntChunks;
 	}
 	
 	public inline function negCopy():LittleIntChunks {
-		var littleIntChunks = new LittleIntChunks();
-		for (i in 0...length) littleIntChunks.push(get(i));
+		var littleIntChunks = new LittleIntChunks(chunks.slice(start, end));
+		littleIntChunks.end = end - start;
+
 		littleIntChunks.isNegative = ! isNegative;
 		return littleIntChunks;
 	}
@@ -108,43 +109,35 @@ class LittleIntChunks {
 	}
 	
 	public inline function get(i:Int):LittleInt {
-		#if cpp
-		return cpp.NativeArray.unsafeGet(chunks, start + i);
-		#else 
-		return chunks[start + i];
-		#end
+		return chunks.get(start + i);
 	}
 	
 	public inline function set(i:Int, v:LittleInt) {
-		#if cpp
-		cpp.NativeArray.unsafeSet(chunks, start + i, v);
-		#else
-		chunks[start + i] = v;
-		#end
+		chunks.set(start + i, v);
 	}
 	
 	public inline function push(v:LittleInt) {
-		end++;
-		chunks.push(v);
+		chunks.push(end++, v);
 	}
 	
 	public inline function pop():LittleInt {
-		end--;
-		return chunks.pop();
+		return chunks.pop(--end);
 	}
 	
 	public inline function unshift(v:LittleInt) {
-		end++;
-		chunks.unshift(v);
+		chunks.unshift(++end, v);
 	}
 	
 	public inline function truncateZeroChunks(remove:Bool) {
-		var i = length;
+		if (this == null) return;
+
+		var i = (remove) ? length : end;
+		
 		while ( --i >= 0) {
 			if (get(i) == 0) {
 				if (remove) pop() else end--;
 			}
-			else i = 0;
+			else break;
 		}
 	}
 	

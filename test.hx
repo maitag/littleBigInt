@@ -217,10 +217,13 @@ class Test extends hxp.Script {
 			
 			case "cpp":
 				if (System.hostPlatform == WINDOWS) {
-					System.runCommand ("bin/cpp",  '${base.main}-debug.exe', []);
+					if (base.debug) System.runCommand ("bin/cpp",  '${base.main}-debug.exe', []);
+					else System.runCommand ("bin/cpp",  '${base.main}.exe', []);
 				}
-				else System.runCommand ("bin/cpp",  './${base.main}-debug', []);
-			
+				else {
+					if (base.debug) System.runCommand ("bin/cpp",  './${base.main}-debug', []);
+					else System.runCommand ("bin/cpp",  './${base.main}', []);
+				}
 			default: Log.error ("Unknown target \"" + target + "\"");
 			
 		}

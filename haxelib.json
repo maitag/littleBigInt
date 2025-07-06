@@ -4,9 +4,9 @@
 	"license": "MIT",
 	"tags": ["math", "arbitrary", "precision", "integer", "bigint"],
 	"description": "pure haxe implementation for arbitrary-precision integer",
-	"version": "0.1.9",
+	"version": "0.2.0",
 	"classPath": "src/",
-	"releasenote": "fix multiplication/division with -1 bug ",
+	"releasenote": "optimization: little int chunks are stored inside Vectors now",
 	"contributors": ["maitag"],
 	"dependencies": {}
 }
